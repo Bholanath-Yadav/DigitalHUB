@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 52" fill="none">
+  <!-- White background with red border -->
+  <rect width="180" height="52" rx="10" fill="white"/>
+  <rect width="180" height="52" rx="10" fill="#E01A22" opacity="0.06"/>
+  <!-- Red "IME" block -->
+  <rect x="8" y="8" width="62" height="36" rx="7" fill="#E01A22"/>
+  <text x="39" y="32" font-family="Arial Black, Arial, sans-serif" font-size="16" font-weight="900" fill="white" text-anchor="middle" letter-spacing="1">IME</text>
+  <!-- "Pay" text -->
+  <text x="126" y="24" font-family="Arial Black, Arial, sans-serif" font-size="17" font-weight="900" fill="#E01A22" text-anchor="middle">Pay</text>
+  <!-- Thin separator line -->
+  <line x1="78" y1="14" x2="78" y2="38" stroke="#E01A22" stroke-width="1.5" opacity="0.3"/>
+  <!-- Small tagline -->
+  <text x="126" y="40" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#E01A22" text-anchor="middle" opacity="0.7">Digital Wallet</text>
+</svg>

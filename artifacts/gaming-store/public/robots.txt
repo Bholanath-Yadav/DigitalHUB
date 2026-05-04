@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /orders/
+Disallow: /profile
+Disallow: /sign-in
+Disallow: /sign-up
+
+Sitemap: https://shop-hub--by095421.replit.app/sitemap.xml

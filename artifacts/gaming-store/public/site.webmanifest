@@ -1,0 +1,19 @@
+{
+  "name": "Digital HUB — Nepal's #1 Gaming Store",
+  "short_name": "Digital HUB",
+  "description": "Buy Free Fire Diamonds, PUBG UC, TikTok Coins, Netflix, Spotify and more. Instant delivery. Pay with eSewa, Khalti or IME Pay.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "lang": "en-NP",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "shopping", "entertainment"]
+}
