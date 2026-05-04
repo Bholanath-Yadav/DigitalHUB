@@ -1,4 +1,4 @@
-import { useGetOrder } from "@workspace/api-client-react";
+import { useGetOrder } from "@/lib/api-hooks";
 import { useRoute, Link, useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

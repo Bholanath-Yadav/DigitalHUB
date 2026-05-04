@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRoute, useLocation } from "wouter";
-import { useGetProduct, useUpdateProduct } from "@workspace/api-client-react";
+import { useGetProduct, useUpdateProduct } from "@/lib/api-hooks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

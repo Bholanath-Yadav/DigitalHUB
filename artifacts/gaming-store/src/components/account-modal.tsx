@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { supabase, STORAGE_BUCKET } from "@/lib/supabase";
 import { compressImage } from "@/lib/upload";
-import { useGetMyOrders, useGetMyProfile, useUpdateMyProfile } from "@workspace/api-client-react";
+import { useGetMyOrders, useGetMyProfile, useUpdateMyProfile } from "@/lib/api-hooks";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

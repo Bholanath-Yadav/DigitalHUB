@@ -1,20 +1,19 @@
 import { Router, type IRouter } from "express";
-import { db, productsTable, bannersTable } from "@workspace/db";
+import { supabase } from "../lib/supabase.js";
 
 const router: IRouter = Router();
 
 const PRODUCTS = [
-  // ── GAME TOP-UPS ──────────────────────────────────────────────────
   {
     name: "Free Fire Diamonds",
     description: "Top up Free Fire Diamonds instantly. Enter your Player ID to receive diamonds directly in your account. Valid for Garena Free Fire Nepal servers.",
     price: "0",
-    category: "game-topups" as const,
-    imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=400&fit=crop",
+    category: "game-topups",
+    image_url: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=400&fit=crop",
     tags: ["Hot", "Popular"],
     featured: true,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "player_id", label: "Player ID", type: "text", required: true, placeholder: "Enter your Free Fire Player ID" },
     ],
     variants: [
@@ -30,12 +29,12 @@ const PRODUCTS = [
     name: "PUBG Mobile UC",
     description: "Purchase PUBG Mobile Unknown Cash (UC) to buy skins, crates, and battle passes. Fast delivery after payment verification.",
     price: "0",
-    category: "game-topups" as const,
-    imageUrl: "https://images.unsplash.com/photo-1586182987320-4f376d39d787?w=400&h=400&fit=crop",
+    category: "game-topups",
+    image_url: "https://images.unsplash.com/photo-1586182987320-4f376d39d787?w=400&h=400&fit=crop",
     tags: ["Hot", "Popular"],
     featured: true,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "player_id",  label: "PUBG Player ID",  type: "text", required: true, placeholder: "Enter your PUBG Player ID" },
       { key: "server",     label: "Server Region",   type: "select", required: true, options: ["Asia", "Europe", "North America", "South America", "KRJP"] },
     ],
@@ -52,12 +51,12 @@ const PRODUCTS = [
     name: "Mobile Legends Diamonds",
     description: "Top up Mobile Legends: Bang Bang diamonds. Buy heroes, skins, and exclusive cosmetics. Enter your User ID and Zone ID.",
     price: "0",
-    category: "game-topups" as const,
-    imageUrl: "https://images.unsplash.com/photo-1551103782-8ab07afd45c1?w=400&h=400&fit=crop",
+    category: "game-topups",
+    image_url: "https://images.unsplash.com/photo-1551103782-8ab07afd45c1?w=400&h=400&fit=crop",
     tags: ["New", "Popular"],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "user_id",  label: "User ID",  type: "text", required: true, placeholder: "Enter User ID" },
       { key: "zone_id",  label: "Zone ID",  type: "text", required: true, placeholder: "Enter Zone ID (e.g., 1234)" },
     ],
@@ -74,12 +73,12 @@ const PRODUCTS = [
     name: "TikTok Coins",
     description: "Recharge TikTok Coins to send gifts to your favourite creators. Works on all TikTok accounts globally.",
     price: "0",
-    category: "game-topups" as const,
-    imageUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=400&fit=crop",
+    category: "game-topups",
+    image_url: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=400&fit=crop",
     tags: ["Hot"],
     featured: true,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "tiktok_username", label: "TikTok Username", type: "text", required: true, placeholder: "@username" },
     ],
     variants: [
@@ -94,12 +93,12 @@ const PRODUCTS = [
     name: "Roblox Robux",
     description: "Buy Roblox Robux to unlock avatar items, game passes, and exclusive in-game content. Safe and instant delivery.",
     price: "0",
-    category: "game-topups" as const,
-    imageUrl: "https://images.unsplash.com/photo-1634152962476-4b8a00e1915c?w=400&h=400&fit=crop",
+    category: "game-topups",
+    image_url: "https://images.unsplash.com/photo-1634152962476-4b8a00e1915c?w=400&h=400&fit=crop",
     tags: ["New"],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "roblox_username", label: "Roblox Username", type: "text", required: true, placeholder: "Enter your Roblox username" },
     ],
     variants: [
@@ -113,12 +112,12 @@ const PRODUCTS = [
     name: "Clash of Clans Gems",
     description: "Top up Clash of Clans gems to speed up buildings, buy resources, and unlock magical items.",
     price: "0",
-    category: "game-topups" as const,
-    imageUrl: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=400&fit=crop",
+    category: "game-topups",
+    image_url: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=400&fit=crop",
     tags: [],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "player_tag", label: "Player Tag", type: "text", required: true, placeholder: "#PLAYER_TAG" },
     ],
     variants: [
@@ -133,12 +132,12 @@ const PRODUCTS = [
     name: "Valorant VP",
     description: "Buy Valorant Points to unlock agents, weapon skins, and battle passes on your Riot account.",
     price: "0",
-    category: "game-topups" as const,
-    imageUrl: "https://images.unsplash.com/photo-1614294149010-950b698f72c0?w=400&h=400&fit=crop",
+    category: "game-topups",
+    image_url: "https://images.unsplash.com/photo-1614294149010-950b698f72c0?w=400&h=400&fit=crop",
     tags: ["Hot"],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "riot_id", label: "Riot ID", type: "text", required: true, placeholder: "Username#TAG" },
     ],
     variants: [
@@ -153,12 +152,12 @@ const PRODUCTS = [
     name: "Genshin Impact Genesis Crystals",
     description: "Buy Genesis Crystals to convert to Primogems or purchase exclusive items in Genshin Impact.",
     price: "0",
-    category: "game-topups" as const,
-    imageUrl: "https://images.unsplash.com/photo-1535223289827-42f1e9919769?w=400&h=400&fit=crop",
+    category: "game-topups",
+    image_url: "https://images.unsplash.com/photo-1535223289827-42f1e9919769?w=400&h=400&fit=crop",
     tags: ["New"],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "uid",    label: "UID",    type: "text",   required: true, placeholder: "Enter your UID" },
       { key: "server", label: "Server", type: "select", required: true, options: ["Asia", "America", "Europe", "CHTW"] },
     ],
@@ -171,18 +170,16 @@ const PRODUCTS = [
       { label: "6480 Crystals", price: 12499, description: "Mega pack" },
     ],
   },
-
-  // ── GIFT CARDS ─────────────────────────────────────────────────────
   {
     name: "Google Play Gift Card",
     description: "Redeem Google Play Gift Cards to buy apps, games, movies, music, and more on Google Play Store. Works globally.",
     price: "0",
-    category: "gift-cards" as const,
-    imageUrl: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&h=400&fit=crop",
+    category: "gift-cards",
+    image_url: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&h=400&fit=crop",
     tags: ["Popular"],
     featured: true,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "email", label: "Google Account Email", type: "email", required: true, placeholder: "your@gmail.com" },
     ],
     variants: [
@@ -197,12 +194,12 @@ const PRODUCTS = [
     name: "Steam Wallet Code",
     description: "Add funds to your Steam Wallet. Buy games, DLCs, in-game items, and more on Steam. Worldwide codes.",
     price: "0",
-    category: "gift-cards" as const,
-    imageUrl: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&h=400&fit=crop",
+    category: "gift-cards",
+    image_url: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&h=400&fit=crop",
     tags: ["Hot"],
     featured: true,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "steam_username", label: "Steam Username", type: "text", required: true, placeholder: "Enter your Steam username" },
     ],
     variants: [
@@ -216,12 +213,12 @@ const PRODUCTS = [
     name: "iTunes / App Store Gift Card",
     description: "Redeem on Apple App Store, Apple Music, iCloud, and more. Available in USD denominations.",
     price: "0",
-    category: "gift-cards" as const,
-    imageUrl: "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&h=400&fit=crop",
+    category: "gift-cards",
+    image_url: "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&h=400&fit=crop",
     tags: ["Popular"],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "apple_id", label: "Apple ID Email", type: "email", required: true, placeholder: "your@icloud.com" },
     ],
     variants: [
@@ -235,12 +232,12 @@ const PRODUCTS = [
     name: "PlayStation Store Gift Card",
     description: "Buy PS4 & PS5 games, add-ons, PS Plus subscriptions, and avatars on PlayStation Store.",
     price: "0",
-    category: "gift-cards" as const,
-    imageUrl: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=400&fit=crop",
+    category: "gift-cards",
+    image_url: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=400&fit=crop",
     tags: ["New"],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "psn_id", label: "PSN ID", type: "text", required: true, placeholder: "Enter your PlayStation Network ID" },
     ],
     variants: [
@@ -253,12 +250,12 @@ const PRODUCTS = [
     name: "Xbox Gift Card",
     description: "Add funds to your Microsoft / Xbox account. Buy Xbox games, Game Pass, and more.",
     price: "0",
-    category: "gift-cards" as const,
-    imageUrl: "https://images.unsplash.com/photo-1621259182978-fbf93132d53d?w=400&h=400&fit=crop",
+    category: "gift-cards",
+    image_url: "https://images.unsplash.com/photo-1621259182978-fbf93132d53d?w=400&h=400&fit=crop",
     tags: [],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "microsoft_email", label: "Microsoft Account Email", type: "email", required: true, placeholder: "your@outlook.com" },
     ],
     variants: [
@@ -268,18 +265,16 @@ const PRODUCTS = [
       { label: "USD 50", price: 6599, description: "Large pack" },
     ],
   },
-
-  // ── SUBSCRIPTIONS ──────────────────────────────────────────────────
   {
     name: "Netflix Subscription",
     description: "Premium Netflix subscription for Nepal. Watch unlimited movies, TV series, anime, and more in Full HD/4K. Shared or private accounts available.",
     price: "0",
-    category: "subscriptions" as const,
-    imageUrl: "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=400&h=400&fit=crop",
+    category: "subscriptions",
+    image_url: "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=400&h=400&fit=crop",
     tags: ["Hot", "Popular"],
     featured: true,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "email", label: "Netflix Account Email", type: "email", required: true, placeholder: "your@email.com" },
     ],
     variants: [
@@ -294,12 +289,12 @@ const PRODUCTS = [
     name: "Spotify Premium",
     description: "Enjoy Spotify Premium with ad-free music, offline downloads, and unlimited skips. Individual, Duo, and Family plans available.",
     price: "0",
-    category: "subscriptions" as const,
-    imageUrl: "https://images.unsplash.com/photo-1611339555312-e607c8352fd7?w=400&h=400&fit=crop",
+    category: "subscriptions",
+    image_url: "https://images.unsplash.com/photo-1611339555312-e607c8352fd7?w=400&h=400&fit=crop",
     tags: ["Popular"],
     featured: true,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "email", label: "Spotify Account Email", type: "email", required: true, placeholder: "your@email.com" },
     ],
     variants: [
@@ -314,12 +309,12 @@ const PRODUCTS = [
     name: "YouTube Premium",
     description: "Ad-free YouTube videos, background play, YouTube Music Premium, and access to YouTube Originals.",
     price: "0",
-    category: "subscriptions" as const,
-    imageUrl: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=400&fit=crop",
+    category: "subscriptions",
+    image_url: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=400&fit=crop",
     tags: ["New"],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "gmail", label: "Gmail Address", type: "email", required: true, placeholder: "your@gmail.com" },
     ],
     variants: [
@@ -331,12 +326,12 @@ const PRODUCTS = [
     name: "Disney+ Hotstar",
     description: "Stream Disney+, Marvel, Star Wars, National Geographic, and live sports on Disney+ Hotstar.",
     price: "0",
-    category: "subscriptions" as const,
-    imageUrl: "https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=400&h=400&fit=crop",
+    category: "subscriptions",
+    image_url: "https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=400&h=400&fit=crop",
     tags: [],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "email", label: "Account Email", type: "email", required: true, placeholder: "your@email.com" },
     ],
     variants: [
@@ -349,12 +344,12 @@ const PRODUCTS = [
     name: "Canva Pro",
     description: "Unlock the full power of Canva with Pro: unlimited templates, brand kit, background remover, and premium elements.",
     price: "0",
-    category: "subscriptions" as const,
-    imageUrl: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=400&fit=crop",
+    category: "subscriptions",
+    image_url: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=400&fit=crop",
     tags: [],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "email", label: "Canva Account Email", type: "email", required: true, placeholder: "your@email.com" },
     ],
     variants: [
@@ -363,18 +358,16 @@ const PRODUCTS = [
       { label: "1 Year",   price: 7999, description: "Best annual value" },
     ],
   },
-
-  // ── VOUCHERS ────────────────────────────────────────────────────────
   {
     name: "eSewa Cash Voucher",
     description: "Recharge your eSewa wallet instantly. Use for online shopping, bill payments, and more across Nepal.",
     price: "0",
-    category: "vouchers" as const,
-    imageUrl: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&h=400&fit=crop",
+    category: "vouchers",
+    image_url: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&h=400&fit=crop",
     tags: ["Popular"],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "esewa_id", label: "eSewa ID / Mobile Number", type: "text", required: true, placeholder: "98XXXXXXXX" },
     ],
     variants: [
@@ -388,12 +381,12 @@ const PRODUCTS = [
     name: "Ncell Recharge",
     description: "Instant Ncell mobile recharge for any Ncell number in Nepal. Top up talk time and data.",
     price: "0",
-    category: "vouchers" as const,
-    imageUrl: "https://images.unsplash.com/photo-1616469829581-73993eb86b02?w=400&h=400&fit=crop",
+    category: "vouchers",
+    image_url: "https://images.unsplash.com/photo-1616469829581-73993eb86b02?w=400&h=400&fit=crop",
     tags: [],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "phone", label: "Ncell Mobile Number", type: "text", required: true, placeholder: "98XXXXXXXX" },
     ],
     variants: [
@@ -407,12 +400,12 @@ const PRODUCTS = [
     name: "NTC Top-Up",
     description: "Top up your Nepal Telecom (NTC) mobile balance instantly. Works for all NTC prepaid numbers.",
     price: "0",
-    category: "vouchers" as const,
-    imageUrl: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=400&fit=crop",
+    category: "vouchers",
+    image_url: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=400&fit=crop",
     tags: [],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "phone", label: "NTC Mobile Number", type: "text", required: true, placeholder: "97XXXXXXXX" },
     ],
     variants: [
@@ -426,12 +419,12 @@ const PRODUCTS = [
     name: "Amazon Gift Card",
     description: "Shop millions of products on Amazon with this gift card. Valid on Amazon.com (US). No expiry date.",
     price: "0",
-    category: "vouchers" as const,
-    imageUrl: "https://images.unsplash.com/photo-1523474253046-8cd2748b5fd2?w=400&h=400&fit=crop",
+    category: "vouchers",
+    image_url: "https://images.unsplash.com/photo-1523474253046-8cd2748b5fd2?w=400&h=400&fit=crop",
     tags: ["New"],
     featured: false,
-    inStock: true,
-    dynamicFields: [
+    in_stock: true,
+    dynamic_fields: [
       { key: "email", label: "Amazon Account Email", type: "email", required: true, placeholder: "your@email.com" },
     ],
     variants: [
@@ -447,53 +440,48 @@ const BANNERS = [
   {
     title: "Free Fire Mega Sale",
     description: "Get up to 20% bonus diamonds this weekend only! Limited time offer.",
-    imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&h=400&fit=crop",
-    linkUrl: "/products?category=game-topups",
+    image_url: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&h=400&fit=crop",
+    link_url: "/products?category=game-topups",
     active: true,
-    sortOrder: 1,
+    sort_order: 1,
   },
   {
     title: "Netflix Premium — Best Deals",
     description: "3-month Netflix Premium subscription at the lowest price in Nepal.",
-    imageUrl: "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=1200&h=400&fit=crop",
-    linkUrl: "/products?category=subscriptions",
+    image_url: "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=1200&h=400&fit=crop",
+    link_url: "/products?category=subscriptions",
     active: true,
-    sortOrder: 2,
+    sort_order: 2,
   },
   {
     title: "Google Play Gift Cards",
     description: "Buy Google Play gift cards and get your favourite apps & games instantly.",
-    imageUrl: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&h=400&fit=crop",
-    linkUrl: "/products?category=gift-cards",
+    image_url: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&h=400&fit=crop",
+    link_url: "/products?category=gift-cards",
     active: true,
-    sortOrder: 3,
+    sort_order: 3,
   },
 ];
 
 router.post("/seed", async (req, res) => {
   try {
-    // Clear existing data
-    await db.delete(productsTable);
+    await supabase.from("products").delete().neq("id", 0);
 
-    // Insert products
-    const inserted = await db.insert(productsTable).values(
-      PRODUCTS.map(p => ({
-        ...p,
-        updatedAt: new Date(),
-      }))
-    ).returning();
+    const { data: inserted, error: insertError } = await supabase.from("products").insert(
+      PRODUCTS.map(p => ({ ...p, updated_at: new Date().toISOString() }))
+    ).select();
+    if (insertError) throw insertError;
 
-    // Seed banners if empty
-    const existingBanners = await db.select().from(bannersTable);
+    const { data: existingBanners } = await supabase.from("banners").select("id");
     let bannersInserted = 0;
-    if (existingBanners.length === 0) {
-      await db.insert(bannersTable).values(BANNERS);
+    if (!existingBanners || existingBanners.length === 0) {
+      await supabase.from("banners").insert(BANNERS);
       bannersInserted = BANNERS.length;
     }
 
     res.json({
       message: "Seed complete",
-      products: inserted.length,
+      products: inserted?.length ?? 0,
       banners: bannersInserted,
     });
   } catch (err: any) {

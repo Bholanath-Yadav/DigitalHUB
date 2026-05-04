@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider, useAuth } from "@/context/auth-context";
-import { setAuthTokenGetter } from "@workspace/api-client-react";
+import { setAuthTokenGetter } from "@/lib/api-hooks";
 import { supabase } from "@/lib/supabase";
 import NotFound from "@/pages/not-found";
 import { PublicLayout } from "@/components/layout/public-layout";

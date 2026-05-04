@@ -1,4 +1,4 @@
-import { useListPayments, useVerifyPayment } from "@workspace/api-client-react";
+import { useListPayments, useVerifyPayment } from "@/lib/api-hooks";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

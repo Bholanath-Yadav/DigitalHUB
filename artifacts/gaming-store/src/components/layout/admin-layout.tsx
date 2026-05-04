@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGetMyProfile } from "@workspace/api-client-react";
+import { useGetMyProfile } from "@/lib/api-hooks";
 import { Link, useLocation, Redirect } from "wouter";
 import { Shield, Package, ShoppingCart, CreditCard, Tag, Image as ImageIcon, Users, MessageSquare, Home, Wallet, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";

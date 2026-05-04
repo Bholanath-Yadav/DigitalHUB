@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useListChatSessions, useGetChatMessages, useDeleteChatSession } from "@workspace/api-client-react";
+import { useListChatSessions, useGetChatMessages, useDeleteChatSession } from "@/lib/api-hooks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";

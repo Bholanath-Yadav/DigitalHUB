@@ -1,4 +1,4 @@
-import { useGetProduct, useCreateOrder, useValidateCoupon } from "@workspace/api-client-react";
+import { useGetProduct, useCreateOrder, useValidateCoupon } from "@/lib/api-hooks";
 import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

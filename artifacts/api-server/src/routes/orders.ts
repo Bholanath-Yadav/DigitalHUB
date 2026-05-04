@@ -1,54 +1,69 @@
 import { Router, type IRouter } from "express";
 import { requireAuth, requireAdmin, optionalAuth } from "../middlewares/supabaseAuth.js";
-import { db, ordersTable, productsTable, couponsTable, usersTable } from "@workspace/db";
-import { eq, and, desc } from "drizzle-orm";
+import { supabase } from "../lib/supabase.js";
 
 const router: IRouter = Router();
 
+function formatProduct(p: any) {
+  return {
+    ...p,
+    price: parseFloat(p.price),
+    tags: Array.isArray(p.tags) ? p.tags : [],
+    dynamicFields: Array.isArray(p.dynamic_fields ?? p.dynamicFields) ? (p.dynamic_fields ?? p.dynamicFields) : [],
+    createdAt: p.created_at ?? p.createdAt,
+  };
+}
+
 async function enrichOrder(order: any) {
-  const [product] = await db.select().from(productsTable).where(eq(productsTable.id, order.productId));
+  const { data: product } = await supabase.from("products").select("*").eq("id", order.product_id ?? order.productId).maybeSingle();
   return {
     ...order,
-    totalAmount: parseFloat(order.totalAmount),
-    discountAmount: parseFloat(order.discountAmount),
-    gameDetails: order.gameDetails || {},
-    product: product ? {
-      ...product,
-      price: parseFloat(product.price),
-      tags: Array.isArray(product.tags) ? product.tags : [],
-      dynamicFields: Array.isArray(product.dynamicFields) ? product.dynamicFields : [],
-      createdAt: product.createdAt?.toISOString?.() ?? product.createdAt,
-    } : null,
-    createdAt: order.createdAt?.toISOString?.() ?? order.createdAt,
-    updatedAt: order.updatedAt?.toISOString?.() ?? order.updatedAt,
+    id: order.id,
+    userId: order.user_id ?? order.userId,
+    productId: order.product_id ?? order.productId,
+    guestName: order.guest_name ?? order.guestName ?? null,
+    guestEmail: order.guest_email ?? order.guestEmail ?? null,
+    guestPhone: order.guest_phone ?? order.guestPhone ?? null,
+    gameDetails: order.game_details ?? order.gameDetails ?? {},
+    totalAmount: parseFloat(order.total_amount ?? order.totalAmount),
+    discountAmount: parseFloat(order.discount_amount ?? order.discountAmount),
+    couponCode: order.coupon_code ?? order.couponCode ?? null,
+    status: order.status,
+    paymentScreenshotUrl: order.payment_screenshot_url ?? order.paymentScreenshotUrl ?? null,
+    adminNote: order.admin_note ?? order.adminNote ?? null,
+    product: product ? formatProduct(product) : null,
+    createdAt: order.created_at ?? order.createdAt,
+    updatedAt: order.updated_at ?? order.updatedAt,
   };
 }
 
 router.get("/orders/my", requireAuth, async (req, res) => {
   try {
-    const orders = await db.select().from(ordersTable)
-      .where(eq(ordersTable.userId, (req as any).supabaseUserId))
-      .orderBy(desc(ordersTable.createdAt));
-    const enriched = await Promise.all(orders.map(enrichOrder));
+    const { data, error } = await supabase.from("orders").select("*")
+      .eq("user_id", (req as any).supabaseUserId)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    const enriched = await Promise.all((data ?? []).map(enrichOrder));
     return res.json(enriched);
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.get("/orders/stats/summary", requireAdmin, async (req, res) => {
   try {
-    const orders = await db.select().from(ordersTable).orderBy(desc(ordersTable.createdAt));
+    const { data: orders, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    const all = orders ?? [];
     const stats = {
-      total: orders.length,
-      pending: orders.filter(o => o.status === "pending").length,
-      verified: orders.filter(o => o.status === "verified").length,
-      rejected: orders.filter(o => o.status === "rejected").length,
-      completed: orders.filter(o => o.status === "completed").length,
-      totalRevenue: orders
+      total: all.length,
+      pending: all.filter(o => o.status === "pending").length,
+      verified: all.filter(o => o.status === "verified").length,
+      rejected: all.filter(o => o.status === "rejected").length,
+      completed: all.filter(o => o.status === "completed").length,
+      totalRevenue: all
         .filter(o => o.status === "completed" || o.status === "verified")
-        .reduce((sum, o) => sum + parseFloat(o.totalAmount), 0),
-      recentOrders: [],
+        .reduce((sum, o) => sum + parseFloat(o.total_amount), 0),
     };
-    const recent = await Promise.all(orders.slice(0, 5).map(enrichOrder));
+    const recent = await Promise.all(all.slice(0, 5).map(enrichOrder));
     return res.json({ ...stats, recentOrders: recent });
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
@@ -56,12 +71,11 @@ router.get("/orders/stats/summary", requireAdmin, async (req, res) => {
 router.get("/orders", requireAdmin, async (req, res) => {
   try {
     const { status } = req.query as any;
-    const conditions: any[] = [];
-    if (status) conditions.push(eq(ordersTable.status, status));
-    const orders = await db.select().from(ordersTable)
-      .where(conditions.length ? and(...conditions) : undefined)
-      .orderBy(desc(ordersTable.createdAt));
-    const enriched = await Promise.all(orders.map(enrichOrder));
+    let query = supabase.from("orders").select("*").order("created_at", { ascending: false });
+    if (status) query = query.eq("status", status);
+    const { data, error } = await query;
+    if (error) throw error;
+    const enriched = await Promise.all((data ?? []).map(enrichOrder));
     return res.json(enriched);
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
@@ -71,13 +85,14 @@ router.post("/orders", optionalAuth, async (req, res) => {
     const supabaseUserId = (req as any).supabaseUserId ?? null;
     const { productId, guestName, guestEmail, guestPhone, gameDetails, couponCode } = req.body;
 
-    const [product] = await db.select().from(productsTable).where(eq(productsTable.id, productId));
+    const { data: product, error: productError } = await supabase.from("products").select("*").eq("id", productId).maybeSingle();
+    if (productError) throw productError;
     if (!product) return res.status(404).json({ error: "Product not found" });
 
     let baseAmount = parseFloat(product.price);
     const selectedVariantName = gameDetails?.__variantName as string | undefined;
     if (selectedVariantName) {
-      const variants = Array.isArray((product as any).variants) ? (product as any).variants : [];
+      const variants = Array.isArray(product.variants) ? product.variants : [];
       const matched = variants.find((v: any) => v.name === selectedVariantName);
       if (matched && typeof matched.price === "number") baseAmount = matched.price;
     }
@@ -87,41 +102,42 @@ router.post("/orders", optionalAuth, async (req, res) => {
     let validCouponCode: string | null = null;
 
     if (couponCode) {
-      const [coupon] = await db.select().from(couponsTable).where(eq(couponsTable.code, couponCode));
+      const { data: coupon } = await supabase.from("coupons").select("*").eq("code", couponCode).maybeSingle();
       if (coupon && coupon.active) {
-        const appIds = Array.isArray(coupon.applicableProductIds) ? coupon.applicableProductIds as number[] : [];
+        const appIds = Array.isArray(coupon.applicable_product_ids) ? coupon.applicable_product_ids as number[] : [];
         if (appIds.length === 0 || appIds.includes(productId)) {
-          if (coupon.discountType === "percentage") {
-            discountAmount = totalAmount * parseFloat(coupon.discountValue) / 100;
+          if (coupon.discount_type === "percentage") {
+            discountAmount = totalAmount * parseFloat(coupon.discount_value) / 100;
           } else {
-            discountAmount = parseFloat(coupon.discountValue);
+            discountAmount = parseFloat(coupon.discount_value);
           }
           totalAmount = Math.max(0, totalAmount - discountAmount);
           validCouponCode = couponCode;
-          await db.update(couponsTable).set({ usageCount: (coupon.usageCount || 0) + 1 }).where(eq(couponsTable.id, coupon.id));
+          await supabase.from("coupons").update({ usage_count: (coupon.usage_count || 0) + 1 }).eq("id", coupon.id);
         }
       }
     }
 
-    const [order] = await db.insert(ordersTable).values({
-      userId: supabaseUserId,
-      guestName: guestName ?? null,
-      guestEmail: guestEmail ?? null,
-      guestPhone: guestPhone ?? null,
-      productId,
-      gameDetails: gameDetails || {},
-      totalAmount: totalAmount.toFixed(2),
-      discountAmount: discountAmount.toFixed(2),
-      couponCode: validCouponCode,
+    const { data: order, error: orderError } = await supabase.from("orders").insert({
+      user_id: supabaseUserId,
+      guest_name: guestName ?? null,
+      guest_email: guestEmail ?? null,
+      guest_phone: guestPhone ?? null,
+      product_id: productId,
+      game_details: gameDetails || {},
+      total_amount: totalAmount.toFixed(2),
+      discount_amount: discountAmount.toFixed(2),
+      coupon_code: validCouponCode,
       status: "pending",
-    }).returning();
+    }).select().single();
+    if (orderError) throw orderError;
 
     if (supabaseUserId) {
-      await db.insert(usersTable).values({
-        supabaseId: supabaseUserId,
+      await supabase.from("users").upsert({
+        supabase_id: supabaseUserId,
         email: (req as any).supabaseEmail || guestEmail || "",
         role: "user",
-      }).onConflictDoNothing();
+      }, { onConflict: "supabase_id", ignoreDuplicates: true });
     }
 
     return res.status(201).json(await enrichOrder(order));
@@ -130,7 +146,8 @@ router.post("/orders", optionalAuth, async (req, res) => {
 
 router.get("/orders/:id", async (req, res) => {
   try {
-    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.id, Number(req.params.id)));
+    const { data: order, error } = await supabase.from("orders").select("*").eq("id", Number(req.params.id)).maybeSingle();
+    if (error) throw error;
     if (!order) return res.status(404).json({ error: "Not found" });
     return res.json(await enrichOrder(order));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
@@ -139,10 +156,11 @@ router.get("/orders/:id", async (req, res) => {
 router.put("/orders/:id", requireAdmin, async (req, res) => {
   try {
     const { status, adminNote } = req.body;
-    const [order] = await db.update(ordersTable)
-      .set({ status, adminNote, updatedAt: new Date() })
-      .where(eq(ordersTable.id, Number(req.params.id)))
-      .returning();
+    const { data: order, error } = await supabase.from("orders")
+      .update({ status, admin_note: adminNote, updated_at: new Date().toISOString() })
+      .eq("id", Number(req.params.id))
+      .select().single();
+    if (error) throw error;
     if (!order) return res.status(404).json({ error: "Not found" });
     return res.json(await enrichOrder(order));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }

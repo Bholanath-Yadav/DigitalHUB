@@ -1,4 +1,4 @@
-import { useGetAdminDashboard } from "@workspace/api-client-react";
+import { useGetDashboard as useGetAdminDashboard } from "@/lib/api-hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";

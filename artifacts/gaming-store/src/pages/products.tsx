@@ -1,10 +1,9 @@
-import { useListProducts } from "@workspace/api-client-react";
+import { useListProducts, ListProductsCategory } from "@/lib/api-hooks";
 import { Link } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Search, Gamepad2, Gift, Tv, Ticket, Zap, LayoutGrid, List } from "lucide-react";
-import { ListProductsCategory } from "@workspace/api-client-react";
 import { fmtNPR } from "@/lib/currency";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageWrapper, FadeUp, MotionCard, fadeUp, scaleIn, staggerFast } from "@/components/motion";

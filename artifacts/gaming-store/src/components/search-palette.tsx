@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useListProducts } from "@workspace/api-client-react";
+import { useListProducts } from "@/lib/api-hooks";
 import { Link } from "wouter";
 import { Search, Gamepad2, X, ArrowRight, Zap } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";

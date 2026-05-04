@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useListPaymentSettings, useUpdatePaymentSetting } from "@workspace/api-client-react";
+import { useListPaymentSettings, useUpdatePaymentSetting } from "@/lib/api-hooks";
 import { uploadToStorage } from "@/lib/upload";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

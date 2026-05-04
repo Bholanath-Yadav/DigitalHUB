@@ -1,6 +1,4 @@
 import { supabase } from "../lib/supabase.js";
-import { db, usersTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
 import type { Request, Response, NextFunction } from "express";
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -35,11 +33,12 @@ export async function requireAdmin(req: Request, res: Response, next: NextFuncti
   if (error || !user) { res.status(401).json({ error: "Unauthorized" }); return; }
 
   try {
-    const [dbUser] = await db.select().from(usersTable).where(eq(usersTable.supabaseId, user.id));
+    const { data: dbUser } = await supabase.from("users").select("*").eq("supabase_id", user.id).maybeSingle();
     if (!dbUser || (dbUser.role !== "admin" && dbUser.role !== "staff")) {
       res.status(403).json({ error: "Forbidden" }); return;
     }
     (req as any).supabaseUserId = user.id;
+    (req as any).supabaseEmail = user.email ?? "";
     (req as any).dbUser = dbUser;
     next();
   } catch (err) {
@@ -56,11 +55,12 @@ export async function requireAdminStrict(req: Request, res: Response, next: Next
   if (error || !user) { res.status(401).json({ error: "Unauthorized" }); return; }
 
   try {
-    const [dbUser] = await db.select().from(usersTable).where(eq(usersTable.supabaseId, user.id));
+    const { data: dbUser } = await supabase.from("users").select("*").eq("supabase_id", user.id).maybeSingle();
     if (!dbUser || dbUser.role !== "admin") {
       res.status(403).json({ error: "Forbidden" }); return;
     }
     (req as any).supabaseUserId = user.id;
+    (req as any).supabaseEmail = user.email ?? "";
     (req as any).dbUser = dbUser;
     next();
   } catch (err) {

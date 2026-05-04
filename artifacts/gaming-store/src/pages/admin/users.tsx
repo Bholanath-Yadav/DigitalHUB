@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useListUsers, useUpdateUserRole, useBanUser, useDeleteUser } from "@workspace/api-client-react";
+import { useListAdminUsers as useListUsers, useUpdateUserRole, useBanUser, useDeleteAdminUser as useDeleteUser } from "@/lib/api-hooks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

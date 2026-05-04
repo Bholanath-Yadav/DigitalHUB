@@ -1,4 +1,4 @@
-import { useGetOrder, useUploadPaymentScreenshot, useListPaymentSettings } from "@workspace/api-client-react";
+import { useGetOrder, useUploadPaymentScreenshot, useListPaymentSettings } from "@/lib/api-hooks";
 import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";

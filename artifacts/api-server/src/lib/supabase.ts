@@ -10,11 +10,18 @@ function resolveUrl(): string {
 
 let _client: SupabaseClient | null = null;
 
+function resolveKey(): string {
+  for (const k of ["SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_ANON_KEY", "VITE_SUPABASE_ANON_KEY"]) {
+    const val = (process.env[k] ?? "").trim();
+    if (val) return val;
+  }
+  throw new Error("No Supabase key found — set SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY, or VITE_SUPABASE_ANON_KEY");
+}
+
 function getClient(): SupabaseClient {
   if (_client) return _client;
   const url = resolveUrl();
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set");
+  const key = resolveKey();
   _client = createClient(url, key, { auth: { persistSession: false } });
   return _client;
 }

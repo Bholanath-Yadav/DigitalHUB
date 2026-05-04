@@ -1,4 +1,4 @@
-import { useGetMyOrders, useGetMyProfile, useUpdateMyProfile } from "@workspace/api-client-react";
+import { useGetMyOrders, useGetMyProfile, useUpdateMyProfile } from "@/lib/api-hooks";
 import { useAuth } from "@/context/auth-context";
 import { supabase, STORAGE_BUCKET } from "@/lib/supabase";
 import { compressImage } from "@/lib/upload";

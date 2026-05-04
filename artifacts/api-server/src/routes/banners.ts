@@ -1,44 +1,47 @@
 import { Router, type IRouter } from "express";
 import { requireAdmin } from "../middlewares/supabaseAuth.js";
-import { db, bannersTable } from "@workspace/db";
-import { eq, asc } from "drizzle-orm";
+import { supabase } from "../lib/supabase.js";
 
 const router: IRouter = Router();
 
 function formatBanner(b: any) {
-  return { ...b, createdAt: b.createdAt?.toISOString?.() ?? b.createdAt };
+  return { ...b, createdAt: b.created_at ?? b.createdAt };
 }
 
 router.get("/banners", async (req, res) => {
   try {
-    const banners = await db.select().from(bannersTable)
-      .where(eq(bannersTable.active, true))
-      .orderBy(asc(bannersTable.sortOrder));
-    return res.json(banners.map(formatBanner));
+    const { data, error } = await supabase.from("banners").select("*")
+      .eq("active", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw error;
+    return res.json((data ?? []).map(formatBanner));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.post("/banners", requireAdmin, async (req, res) => {
   try {
-    const [banner] = await db.insert(bannersTable).values(req.body).returning();
-    return res.status(201).json(formatBanner(banner));
+    const { data, error } = await supabase.from("banners").insert(req.body).select().single();
+    if (error) throw error;
+    return res.status(201).json(formatBanner(data));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.put("/banners/:id", requireAdmin, async (req, res) => {
   try {
-    const [banner] = await db.update(bannersTable)
-      .set({ ...req.body, updatedAt: new Date() })
-      .where(eq(bannersTable.id, Number(req.params.id)))
-      .returning();
-    if (!banner) return res.status(404).json({ error: "Not found" });
-    return res.json(formatBanner(banner));
+    const { data, error } = await supabase.from("banners")
+      .update({ ...req.body, updated_at: new Date().toISOString() })
+      .eq("id", Number(req.params.id))
+      .select().single();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: "Not found" });
+    return res.json(formatBanner(data));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.delete("/banners/:id", requireAdmin, async (req, res) => {
   try {
-    await db.delete(bannersTable).where(eq(bannersTable.id, Number(req.params.id)));
+    const { error } = await supabase.from("banners").delete().eq("id", Number(req.params.id));
+    if (error) throw error;
     return res.json({ message: "Deleted" });
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });

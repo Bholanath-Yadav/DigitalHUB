@@ -1,4 +1,4 @@
-import { useListOrders, useUpdateOrderStatus } from "@workspace/api-client-react";
+import { useListOrders, useUpdateOrderStatus } from "@/lib/api-hooks";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

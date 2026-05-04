@@ -1,52 +1,60 @@
 import { Router, type IRouter } from "express";
 import { requireAdmin } from "../middlewares/supabaseAuth.js";
-import { db, couponsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { supabase } from "../lib/supabase.js";
 
 const router: IRouter = Router();
 
 function formatCoupon(c: any) {
   return {
     ...c,
-    discountValue: parseFloat(c.discountValue),
-    applicableProductIds: Array.isArray(c.applicableProductIds) ? c.applicableProductIds : [],
-    createdAt: c.createdAt?.toISOString?.() ?? c.createdAt,
-    expiresAt: c.expiresAt?.toISOString?.() ?? c.expiresAt ?? null,
+    discountValue: parseFloat(c.discount_value ?? c.discountValue),
+    applicableProductIds: Array.isArray(c.applicable_product_ids ?? c.applicableProductIds)
+      ? (c.applicable_product_ids ?? c.applicableProductIds) : [],
+    createdAt: c.created_at ?? c.createdAt,
+    expiresAt: c.expires_at ?? c.expiresAt ?? null,
   };
 }
 
 router.get("/coupons", requireAdmin, async (req, res) => {
   try {
-    const coupons = await db.select().from(couponsTable);
-    return res.json(coupons.map(formatCoupon));
+    const { data, error } = await supabase.from("coupons").select("*");
+    if (error) throw error;
+    return res.json((data ?? []).map(formatCoupon));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.post("/coupons", requireAdmin, async (req, res) => {
   try {
-    const [coupon] = await db.insert(couponsTable).values({
+    const { data, error } = await supabase.from("coupons").insert({
       ...req.body,
-      applicableProductIds: req.body.applicableProductIds || [],
-      expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null,
-    }).returning();
-    return res.status(201).json(formatCoupon(coupon));
+      applicable_product_ids: req.body.applicableProductIds || req.body.applicable_product_ids || [],
+      expires_at: req.body.expiresAt ? new Date(req.body.expiresAt).toISOString() : null,
+    }).select().single();
+    if (error) throw error;
+    return res.status(201).json(formatCoupon(data));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.put("/coupons/:id", requireAdmin, async (req, res) => {
   try {
-    const [coupon] = await db.update(couponsTable)
-      .set({ ...req.body, expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null, updatedAt: new Date() } as any)
-      .where(eq(couponsTable.id, Number(req.params.id)))
-      .returning();
-    if (!coupon) return res.status(404).json({ error: "Not found" });
-    return res.json(formatCoupon(coupon));
+    const { data, error } = await supabase.from("coupons")
+      .update({
+        ...req.body,
+        expires_at: req.body.expiresAt ? new Date(req.body.expiresAt).toISOString() : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", Number(req.params.id))
+      .select().single();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: "Not found" });
+    return res.json(formatCoupon(data));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.delete("/coupons/:id", requireAdmin, async (req, res) => {
   try {
-    await db.delete(couponsTable).where(eq(couponsTable.id, Number(req.params.id)));
+    const { error } = await supabase.from("coupons").delete().eq("id", Number(req.params.id));
+    if (error) throw error;
     return res.json({ message: "Deleted" });
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
@@ -54,15 +62,16 @@ router.delete("/coupons/:id", requireAdmin, async (req, res) => {
 router.post("/coupons/validate", async (req, res) => {
   try {
     const { code, productId, amount } = req.body;
-    const [coupon] = await db.select().from(couponsTable).where(eq(couponsTable.code, code));
+    const { data: coupon, error } = await supabase.from("coupons").select("*").eq("code", code).maybeSingle();
+    if (error) throw error;
     if (!coupon || !coupon.active) return res.json({ valid: false, discountAmount: 0, finalAmount: amount, message: "Invalid or inactive coupon" });
-    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) return res.json({ valid: false, discountAmount: 0, finalAmount: amount, message: "Coupon has expired" });
-    if (coupon.usageLimit !== null && coupon.usageCount >= coupon.usageLimit) return res.json({ valid: false, discountAmount: 0, finalAmount: amount, message: "Coupon usage limit reached" });
-    const appIds = Array.isArray(coupon.applicableProductIds) ? coupon.applicableProductIds as number[] : [];
+    if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) return res.json({ valid: false, discountAmount: 0, finalAmount: amount, message: "Coupon has expired" });
+    if (coupon.usage_limit !== null && coupon.usage_count >= coupon.usage_limit) return res.json({ valid: false, discountAmount: 0, finalAmount: amount, message: "Coupon usage limit reached" });
+    const appIds = Array.isArray(coupon.applicable_product_ids) ? coupon.applicable_product_ids as number[] : [];
     if (appIds.length > 0 && !appIds.includes(productId)) return res.json({ valid: false, discountAmount: 0, finalAmount: amount, message: "Coupon not valid for this product" });
     let discountAmount = 0;
-    if (coupon.discountType === "percentage") discountAmount = amount * parseFloat(coupon.discountValue) / 100;
-    else discountAmount = parseFloat(coupon.discountValue);
+    if (coupon.discount_type === "percentage") discountAmount = amount * parseFloat(coupon.discount_value) / 100;
+    else discountAmount = parseFloat(coupon.discount_value);
     const finalAmount = Math.max(0, amount - discountAmount);
     return res.json({ valid: true, discountAmount, finalAmount, message: "Coupon applied successfully" });
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }

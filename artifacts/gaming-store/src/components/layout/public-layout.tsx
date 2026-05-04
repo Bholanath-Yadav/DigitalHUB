@@ -3,7 +3,7 @@ import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect, useCallback } from "react";
-import { useGetMyProfile } from "@workspace/api-client-react";
+import { useGetMyProfile } from "@/lib/api-hooks";
 import { ChatWidget } from "@/components/chat-widget";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { useTheme } from "@/components/theme-provider";

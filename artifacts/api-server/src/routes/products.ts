@@ -1,7 +1,6 @@
 import { Router, type IRouter } from "express";
 import { requireAdmin } from "../middlewares/supabaseAuth.js";
-import { db, productsTable } from "@workspace/db";
-import { eq, ilike, and } from "drizzle-orm";
+import { supabase } from "../lib/supabase.js";
 
 const router: IRouter = Router();
 
@@ -10,36 +9,36 @@ function formatProduct(p: any) {
     ...p,
     price: parseFloat(p.price),
     tags: Array.isArray(p.tags) ? p.tags : [],
-    dynamicFields: Array.isArray(p.dynamicFields) ? p.dynamicFields : [],
-    createdAt: p.createdAt?.toISOString?.() ?? p.createdAt,
+    dynamicFields: Array.isArray(p.dynamic_fields ?? p.dynamicFields) ? (p.dynamic_fields ?? p.dynamicFields) : [],
+    createdAt: p.created_at ?? p.createdAt,
   };
 }
 
 router.get("/products", async (req, res) => {
   try {
     const { category, search, featured } = req.query as any;
-    const conditions: any[] = [];
-    if (category) conditions.push(eq(productsTable.category, category));
-    if (featured === "true") conditions.push(eq(productsTable.featured, true));
-    if (search) conditions.push(ilike(productsTable.name, `%${search}%`));
-
-    const products = await db.select().from(productsTable)
-      .where(conditions.length ? and(...conditions) : undefined)
-      .orderBy(productsTable.createdAt);
-
+    let query = supabase.from("products").select("*");
+    if (category) query = query.eq("category", category);
+    if (featured === "true") query = query.eq("featured", true);
+    if (search) query = query.ilike("name", `%${search}%`);
+    query = query.order("created_at", { ascending: true });
+    const { data, error } = await query;
+    if (error) throw error;
     if (!search) res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
-    return res.json(products.map(formatProduct));
+    return res.json((data ?? []).map(formatProduct));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.get("/products/stats/summary", requireAdmin, async (req, res) => {
   try {
-    const all = await db.select().from(productsTable);
+    const { data, error } = await supabase.from("products").select("*");
+    if (error) throw error;
+    const all = data ?? [];
     const byCategory: Record<string, number> = {};
     let inStock = 0, outOfStock = 0;
     for (const p of all) {
       byCategory[p.category] = (byCategory[p.category] || 0) + 1;
-      if (p.inStock) inStock++; else outOfStock++;
+      if (p.in_stock) inStock++; else outOfStock++;
     }
     return res.json({ total: all.length, byCategory, inStock, outOfStock });
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
@@ -47,38 +46,42 @@ router.get("/products/stats/summary", requireAdmin, async (req, res) => {
 
 router.get("/products/:id", async (req, res) => {
   try {
-    const [product] = await db.select().from(productsTable).where(eq(productsTable.id, Number(req.params.id)));
-    if (!product) return res.status(404).json({ error: "Not found" });
+    const { data, error } = await supabase.from("products").select("*").eq("id", Number(req.params.id)).maybeSingle();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: "Not found" });
     res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
-    return res.json(formatProduct(product));
+    return res.json(formatProduct(data));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.post("/products", requireAdmin, async (req, res) => {
   try {
-    const [product] = await db.insert(productsTable).values({
+    const { data, error } = await supabase.from("products").insert({
       ...req.body,
       tags: req.body.tags || [],
-      dynamicFields: req.body.dynamicFields || [],
-    }).returning();
-    return res.status(201).json(formatProduct(product));
+      dynamic_fields: req.body.dynamicFields || req.body.dynamic_fields || [],
+    }).select().single();
+    if (error) throw error;
+    return res.status(201).json(formatProduct(data));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.put("/products/:id", requireAdmin, async (req, res) => {
   try {
-    const [product] = await db.update(productsTable)
-      .set({ ...req.body, updatedAt: new Date() })
-      .where(eq(productsTable.id, Number(req.params.id)))
-      .returning();
-    if (!product) return res.status(404).json({ error: "Not found" });
-    return res.json(formatProduct(product));
+    const { data, error } = await supabase.from("products")
+      .update({ ...req.body, updated_at: new Date().toISOString() })
+      .eq("id", Number(req.params.id))
+      .select().single();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: "Not found" });
+    return res.json(formatProduct(data));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.delete("/products/:id", requireAdmin, async (req, res) => {
   try {
-    await db.delete(productsTable).where(eq(productsTable.id, Number(req.params.id)));
+    const { error } = await supabase.from("products").delete().eq("id", Number(req.params.id));
+    if (error) throw error;
     return res.json({ message: "Deleted" });
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });

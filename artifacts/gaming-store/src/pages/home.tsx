@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useListProducts, useListBanners } from "@workspace/api-client-react";
+import { useListProducts, useListBanners } from "@/lib/api-hooks";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Gamepad2, Gift, Tv, Ticket, ArrowRight, Zap, ShieldCheck, Clock, ChevronDown } from "lucide-react";

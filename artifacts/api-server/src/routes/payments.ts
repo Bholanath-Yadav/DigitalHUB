@@ -1,25 +1,29 @@
 import { Router, type IRouter } from "express";
 import { requireAdmin } from "../middlewares/supabaseAuth.js";
-import { db, paymentsTable, ordersTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { supabase } from "../lib/supabase.js";
 
 const router: IRouter = Router();
 
 function formatPayment(p: any) {
-  return { ...p, createdAt: p.createdAt?.toISOString?.() ?? p.createdAt };
+  return { ...p, createdAt: p.created_at ?? p.createdAt };
 }
 
 router.post("/payments/upload", async (req, res) => {
   try {
     const { orderId, screenshotUrl, paymentMethod } = req.body;
-    const [order] = await db.select().from(ordersTable).where(eq(ordersTable.id, orderId));
+    const { data: order, error: orderError } = await supabase.from("orders").select("*").eq("id", orderId).maybeSingle();
+    if (orderError) throw orderError;
     if (!order) return res.status(404).json({ error: "Order not found" });
 
-    await db.update(ordersTable).set({ paymentScreenshotUrl: screenshotUrl, updatedAt: new Date() }).where(eq(ordersTable.id, orderId));
+    await supabase.from("orders").update({ payment_screenshot_url: screenshotUrl, updated_at: new Date().toISOString() }).eq("id", orderId);
 
-    const [payment] = await db.insert(paymentsTable).values({
-      orderId, screenshotUrl, paymentMethod, status: "pending",
-    }).returning();
+    const { data: payment, error: paymentError } = await supabase.from("payments").insert({
+      order_id: orderId,
+      screenshot_url: screenshotUrl,
+      payment_method: paymentMethod,
+      status: "pending",
+    }).select().single();
+    if (paymentError) throw paymentError;
 
     return res.json(formatPayment(payment));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
@@ -28,27 +32,28 @@ router.post("/payments/upload", async (req, res) => {
 router.get("/payments", requireAdmin, async (req, res) => {
   try {
     const { status } = req.query as any;
-    const conditions: any[] = [];
-    if (status) conditions.push(eq(paymentsTable.status, status));
-    const payments = await db.select().from(paymentsTable)
-      .where(conditions.length ? and(...conditions) : undefined);
-    return res.json(payments.map(formatPayment));
+    let query = supabase.from("payments").select("*");
+    if (status) query = query.eq("status", status);
+    const { data, error } = await query;
+    if (error) throw error;
+    return res.json((data ?? []).map(formatPayment));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
 router.post("/payments/:id/verify", requireAdmin, async (req, res) => {
   try {
     const { status, adminNote } = req.body;
-    const [payment] = await db.update(paymentsTable)
-      .set({ status, adminNote, updatedAt: new Date() } as any)
-      .where(eq(paymentsTable.id, Number(req.params.id)))
-      .returning();
+    const { data: payment, error } = await supabase.from("payments")
+      .update({ status, admin_note: adminNote, updated_at: new Date().toISOString() })
+      .eq("id", Number(req.params.id))
+      .select().single();
+    if (error) throw error;
     if (!payment) return res.status(404).json({ error: "Not found" });
 
     if (status === "verified") {
-      await db.update(ordersTable).set({ status: "verified", updatedAt: new Date() }).where(eq(ordersTable.id, payment.orderId));
+      await supabase.from("orders").update({ status: "verified", updated_at: new Date().toISOString() }).eq("id", payment.order_id);
     } else if (status === "rejected") {
-      await db.update(ordersTable).set({ status: "rejected", updatedAt: new Date() }).where(eq(ordersTable.id, payment.orderId));
+      await supabase.from("orders").update({ status: "rejected", updated_at: new Date().toISOString() }).eq("id", payment.order_id);
     }
 
     return res.json(formatPayment(payment));
