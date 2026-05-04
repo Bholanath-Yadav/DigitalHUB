@@ -359,6 +359,7 @@ export interface BanUserBody {
 export interface UpdateProfileBody {
   name?: string | null;
   phone?: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface OrdersByStatus {

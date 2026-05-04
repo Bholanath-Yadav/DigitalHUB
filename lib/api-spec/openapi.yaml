@@ -1239,6 +1239,9 @@ components:
         phone:
           type: string
           nullable: true
+        avatarUrl:
+          type: string
+          nullable: true
       required: []
 
     DashboardStats:

@@ -1036,6 +1036,7 @@ export const GetMyProfileResponse = zod.object({
 export const UpdateMyProfileBody = zod.object({
   name: zod.string().nullish(),
   phone: zod.string().nullish(),
+  avatarUrl: zod.string().nullish(),
 });
 
 export const UpdateMyProfileResponse = zod.object({
