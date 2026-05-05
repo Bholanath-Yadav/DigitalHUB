@@ -262,7 +262,7 @@ export default function AdminProducts() {
   };
 
   const handleDelete = (id: number) => {
-    deleteProduct.mutate({ id }, {
+    deleteProduct.mutate(id, {
       onSuccess: () => {
         toast({ title: "Product deleted" });
         queryClient.invalidateQueries({ queryKey: ["admin-products"] });

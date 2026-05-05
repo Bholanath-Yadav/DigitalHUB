@@ -44,7 +44,7 @@ export default function AdminUsers() {
 
   const handleRoleChange = (supabaseId: string, role: "user" | "staff" | "admin") => {
     updateRole.mutate(
-      { clerkId: supabaseId, data: { role } },
+      { userId: supabaseId, data: { role } },
       { onSuccess: () => { toast({ title: "Role updated" }); invalidate(); },
         onError:   () =>  toast({ title: "Failed to update role", variant: "destructive" }) }
     );
@@ -52,7 +52,7 @@ export default function AdminUsers() {
 
   const handleBan = (user: UserRow, ban: boolean) => {
     banUser.mutate(
-      { clerkId: user.supabaseId, data: { isBanned: ban } },
+      { userId: user.supabaseId, data: { isBanned: ban } },
       { onSuccess: () => { toast({ title: ban ? `${user.name || user.email} banned` : `${user.name || user.email} unbanned` }); invalidate(); setConfirmBan(null); },
         onError:   () =>  toast({ title: "Action failed", variant: "destructive" }) }
     );
@@ -60,7 +60,7 @@ export default function AdminUsers() {
 
   const handleDelete = (user: UserRow) => {
     deleteUser.mutate(
-      { clerkId: user.supabaseId },
+      user.supabaseId,
       { onSuccess: () => { toast({ title: "User deleted" }); invalidate(); setConfirmDelete(null); },
         onError:   (e: any) => toast({ title: e?.response?.data?.error ?? "Delete failed", variant: "destructive" }) }
     );

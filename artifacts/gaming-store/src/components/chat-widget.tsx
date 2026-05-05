@@ -59,6 +59,7 @@ export function ChatWidget() {
   const [unread, setUnread]     = useState(1);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [sending, setSending]   = useState(false);
+  const [isTabVisible, setIsTabVisible] = useState(() => document.visibilityState === "visible");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef  = useRef<HTMLInputElement>(null);
 
@@ -73,14 +74,20 @@ export function ChatWidget() {
   }, []);
 
   // Load messages from server
-  const fetchMessages = useCallback(async (sid: string) => {
+  const fetchMessages = useCallback(async (sid: string, signal?: AbortSignal) => {
     if (!sid) return;
     try {
-      const res = await fetch(`/api/chat/messages?sessionId=${encodeURIComponent(sid)}`);
+      const res = await fetch(`/api/chat/messages?sessionId=${encodeURIComponent(sid)}`, { signal });
       if (!res.ok) return;
       const data: ChatMsg[] = await res.json();
       setMessages(data.length > 0 ? data : [GREETING]);
     } catch { /* network error — keep existing messages */ }
+  }, []);
+
+  useEffect(() => {
+    const onVisibilityChange = () => setIsTabVisible(document.visibilityState === "visible");
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, []);
 
   // Fetch on open
@@ -92,10 +99,13 @@ export function ChatWidget() {
 
   // Poll every 4s while open
   useEffect(() => {
-    if (!isOpen || !sessionId) return;
-    const id = setInterval(() => fetchMessages(sessionId), 4000);
+    if (!isOpen || !sessionId || !isTabVisible) return;
+    const id = setInterval(() => {
+      const ctrl = new AbortController();
+      fetchMessages(sessionId, ctrl.signal);
+    }, 8000);
     return () => clearInterval(id);
-  }, [isOpen, sessionId, fetchMessages]);
+  }, [isOpen, sessionId, fetchMessages, isTabVisible]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -222,8 +232,8 @@ export function ChatWidget() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", stiffness: 280, damping: 24 }}
-            className="fixed bottom-4 right-4 z-50 flex flex-col rounded-2xl overflow-hidden shadow-2xl"
-            style={{ width: "min(340px, calc(100vw - 2rem))", height: "min(520px, calc(100dvh - 5rem))" }}
+            className="fixed bottom-2 right-2 left-2 sm:left-auto sm:bottom-4 sm:right-4 z-50 flex flex-col rounded-2xl overflow-hidden shadow-2xl"
+            style={{ width: "min(360px, calc(100vw - 1rem))", height: "min(560px, calc(100dvh - 1rem))" }}
           >
             {/* Header */}
             <div className="relative flex items-center gap-3 px-4 py-3 shrink-0"

@@ -59,7 +59,6 @@ export default defineConfig({
           "vendor-react":   ["react", "react-dom"],
           "vendor-query":   ["@tanstack/react-query"],
           "vendor-motion":  ["framer-motion"],
-          "vendor-clerk":   ["@clerk/react", "@clerk/themes"],
           "vendor-ui":      ["@radix-ui/react-dialog", "@radix-ui/react-tabs"],
         },
       },

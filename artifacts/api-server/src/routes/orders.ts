@@ -16,13 +16,21 @@ function formatProduct(p: any) {
 
 async function enrichOrder(order: any) {
   const { data: product } = await supabase.from("products").select("*").eq("id", order.product_id ?? order.productId).maybeSingle();
+  // If order has a registered user, fetch their profile for display name
+  let userProfile: any = null;
+  const userId = order.user_id ?? order.userId;
+  if (userId) {
+    const { data: u } = await supabase.from("users").select("*").eq("supabase_id", userId).maybeSingle();
+    if (u) userProfile = u;
+  }
   return {
     ...order,
     id: order.id,
     userId: order.user_id ?? order.userId,
     productId: order.product_id ?? order.productId,
-    guestName: order.guest_name ?? order.guestName ?? null,
-    guestEmail: order.guest_email ?? order.guestEmail ?? null,
+    // Prefer registered user's name/email when available
+    guestName: userProfile?.name ?? order.guest_name ?? order.guestName ?? (userProfile?.email ?? null),
+    guestEmail: userProfile?.email ?? order.guest_email ?? order.guestEmail ?? null,
     guestPhone: order.guest_phone ?? order.guestPhone ?? null,
     gameDetails: order.game_details ?? order.gameDetails ?? {},
     totalAmount: parseFloat(order.total_amount ?? order.totalAmount),

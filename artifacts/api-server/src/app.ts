@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
+import compression from "compression";
 import router from "./routes/index.js";
 import { logger } from "./lib/logger.js";
 
@@ -24,6 +25,7 @@ const allowedOrigin = process.env.ALLOWED_ORIGIN;
 app.use(
   cors({
     credentials: true,
+    maxAge: 86400,
     origin: allowedOrigin
       ? (origin, cb) => {
           if (!origin) return cb(null, true);
@@ -38,6 +40,7 @@ app.use(
   }),
 );
 
+app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

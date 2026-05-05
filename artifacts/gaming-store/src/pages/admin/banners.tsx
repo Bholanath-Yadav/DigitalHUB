@@ -87,7 +87,7 @@ export default function AdminBanners() {
   };
 
   const handleDelete = (id: number) => {
-    deleteBanner.mutate({ id }, {
+    deleteBanner.mutate(id, {
       onSuccess: () => {
         toast({ title: "Banner deleted" });
         queryClient.invalidateQueries({ queryKey: ["admin-banners"] });

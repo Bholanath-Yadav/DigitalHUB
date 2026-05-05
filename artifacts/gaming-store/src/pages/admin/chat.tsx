@@ -75,7 +75,7 @@ export default function AdminChat() {
   const handleDelete = () => {
     if (!deleteTarget) return;
     deleteSession.mutate(
-      { sessionId: deleteTarget },
+      deleteTarget,
       {
         onSuccess: () => {
           toast({ title: "Chat deleted" });

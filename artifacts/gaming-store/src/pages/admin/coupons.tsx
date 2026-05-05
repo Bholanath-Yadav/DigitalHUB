@@ -75,7 +75,7 @@ export default function AdminCoupons() {
   };
 
   const handleDelete = (id: number) => {
-    deleteCoupon.mutate({ id }, {
+    deleteCoupon.mutate(id, {
       onSuccess: () => {
         toast({ title: "Coupon deleted" });
         queryClient.invalidateQueries({ queryKey: ["admin-coupons"] });

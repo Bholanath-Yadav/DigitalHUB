@@ -6,6 +6,7 @@ if (!apiKey) {
 }
 
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+const AI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS ?? "6000");
 
 const SYSTEM_PROMPT = `You are a helpful customer support assistant for Digital HUB Nepal, a gaming store that sells:
 - Game top-ups: Free Fire Diamonds, PUBG UC, Mobile Legends Diamonds, TikTok Coins
@@ -35,12 +36,18 @@ export async function getAIResponse(userMessage: string): Promise<string> {
     const chat = model.startChat({
       history: [],
       generationConfig: {
-        maxOutputTokens: 150,
-        temperature: 0.7,
+        maxOutputTokens: 120,
+        temperature: 0.45,
       },
     });
 
-    const result = await chat.sendMessage(userMessage);
+    const aiCall = chat.sendMessage(`${SYSTEM_PROMPT}\n\nCustomer message: ${userMessage}`);
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(() => reject(new Error(`Gemini timeout after ${AI_TIMEOUT_MS}ms`)), AI_TIMEOUT_MS);
+    });
+    const result = await Promise.race([aiCall, timeout]);
+    if (timeoutHandle) clearTimeout(timeoutHandle);
     const response = result.response.text();
     return response.trim();
   } catch (error) {

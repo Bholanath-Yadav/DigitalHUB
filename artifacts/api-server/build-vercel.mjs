@@ -19,7 +19,9 @@ const outDir      = path.resolve(repoRoot, "api");
 await mkdir(outDir, { recursive: true });
 
 await esbuild({
-  entryPoints: [path.resolve(artifactDir, "src/vercel.ts")],
+  entryPoints: {
+    index: path.resolve(artifactDir, "src/vercel.ts"),
+  },
   platform: "node",
   bundle: true,
   format: "esm",
@@ -46,4 +48,4 @@ globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
   },
 });
 
-console.log(`✓ Vercel API bundle → ${outDir}/vercel.mjs`);
+console.log(`✓ Vercel API bundle → ${outDir}/index.mjs`);

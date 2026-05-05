@@ -10,7 +10,7 @@ type BannerItem = {
   linkUrl?: string | null;
 };
 
-const INTERVAL = 1500;
+const INTERVAL = 5000;
 
 const FALLBACK_GRADIENTS = [
   { from: "#0c1a3a", via: "#0f2952", to: "#0a1628", accent: "#00c4ff" },
@@ -133,6 +133,8 @@ export function BannerCarousel({ banners }: { banners: BannerItem[] }) {
           {banner.imageUrl && (
             <img
               src={banner.imageUrl} alt=""
+              loading="eager"
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover"
               style={{ opacity: 0.28, mixBlendMode: "luminosity" }}
             />
@@ -146,6 +148,8 @@ export function BannerCarousel({ banners }: { banners: BannerItem[] }) {
             >
               <img
                 src={banner.imageUrl} alt=""
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover object-center"
                 style={{ opacity: 0.75 }}
               />
@@ -262,7 +266,7 @@ export function BannerCarousel({ banners }: { banners: BannerItem[] }) {
                       className="relative w-full h-full rounded-2xl overflow-hidden"
                       style={{ border: `1.5px solid ${g.accent}44`, boxShadow: `0 0 0 1px ${g.accent}18 inset` }}
                     >
-                      <img src={banner.imageUrl} alt={banner.title} className="w-full h-full object-cover" />
+                      <img src={banner.imageUrl} alt={banner.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                       {/* Tint overlay */}
                       <div className="absolute inset-0"
                         style={{ background: `linear-gradient(135deg, transparent 55%, ${g.accent}18 100%)` }} />
