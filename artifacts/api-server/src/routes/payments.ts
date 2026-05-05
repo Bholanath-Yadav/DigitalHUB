@@ -5,7 +5,15 @@ import { supabase } from "../lib/supabase.js";
 const router: IRouter = Router();
 
 function formatPayment(p: any) {
-  return { ...p, createdAt: p.created_at ?? p.createdAt };
+  return {
+    ...p,
+    orderId: p.order_id ?? p.orderId,
+    screenshotUrl: p.screenshot_url ?? p.screenshotUrl ?? null,
+    paymentMethod: p.payment_method ?? p.paymentMethod,
+    adminNote: p.admin_note ?? p.adminNote ?? null,
+    createdAt: p.created_at ?? p.createdAt,
+    updatedAt: p.updated_at ?? p.updatedAt,
+  };
 }
 
 router.post("/payments/upload", async (req, res) => {

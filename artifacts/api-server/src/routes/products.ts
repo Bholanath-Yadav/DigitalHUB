@@ -8,9 +8,13 @@ function formatProduct(p: any) {
   return {
     ...p,
     price: parseFloat(p.price),
+    imageUrl: p.image_url ?? p.imageUrl ?? null,
     tags: Array.isArray(p.tags) ? p.tags : [],
     dynamicFields: Array.isArray(p.dynamic_fields ?? p.dynamicFields) ? (p.dynamic_fields ?? p.dynamicFields) : [],
+    inStock: p.in_stock ?? p.inStock ?? false,
+    featured: p.featured ?? false,
     createdAt: p.created_at ?? p.createdAt,
+    updatedAt: p.updated_at ?? p.updatedAt,
   };
 }
 
@@ -24,7 +28,7 @@ router.get("/products", async (req, res) => {
     query = query.order("created_at", { ascending: true });
     const { data, error } = await query;
     if (error) throw error;
-    if (!search) res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+    res.set("Cache-Control", "public, max-age=600, stale-while-revalidate=3600"); // 10 min cache, 1 hr stale
     return res.json((data ?? []).map(formatProduct));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
@@ -49,7 +53,7 @@ router.get("/products/:id", async (req, res) => {
     const { data, error } = await supabase.from("products").select("*").eq("id", Number(req.params.id)).maybeSingle();
     if (error) throw error;
     if (!data) return res.status(404).json({ error: "Not found" });
-    res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+    res.set("Cache-Control", "public, max-age=600, stale-while-revalidate=3600"); // 10 min cache, 1 hr stale
     return res.json(formatProduct(data));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });

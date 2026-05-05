@@ -1,6 +1,7 @@
 import { useGetDashboard as useGetAdminDashboard } from "@/lib/api-hooks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fmtNPR } from "@/lib/currency";
 import {
@@ -10,7 +11,7 @@ import {
 import {
   TrendingUp, ShoppingCart, Users, Package,
   Wallet, Tag, ArchiveX, CheckCircle2, Clock,
-  XCircle, BadgeCheck, Layers,
+  XCircle, BadgeCheck, Layers, RefreshCcw,
 } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -115,7 +116,7 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function AdminDashboard() {
-  const { data: stats, isLoading } = useGetAdminDashboard({
+  const { data: stats, isLoading, isFetching, refetch } = useGetAdminDashboard({
     query: { queryKey: ["admin-dashboard"] },
   });
 
@@ -165,9 +166,21 @@ export default function AdminDashboard() {
             {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </p>
         </div>
-        <Badge variant="outline" className="text-xs gap-1.5 px-3 py-1.5">
-          <TrendingUp className="h-3 w-3" /> Last 30 days
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="gap-2"
+          >
+            <RefreshCcw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <Badge variant="outline" className="text-xs gap-1.5 px-3 py-1.5">
+            <TrendingUp className="h-3 w-3" /> Last 30 days
+          </Badge>
+        </div>
       </div>
 
       {/* Primary Stats */}

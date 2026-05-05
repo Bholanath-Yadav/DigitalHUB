@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Edit, Trash2, Image, Upload, Loader2, X } from "lucide-react";
+import { Plus, Edit, Trash2, Image, Upload, Loader2, X, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { uploadToStorage } from "@/lib/upload";
@@ -144,6 +144,13 @@ export default function AdminBanners() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
+                    {b.linkUrl && (
+                      <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-blue/10 hover:text-blue" asChild>
+                        <a href={b.linkUrl} target="_blank" rel="noopener noreferrer" title="View banner">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      </Button>
+                    )}
                     <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/10 hover:text-primary" onClick={() => openEdit(b)}>
                       <Edit className="h-3.5 w-3.5" />
                     </Button>

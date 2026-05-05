@@ -5,7 +5,14 @@ import { supabase } from "../lib/supabase.js";
 const router: IRouter = Router();
 
 function formatBanner(b: any) {
-  return { ...b, createdAt: b.created_at ?? b.createdAt };
+  return {
+    ...b,
+    imageUrl: b.image_url ?? b.imageUrl,
+    linkUrl: b.link_url ?? b.linkUrl,
+    sortOrder: b.sort_order ?? b.sortOrder,
+    createdAt: b.created_at ?? b.createdAt,
+    updatedAt: b.updated_at ?? b.updatedAt,
+  };
 }
 
 router.get("/banners", async (req, res) => {
@@ -20,7 +27,15 @@ router.get("/banners", async (req, res) => {
 
 router.post("/banners", requireAdmin, async (req, res) => {
   try {
-    const { data, error } = await supabase.from("banners").insert(req.body).select().single();
+    const insertData = {
+      title: req.body.title,
+      subtitle: req.body.subtitle || null,
+      image_url: req.body.imageUrl || null,
+      link_url: req.body.linkUrl || null,
+      active: req.body.active,
+      sort_order: req.body.sortOrder
+    };
+    const { data, error } = await supabase.from("banners").insert(insertData).select().single();
     if (error) throw error;
     return res.status(201).json(formatBanner(data));
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
@@ -28,8 +43,17 @@ router.post("/banners", requireAdmin, async (req, res) => {
 
 router.put("/banners/:id", requireAdmin, async (req, res) => {
   try {
+    const updateData = {
+      title: req.body.title,
+      subtitle: req.body.subtitle || null,
+      image_url: req.body.imageUrl || null,
+      link_url: req.body.linkUrl || null,
+      active: req.body.active,
+      sort_order: req.body.sortOrder,
+      updated_at: new Date().toISOString()
+    };
     const { data, error } = await supabase.from("banners")
-      .update({ ...req.body, updated_at: new Date().toISOString() })
+      .update(updateData)
       .eq("id", Number(req.params.id))
       .select().single();
     if (error) throw error;

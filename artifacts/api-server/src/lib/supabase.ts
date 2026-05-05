@@ -1,4 +1,34 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+function loadEnvFile(filePath: string): boolean {
+  try {
+    const envContent = readFileSync(filePath, "utf-8");
+    for (const line of envContent.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+
+      const [key, ...valueParts] = trimmed.split("=");
+      if (!key || process.env[key]) continue;
+
+      process.env[key] = valueParts.join("=").trim();
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+for (const candidate of [
+  ".env",
+  resolve(process.cwd(), ".env"),
+  resolve(process.cwd(), "..", ".env"),
+  resolve(process.cwd(), "..", "..", ".env"),
+]) {
+  if (loadEnvFile(candidate)) break;
+}
 
 function resolveUrl(): string {
   for (const key of ["SUPABASE_URL", "VITE_SUPABASE_URL"]) {
