@@ -474,28 +474,33 @@ export function useUpdateOrderStatus(options?: UseMutationOptions<Order, Error, 
 export function useUploadPaymentScreenshot(options?: UseMutationOptions<Payment, Error, { data: UploadPaymentBody }>) {
   return useMutation<Payment, Error, { data: UploadPaymentBody }>({
     mutationFn: async ({ data }) => {
-      const { data: insertedPayment, error } = await supabase
-        .from("payments")
-        .insert({
-          order_id: data.orderId,
-          screenshot_url: data.screenshotUrl,
-          payment_method: data.paymentMethod,
-          status: "pending",
-        })
-        .select("*")
-        .single();
+      try {
+        const { data: insertedPayment, error } = await supabase
+          .from("payments")
+          .insert({
+            order_id: data.orderId,
+            screenshot_url: data.screenshotUrl,
+            payment_method: data.paymentMethod,
+            status: "pending",
+          })
+          .select("*")
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      return {
-        id: insertedPayment.id,
-        orderId: insertedPayment.order_id,
-        screenshotUrl: insertedPayment.screenshot_url,
-        paymentMethod: insertedPayment.payment_method,
-        status: insertedPayment.status,
-        adminNote: insertedPayment.admin_note ?? null,
-        createdAt: insertedPayment.created_at ?? insertedPayment.createdAt,
-      };
+        return {
+          id: insertedPayment.id,
+          orderId: insertedPayment.order_id,
+          screenshotUrl: insertedPayment.screenshot_url,
+          paymentMethod: insertedPayment.payment_method,
+          status: insertedPayment.status,
+          adminNote: insertedPayment.admin_note ?? null,
+          createdAt: insertedPayment.created_at ?? insertedPayment.createdAt,
+        };
+      } catch (e: any) {
+        console.error("useUploadPaymentScreenshot mutation error:", e);
+        throw new Error(e?.message ?? String(e));
+      }
     },
     ...options,
   });

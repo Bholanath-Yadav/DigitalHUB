@@ -234,7 +234,10 @@ export default function ProductDetails() {
       },
       {
         onSuccess: (order) => setLocation(`/checkout/${order.id}`),
-        onError: () => toast({ title: "Failed to create order", description: "Please try again.", variant: "destructive" }),
+        onError: (err: any) => {
+          console.error("createOrder failed", err);
+          toast({ title: "Failed to create order", description: err?.message ?? "Please try again.", variant: "destructive" });
+        },
       }
     );
   };

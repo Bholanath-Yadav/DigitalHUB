@@ -108,8 +108,9 @@ export default function Checkout() {
           toast({ title: "Payment submitted!", description: "Your payment is pending verification." });
           setLocation(`/orders/${orderId}`);
         },
-        onError: () => {
-          toast({ title: "Submission failed", variant: "destructive" });
+        onError: (err: any) => {
+          console.error("uploadScreenshot failed", err);
+          toast({ title: "Submission failed", description: err?.message ?? "Please try again.", variant: "destructive" });
         },
         onSettled: () => setUploading(false),
       }
