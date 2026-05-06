@@ -184,7 +184,7 @@ export default function Checkout() {
 
           {Object.keys(order.gameDetails || {}).length > 0 && (
             <Card>
-              <CardHeader className="pb-3"><CardTitle className="text-base">Game Details</CardTitle></CardHeader>
+              <CardHeader className="pb-3"><CardTitle className="text-base">Account Details</CardTitle></CardHeader>
               <CardContent>
                 <dl className="space-y-1.5 text-sm">
                   {Object.entries(order.gameDetails || {})

@@ -552,7 +552,7 @@ export default function AdminProducts() {
               <div className="rounded-xl bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 p-3 flex items-start gap-2.5">
                 <Layers className="h-4 w-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  After creating, you'll go to the <strong className="text-foreground">Variant Manager</strong> to add price packages like "25 Diamonds — Rs. 39".
+                  After creating, you'll go to the <strong className="text-foreground">Variant Manager</strong> to add price packages like "25 Diamonds — NPR 39".
                 </p>
               </div>
             )}

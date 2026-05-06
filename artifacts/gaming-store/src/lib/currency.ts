@@ -6,7 +6,7 @@ export function toINR(npr: number): number {
 }
 
 export function fmtNPR(npr: number): string {
-  return `Rs. ${Math.round(npr).toLocaleString("ne-NP")}`;
+  return `NPR ${Math.round(npr).toLocaleString("en-IN")}`;
 }
 
 export function fmtINR(inr: number): string {

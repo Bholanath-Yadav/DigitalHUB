@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { requireAdmin, optionalAuth } from "../middlewares/supabaseAuth.js";
 import { supabase } from "../lib/supabase.js";
-import { getAIResponse } from "../lib/gemini.js";
+import { getAIResponseWithContext } from "../lib/gemini.js";
 
 const router: IRouter = Router();
 
@@ -48,7 +48,19 @@ router.post("/chat/messages", optionalAuth, async (req, res) => {
     if (msgError) throw msgError;
 
     if (senderRole === "user") {
-      const botReply = await getAIResponse(content);
+      const { data: recentRows } = await supabase
+        .from("chat_messages")
+        .select("sender, content")
+        .eq("session_id", sessionId)
+        .order("created_at", { ascending: false })
+        .limit(8);
+
+      const recentMessages = (recentRows ?? []).reverse().map((row: any) => ({
+        sender: row.sender,
+        content: row.content,
+      }));
+
+      const botReply = await getAIResponseWithContext(content, recentMessages);
       const { data: botMsg, error: botError } = await supabase.from("chat_messages").insert({
         session_id: sessionId,
         user_id: null,

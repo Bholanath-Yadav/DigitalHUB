@@ -121,7 +121,7 @@ function Navbar() {
           <SearchTrigger onOpen={() => setSearchOpen(true)} />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-row-reverse items-center gap-2">
           <ThemeToggle />
 
           {isSignedIn ? (
@@ -285,7 +285,7 @@ function Footer() {
         <div className="mb-8">
           <CustomerReviewsPanel />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-right md:text-right">
           <div className="md:col-span-2">
             <div className="mb-3">
               <Logo href="/" size="sm" markSize={26} />

@@ -140,7 +140,7 @@ export default function AdminCoupons() {
               <TableRow key={c.id}>
                 <TableCell className="font-mono font-bold tracking-widest">{c.code}</TableCell>
                 <TableCell className="font-semibold">
-                  {c.discountType === "percentage" ? `${c.discountValue}%` : `Rs. ${c.discountValue}`}
+                  {c.discountType === "percentage" ? `${c.discountValue}%` : `NPR ${c.discountValue}`}
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {c.usageCount}{c.usageLimit ? ` / ${c.usageLimit}` : " used"}
@@ -179,7 +179,7 @@ export default function AdminCoupons() {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="percentage">Percentage (%)</SelectItem>
-                    <SelectItem value="fixed">Fixed (Rs.)</SelectItem>
+                    <SelectItem value="fixed">Fixed (NPR)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

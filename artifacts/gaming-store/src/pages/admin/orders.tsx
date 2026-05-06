@@ -1,13 +1,23 @@
 import { useMemo, useState } from "react";
-import { useListOrders, useUpdateOrderStatus } from "@/lib/api-hooks";
+import { useListOrders, useUpdateOrderStatus, useDeleteOrder } from "@/lib/api-hooks";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { ShoppingCart, RefreshCcw, Search } from "lucide-react";
+import { ShoppingCart, RefreshCcw, Search, Trash2 } from "lucide-react";
 import { fmtNPR } from "@/lib/currency";
 
 const STATUS_COLORS: Record<string, any> = {
@@ -20,8 +30,16 @@ const STATUS_COLORS: Record<string, any> = {
 export default function AdminOrders() {
   const { data: orders, isLoading } = useListOrders(undefined, { query: { queryKey: ["admin-orders"] } });
   const updateStatus = useUpdateOrderStatus();
+  const deleteOrder = useDeleteOrder();
   const { toast } = useToast();
   const [search, setSearch] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+
+  const isOldOrder = (createdAt: string) => {
+    const ageMs = Date.now() - new Date(createdAt).getTime();
+    const days = ageMs / (1000 * 60 * 60 * 24);
+    return days >= 30;
+  };
 
   const filteredOrders = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -48,6 +66,19 @@ export default function AdminOrders() {
         onError: () => toast({ title: "Failed to update status", variant: "destructive" }),
       }
     );
+  };
+
+  const handleDelete = (id: number) => {
+    deleteOrder.mutate(id, {
+      onSuccess: () => {
+        toast({ title: "Order deleted" });
+        queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+        setDeleteTarget(null);
+      },
+      onError: () => {
+        toast({ title: "Failed to delete order", variant: "destructive" });
+      },
+    });
   };
 
   return (
@@ -89,11 +120,12 @@ export default function AdminOrders() {
               <TableHead>Amount</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Change Status</TableHead>
+              <TableHead className="text-right">Delete</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading && (
-              <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">Loading…</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">Loading…</TableCell></TableRow>
             )}
             {filteredOrders.map((order) => (
               <TableRow key={order.id}>
@@ -124,11 +156,43 @@ export default function AdminOrders() {
                     </SelectContent>
                   </Select>
                 </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={() => setDeleteTarget(order.id)}
+                    disabled={!isOldOrder(order.createdAt) || deleteOrder.isPending}
+                    title={isOldOrder(order.createdAt) ? "Delete order" : "Only orders older than 30 days can be deleted"}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete old order?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes the order record. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteTarget && handleDelete(deleteTarget)}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

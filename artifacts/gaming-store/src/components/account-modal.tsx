@@ -177,19 +177,19 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="p-0 max-w-[900px] w-[95vw] h-[85vh] max-h-[680px] flex overflow-hidden rounded-2xl gap-0 border border-border shadow-2xl">
+      <DialogContent className="p-0 max-w-[900px] w-[100vw] h-[100dvh] sm:w-[95vw] sm:h-[85vh] max-h-none sm:max-h-[680px] flex flex-col lg:flex-row overflow-hidden rounded-none sm:rounded-2xl gap-0 border border-border shadow-2xl">
         <DialogTitle className="sr-only">Account</DialogTitle>
 
         {/* ── Left Sidebar ── */}
-        <div className="w-56 shrink-0 bg-muted/40 border-r border-border flex flex-col">
-          <div className="p-5 border-b border-border">
+        <div className="w-full lg:w-56 shrink-0 bg-muted/40 border-b lg:border-b-0 lg:border-r border-border flex flex-col">
+          <div className="p-4 sm:p-5 border-b border-border">
             <h2 className="font-bold text-base">Account</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Manage your account info.</p>
           </div>
-          <nav className="flex-1 p-3 space-y-1">
+          <nav className="flex-1 p-3 grid grid-cols-2 gap-2 sm:grid-cols-1 sm:space-y-1 sm:gap-0">
             {NAV_ITEMS.map(({ id, icon: Icon, label, sub }) => (
               <button key={id} onClick={() => setSection(id)}
-                className={`w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-xl transition-all group
+                className={`w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-xl transition-all group min-h-[4.5rem] sm:min-h-0
                   ${section === id ? "bg-primary/10 text-primary shadow-sm" : "text-foreground/70 hover:text-foreground hover:bg-muted"}`}>
                 <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${section === id ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`} />
                 <div className="min-w-0">
@@ -210,13 +210,13 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
 
         {/* ── Right Content ── */}
         <div className="flex-1 flex flex-col min-w-0 bg-background">
-          <div className="px-7 py-5 border-b border-border shrink-0">
+          <div className="px-4 sm:px-7 py-4 sm:py-5 border-b border-border shrink-0">
             <h3 className="font-bold text-lg">{NAV_ITEMS.find(n => n.id === section)?.label}</h3>
             <p className="text-sm text-muted-foreground mt-0.5">{NAV_ITEMS.find(n => n.id === section)?.sub}</p>
           </div>
 
           <ScrollArea className="flex-1">
-            <div className="px-7 py-6 space-y-6">
+            <div className="px-4 sm:px-7 py-5 sm:py-6 space-y-5 sm:space-y-6">
 
               {/* ── PROFILE ── */}
               {section === "profile" && (
@@ -265,7 +265,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-border p-6 space-y-4">
+                  <div className="rounded-2xl border border-border p-4 sm:p-6 space-y-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="acc-email" className="text-sm font-medium">Email address</Label>
                       <div className="flex gap-2">
@@ -273,7 +273,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                         <Badge variant="secondary" className="self-center px-3 py-1.5 text-xs shrink-0">Primary</Badge>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <Label htmlFor="acc-name" className="text-sm font-medium">Display name</Label>
                         <Input id="acc-name" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" />
@@ -283,7 +283,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                         <Input id="acc-phone" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+977 9800000000" />
                       </div>
                     </div>
-                    <Button onClick={handleSaveProfile} disabled={updateProfile.isPending} className="gap-2 bg-gradient-to-r from-primary to-secondary text-white border-none hover:opacity-90">
+                    <Button onClick={handleSaveProfile} disabled={updateProfile.isPending} className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-secondary text-white border-none hover:opacity-90">
                       {updateProfile.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : "Save Changes"}
                     </Button>
                   </div>

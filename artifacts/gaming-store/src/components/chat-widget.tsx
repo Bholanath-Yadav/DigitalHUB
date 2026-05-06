@@ -1,8 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, Send, MessageCircle } from "lucide-react";
-import { queryClient } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "@/lib/supabase";
 
 type ChatMsg = {
   id: number;
@@ -61,6 +59,7 @@ export function ChatWidget() {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [sending, setSending]   = useState(false);
   const [isTabVisible, setIsTabVisible] = useState(() => document.visibilityState === "visible");
+  const [guestName, setGuestName] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef  = useRef<HTMLInputElement>(null);
 
@@ -72,29 +71,26 @@ export function ChatWidget() {
       localStorage.setItem("chat_session_id", stored);
     }
     setSessionId(stored);
+
+    const storedGuestName = localStorage.getItem("chat_guest_name") || "";
+    setGuestName(storedGuestName);
   }, []);
 
-  // Load messages from Supabase
-  const fetchMessages = useCallback(async (sid: string, signal?: AbortSignal) => {
+  // Load messages from localStorage (client-only quick replies)
+  const fetchMessages = (sid: string) => {
     if (!sid) return;
     try {
-      const { data, error } = await supabase
-        .from("chat_messages")
-        .select("*")
-        .eq("session_id", sid)
-        .order("created_at", { ascending: true });
-      
-      if (error) throw error;
-      const chatMsgs: ChatMsg[] = (data ?? []).map(msg => ({
-        id: msg.id,
-        sessionId: msg.session_id,
-        sender: msg.sender,
-        content: msg.content,
-        createdAt: msg.created_at,
-      }));
-      setMessages(chatMsgs.length > 0 ? chatMsgs : [GREETING]);
-    } catch { /* network error — keep existing messages */ }
-  }, []);
+      const raw = localStorage.getItem(`chat_history_${sid}`);
+      if (raw) {
+        const data: ChatMsg[] = JSON.parse(raw);
+        setMessages(data.length > 0 ? data : [GREETING]);
+      } else {
+        setMessages([GREETING]);
+      }
+    } catch {
+      setMessages([GREETING]);
+    }
+  };
 
   useEffect(() => {
     const onVisibilityChange = () => setIsTabVisible(document.visibilityState === "visible");
@@ -102,22 +98,12 @@ export function ChatWidget() {
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, []);
 
-  // Fetch on open
+  // Fetch on open (local-only)
   useEffect(() => {
     if (isOpen && sessionId) {
       fetchMessages(sessionId);
     }
-  }, [isOpen, sessionId, fetchMessages]);
-
-  // Poll every 4s while open
-  useEffect(() => {
-    if (!isOpen || !sessionId || !isTabVisible) return;
-    const id = setInterval(() => {
-      const ctrl = new AbortController();
-      fetchMessages(sessionId, ctrl.signal);
-    }, 8000);
-    return () => clearInterval(id);
-  }, [isOpen, sessionId, fetchMessages, isTabVisible]);
+  }, [isOpen, sessionId]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -152,55 +138,46 @@ export function ChatWidget() {
       const base = prev.filter(m => m.id !== -1); // Remove greeting placeholder
       return [...base, optimisticUserMsg];
     });
-
     try {
-      // Insert message to Supabase
-      const { data: insertedMsg, error } = await supabase
-        .from("chat_messages")
-        .insert({
-          session_id: sessionId,
-          sender: "user",
-          content: text,
-        })
-        .select()
-        .single();
+      // Simple client-side quick reply logic (no server)
+      const reply = getQuickReply(text);
 
-      if (error) throw error;
-
-      // Create bot response
-      const botMsg: ChatMsg = {
-        id: Math.random(),
-        sessionId,
-        sender: "bot",
-        content: "Thanks for your message! Our team will respond shortly.",
-        createdAt: new Date().toISOString(),
-      };
-
-      // Replace optimistic message with actual from DB + add bot reply
-      setMessages(prev => {
-        const filtered = prev.filter(m => m.id !== optimisticUserMsg.id);
-        const next = [...filtered];
-        next.push({
-          id: insertedMsg.id,
-          sessionId: insertedMsg.session_id,
-          sender: insertedMsg.sender,
-          content: insertedMsg.content,
-          createdAt: insertedMsg.created_at,
+      // Simulate short typing delay
+      setTimeout(() => {
+        const botMsg: ChatMsg = {
+          id: Date.now() + 1,
+          sessionId,
+          sender: "bot",
+          content: reply,
+          createdAt: new Date().toISOString(),
+        };
+        setMessages(prev => {
+          const filtered = prev.filter(m => m.id !== optimisticUserMsg.id);
+          const next = [...filtered, optimisticUserMsg, botMsg];
+          try { localStorage.setItem(`chat_history_${sessionId}`, JSON.stringify(next)); } catch {}
+          return next;
         });
-        next.push(botMsg);
-        return next;
-      });
-      // Also invalidate any cached queries
-      queryClient.invalidateQueries({ queryKey: ["chat-messages", sessionId] });
+        setSending(false);
+      }, 600 + Math.floor(Math.random() * 500));
     } catch {
-      setMessages(prev => prev.filter(m => m.id !== optimisticUserMsg.id));
-      setMessage(text);
-    } finally {
       setSending(false);
+      setMessage(text);
     }
   };
 
   const displayMessages = messages.length === 0 ? [GREETING] : messages;
+
+  function getQuickReply(text: string) {
+    const t = text.toLowerCase();
+    if (/\b(order|status|track|tracking|where)\b/.test(t)) return "Short: give your order ID for status.";
+    if (/\b(payment|pay|refund|charge|transaction)\b/.test(t)) return "Short: share transaction ID or contact payments.";
+    if (/\b(price|cost|how much|price)\b/.test(t)) return "Short: check product page or ask which game.";
+    if (/\b(hello|hi|hey)\b/.test(t)) return "Hi — how can I help?";
+    if (/\b(thank|thanks|ty)\b/.test(t)) return "You’re welcome!";
+    if (/\b(delivery|deliver|arrival)\b/.test(t)) return "Short: delivery within 24–72h depending on product.";
+    if (/\b(support|help|agent)\b/.test(t)) return "Short: contact on WhatsApp +9779826749317.";
+    return "Short: can you rephrase in a few words?";
+  }
 
   return (
     <>

@@ -478,6 +478,17 @@ export function useUpdateOrderStatus(options?: UseMutationOptions<Order, Error, 
   });
 }
 
+export function useDeleteOrder(options?: UseMutationOptions<{ message: string }, Error, number>) {
+  return useMutation<{ message: string }, Error, number>({
+    mutationFn: async (id) => {
+      const { error } = await supabase.from("orders").delete().eq("id", id);
+      if (error) throw error;
+      return { message: "Order deleted" };
+    },
+    ...options,
+  });
+}
+
 export function useUploadPaymentScreenshot(options?: UseMutationOptions<Payment, Error, { data: UploadPaymentBody }>) {
   return useMutation<Payment, Error, { data: UploadPaymentBody }>({
     mutationFn: async ({ data }) => {
@@ -679,23 +690,23 @@ export function useCreateReview(options?: UseMutationOptions<Review, Error, { da
       const { data: authData } = await supabase.auth.getUser();
       const user = authData.user;
 
-      const { data: inserted, error } = await supabase
+      const now = new Date().toISOString();
+      const payload = {
+        user_id: user?.id ?? null,
+        guest_name: data.guestName,
+        guest_email: data.guestEmail,
+        rating: data.rating,
+        content: data.content,
+        approved: false,
+        rejected: false,
+      };
+
+      const { error } = await supabase
         .from("reviews")
-        .insert({
-          user_id: user?.id ?? null,
-          guest_name: data.guestName,
-          guest_email: data.guestEmail,
-          rating: data.rating,
-          content: data.content,
-          approved: false,
-          rejected: false,
-        })
-        .select("*")
-        .maybeSingle();
+        .insert(payload);
 
       if (error) throw error;
-      if (!inserted) throw new Error("Failed to create review");
-      return mapReview(inserted);
+      return mapReview({ id: Date.now(), created_at: now, updated_at: now, ...payload });
     },
     ...options,
   });

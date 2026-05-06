@@ -56,6 +56,36 @@ export async function getAIResponse(userMessage: string): Promise<string> {
   }
 }
 
+export async function getAIResponseWithContext(userMessage: string, recentMessages: Array<{ sender: string; content: string }>): Promise<string> {
+  if (!genAI) {
+    return getFallbackResponse(userMessage);
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const contextText = recentMessages
+      .slice(-8)
+      .map((m) => `${m.sender.toUpperCase()}: ${m.content}`)
+      .join("\n");
+
+    const prompt = `${SYSTEM_PROMPT}\n\nRecent conversation context:\n${contextText || "(no prior messages)"}\n\nLatest customer message: ${userMessage}`;
+
+    const aiCall = model.generateContent(prompt);
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timeoutHandle = setTimeout(() => reject(new Error(`Gemini timeout after ${AI_TIMEOUT_MS}ms`)), AI_TIMEOUT_MS);
+    });
+
+    const result = await Promise.race([aiCall, timeout]);
+    if (timeoutHandle) clearTimeout(timeoutHandle);
+    const response = result.response.text();
+    return response.trim();
+  } catch (error) {
+    console.error("Gemini API context error:", error);
+    return getFallbackResponse(userMessage);
+  }
+}
+
 function getFallbackResponse(message: string): string {
   const lower = message.toLowerCase();
 
