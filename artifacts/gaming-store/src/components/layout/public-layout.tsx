@@ -13,7 +13,7 @@ import { Logo, LogoMark, LogoText } from "@/components/logo";
 import { CustomerReviewsPanel } from "@/components/customer-reviews";
 import { motion } from "framer-motion";
 import {
-  User, Menu, Shield, Sun, Moon, Share2,
+  User, LogOut, Menu, Shield, Sun, Moon, Share2,
   Gamepad2, Gift, Ticket, Zap, ChevronRight,
 } from "lucide-react";
 
