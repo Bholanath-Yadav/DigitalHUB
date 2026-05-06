@@ -47,5 +47,19 @@ DROP POLICY IF EXISTS "Users update own profile" ON users;
 CREATE POLICY "Users update own profile"
   ON users FOR UPDATE
   TO authenticated
-  USING (supabase_id = auth.uid()::text)
+  USING (supabase_id = auth.uid()::text);
+
+-- Chat messages: allow anyone to read messages from a specific session
+DROP POLICY IF EXISTS "Public read chat messages" ON chat_messages;
+CREATE POLICY "Public read chat messages"
+  ON chat_messages FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+-- Chat messages: allow anyone to insert messages (guest or authenticated)
+DROP POLICY IF EXISTS "Public insert chat messages" ON chat_messages;
+CREATE POLICY "Public insert chat messages"
+  ON chat_messages FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true)
   WITH CHECK (supabase_id = auth.uid()::text);

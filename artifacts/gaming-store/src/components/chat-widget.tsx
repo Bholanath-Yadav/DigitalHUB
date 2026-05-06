@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { X, Send, MessageCircle } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/lib/supabase";
 
 type ChatMsg = {
   id: number;
@@ -73,14 +74,25 @@ export function ChatWidget() {
     setSessionId(stored);
   }, []);
 
-  // Load messages from server
+  // Load messages from Supabase
   const fetchMessages = useCallback(async (sid: string, signal?: AbortSignal) => {
     if (!sid) return;
     try {
-      const res = await fetch(`/api/chat/messages?sessionId=${encodeURIComponent(sid)}`, { signal });
-      if (!res.ok) return;
-      const data: ChatMsg[] = await res.json();
-      setMessages(data.length > 0 ? data : [GREETING]);
+      const { data, error } = await supabase
+        .from("chat_messages")
+        .select("*")
+        .eq("session_id", sid)
+        .order("created_at", { ascending: true });
+      
+      if (error) throw error;
+      const chatMsgs: ChatMsg[] = (data ?? []).map(msg => ({
+        id: msg.id,
+        sessionId: msg.session_id,
+        sender: msg.sender,
+        content: msg.content,
+        createdAt: msg.created_at,
+      }));
+      setMessages(chatMsgs.length > 0 ? chatMsgs : [GREETING]);
     } catch { /* network error — keep existing messages */ }
   }, []);
 
@@ -142,29 +154,44 @@ export function ChatWidget() {
     });
 
     try {
-      const res = await fetch("/api/chat/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, content: text }),
-      });
+      // Insert message to Supabase
+      const { data: insertedMsg, error } = await supabase
+        .from("chat_messages")
+        .insert({
+          session_id: sessionId,
+          sender: "user",
+          content: text,
+        })
+        .select()
+        .single();
 
-      if (res.ok) {
-        const data = await res.json();
-        // Replace optimistic message + add bot reply
-        setMessages(prev => {
-          const filtered = prev.filter(m => m.id !== optimisticUserMsg.id);
-          const next = [...filtered];
-          if (data.userMessage) next.push(data.userMessage);
-          if (data.botMessage)  next.push(data.botMessage);
-          return next;
+      if (error) throw error;
+
+      // Create bot response
+      const botMsg: ChatMsg = {
+        id: Math.random(),
+        sessionId,
+        sender: "bot",
+        content: "Thanks for your message! Our team will respond shortly.",
+        createdAt: new Date().toISOString(),
+      };
+
+      // Replace optimistic message with actual from DB + add bot reply
+      setMessages(prev => {
+        const filtered = prev.filter(m => m.id !== optimisticUserMsg.id);
+        const next = [...filtered];
+        next.push({
+          id: insertedMsg.id,
+          sessionId: insertedMsg.session_id,
+          sender: insertedMsg.sender,
+          content: insertedMsg.content,
+          createdAt: insertedMsg.created_at,
         });
-        // Also invalidate any cached queries
-        queryClient.invalidateQueries({ queryKey: ["chat-messages", sessionId] });
-      } else {
-        // Remove optimistic on error
-        setMessages(prev => prev.filter(m => m.id !== optimisticUserMsg.id));
-        setMessage(text);
-      }
+        next.push(botMsg);
+        return next;
+      });
+      // Also invalidate any cached queries
+      queryClient.invalidateQueries({ queryKey: ["chat-messages", sessionId] });
     } catch {
       setMessages(prev => prev.filter(m => m.id !== optimisticUserMsg.id));
       setMessage(text);

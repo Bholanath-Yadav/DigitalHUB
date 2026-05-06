@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useListChatSessions, useGetChatMessages, useDeleteChatSession } from "@/lib/api-hooks";
+import { supabase } from "@/lib/supabase";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -46,18 +47,16 @@ export default function AdminChat() {
     const text = reply.trim();
     setReply("");
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (session?.access_token) headers["Authorization"] = `Bearer ${session.access_token}`;
-      const res = await fetch("/api/chat/messages", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          sessionId: selectedSession,
+      // Insert staff message directly to Supabase
+      const { error } = await supabase
+        .from("chat_messages")
+        .insert({
+          session_id: selectedSession,
+          sender: "staff",
           content: text,
-          isStaff: true,
-        }),
-      });
-      if (res.ok) {
+        });
+      
+      if (!error) {
         queryClient.invalidateQueries({ queryKey: ["admin-chat-messages", selectedSession] });
         queryClient.invalidateQueries({ queryKey: ["admin-chat-sessions"] });
       } else {

@@ -501,7 +501,23 @@ export function useGetChatMessages(
 ) {
   return useQuery<ChatMessage[]>({
     queryKey: ["chat-messages", params.sessionId],
-    queryFn: () => apiFetch<ChatMessage[]>(`/chat/messages?sessionId=${encodeURIComponent(params.sessionId)}`),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("chat_messages")
+        .select("*")
+        .eq("session_id", params.sessionId)
+        .order("created_at", { ascending: true });
+      
+      if (error) throw error;
+      return (data ?? []).map(msg => ({
+        id: msg.id,
+        sessionId: msg.session_id,
+        sender: msg.sender,
+        content: msg.content,
+        createdAt: msg.created_at,
+        guestName: msg.guest_name,
+      }));
+    },
     enabled: !!params.sessionId,
     ...options?.query,
   });
@@ -509,7 +525,39 @@ export function useGetChatMessages(
 
 export function useSendChatMessage(options?: UseMutationOptions<{ userMessage: ChatMessage; botMessage: ChatMessage | null }, Error, { data: { sessionId: string; content: string; guestName?: string | null; isStaff?: boolean } }>) {
   return useMutation<{ userMessage: ChatMessage; botMessage: ChatMessage | null }, Error, { data: { sessionId: string; content: string; guestName?: string | null; isStaff?: boolean } }>({
-    mutationFn: ({ data }) => apiFetch("/chat/messages", { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: async ({ data }) => {
+      // Insert user message
+      const { error: insertError } = await supabase
+        .from("chat_messages")
+        .insert({
+          session_id: data.sessionId,
+          sender: "user",
+          content: data.content,
+          guest_name: data.guestName || null,
+        });
+      
+      if (insertError) throw insertError;
+
+      // Create a mock bot response (can be enhanced with serverless function later)
+      const botResponse: ChatMessage = {
+        id: Math.random(),
+        sessionId: data.sessionId,
+        sender: "bot",
+        content: "Thanks for your message! Our team will respond shortly.",
+        createdAt: new Date().toISOString(),
+      };
+
+      const userMessage: ChatMessage = {
+        id: Math.random(),
+        sessionId: data.sessionId,
+        sender: "user",
+        content: data.content,
+        createdAt: new Date().toISOString(),
+        guestName: data.guestName,
+      };
+
+      return { userMessage, botMessage: botResponse };
+    },
     ...options,
   });
 }
@@ -517,14 +565,30 @@ export function useSendChatMessage(options?: UseMutationOptions<{ userMessage: C
 export function useListChatSessions(options?: { query?: UseQueryOptions<ChatSession[]> }) {
   return useQuery<ChatSession[]>({
     queryKey: ["chat-sessions"],
-    queryFn: () => apiFetch<ChatSession[]>("/chat/sessions"),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("chat_messages")
+        .select("DISTINCT session_id")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return (data ?? []).map(row => ({ id: row.session_id }));
+    },
     ...options?.query,
   });
 }
 
 export function useDeleteChatSession(options?: UseMutationOptions<{ message: string }, Error, string>) {
   return useMutation<{ message: string }, Error, string>({
-    mutationFn: (sessionId) => apiFetch<{ message: string }>(`/chat/sessions/${sessionId}`, { method: "DELETE" }),
+    mutationFn: async (sessionId) => {
+      const { error } = await supabase
+        .from("chat_messages")
+        .delete()
+        .eq("session_id", sessionId);
+      
+      if (error) throw error;
+      return { message: "Session deleted" };
+    },
     ...options,
   });
 }
