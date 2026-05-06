@@ -24,6 +24,7 @@ import {
   type ValidateCouponBody,
   type UpdateProfileBody,
 } from "./api-client";
+import { supabase } from "./supabase";
 
 function qs(params: Record<string, any>): string {
   const p = new URLSearchParams();
@@ -37,13 +38,56 @@ function qs(params: Record<string, any>): string {
 export { setAuthTokenGetter, ListProductsCategory } from "./api-client";
 export type { Product, Order, Banner, Coupon, Payment, PaymentSetting, UserProfile, ChatMessage, ChatSession, CouponValidationResult, DashboardStats, OrderStats, ProductStats, UpdateProfileBody };
 
+function mapProduct(row: any): Product {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    price: Number(row.price),
+    category: row.category,
+    imageUrl: row.image_url ?? row.imageUrl ?? null,
+    tags: Array.isArray(row.tags) ? row.tags : [],
+    dynamicFields: Array.isArray(row.dynamic_fields ?? row.dynamicFields)
+      ? (row.dynamic_fields ?? row.dynamicFields)
+      : [],
+    variants: Array.isArray(row.variants) ? row.variants : [],
+    inStock: row.in_stock ?? row.inStock ?? false,
+    featured: row.featured ?? false,
+    createdAt: row.created_at ?? row.createdAt,
+  };
+}
+
+function mapBanner(row: any): Banner {
+  return {
+    id: row.id,
+    title: row.title,
+    subtitle: row.subtitle ?? null,
+    imageUrl: row.image_url ?? row.imageUrl ?? null,
+    linkUrl: row.link_url ?? row.linkUrl ?? null,
+    active: row.active ?? true,
+    sortOrder: row.sort_order ?? row.sortOrder ?? 0,
+    createdAt: row.created_at ?? row.createdAt,
+  };
+}
+
+async function fetchProducts(params: ListProductsParams = {}): Promise<Product[]> {
+  let query = supabase.from("products").select("*");
+  if (params.category) query = query.eq("category", params.category);
+  if (params.featured === true) query = query.eq("featured", true);
+  if (params.search) query = query.ilike("name", `%${params.search}%`);
+
+  const { data, error } = await query.order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []).map(mapProduct);
+}
+
 export function useListProducts(
   params: ListProductsParams = {},
   options?: { query?: UseQueryOptions<Product[]> }
 ) {
   return useQuery<Product[]>({
     queryKey: ["products", params],
-    queryFn: () => apiFetch<Product[]>(`/products${qs(params as any)}`),
+    queryFn: () => fetchProducts(params),
     ...options?.query,
   });
 }
@@ -54,7 +98,12 @@ export function useGetProduct(
 ) {
   return useQuery<Product>({
     queryKey: ["product", id],
-    queryFn: () => apiFetch<Product>(`/products/${id}`),
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
+      if (error) throw error;
+      if (!data) throw new Error("Product not found");
+      return mapProduct(data);
+    },
     enabled: !!id,
     ...options?.query,
   });
@@ -63,7 +112,27 @@ export function useGetProduct(
 export function useGetProductStats(options?: { query?: UseQueryOptions<ProductStats> }) {
   return useQuery<ProductStats>({
     queryKey: ["product-stats"],
-    queryFn: () => apiFetch<ProductStats>("/products/stats/summary"),
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("category, in_stock");
+      if (error) throw error;
+
+      const byCategory: Record<string, number> = {};
+      let inStock = 0;
+      let outOfStock = 0;
+
+      for (const product of data ?? []) {
+        byCategory[product.category] = (byCategory[product.category] ?? 0) + 1;
+        if (product.in_stock) inStock += 1;
+        else outOfStock += 1;
+      }
+
+      return {
+        total: (data ?? []).length,
+        byCategory,
+        inStock,
+        outOfStock,
+      };
+    },
     ...options?.query,
   });
 }
@@ -170,7 +239,15 @@ export function useVerifyPayment(options?: UseMutationOptions<Payment, Error, { 
 export function useListBanners(options?: { query?: UseQueryOptions<Banner[]> }) {
   return useQuery<Banner[]>({
     queryKey: ["banners"],
-    queryFn: () => apiFetch<Banner[]>("/banners"),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("banners")
+        .select("*")
+        .eq("active", true)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return (data ?? []).map(mapBanner);
+    },
     ...options?.query,
   });
 }
@@ -199,7 +276,25 @@ export function useDeleteBanner(options?: UseMutationOptions<{ message: string }
 export function useListCoupons(options?: { query?: UseQueryOptions<Coupon[]> }) {
   return useQuery<Coupon[]>({
     queryKey: ["coupons"],
-    queryFn: () => apiFetch<Coupon[]>("/coupons"),
+    queryFn: async () => {
+      const { data, error } = await supabase.from("coupons").select("*").eq("active", true);
+      if (error) throw error;
+
+      return (data ?? []).map((row: any) => ({
+        id: row.id,
+        code: row.code,
+        discountType: row.discount_type,
+        discountValue: Number(row.discount_value),
+        expiresAt: row.expires_at ?? null,
+        usageLimit: row.usage_limit ?? null,
+        usageCount: row.usage_count ?? 0,
+        active: row.active ?? true,
+        applicableProductIds: Array.isArray(row.applicable_product_ids)
+          ? row.applicable_product_ids.map((value: any) => Number(value))
+          : [],
+        createdAt: row.created_at ?? row.createdAt,
+      }));
+    },
     ...options?.query,
   });
 }
@@ -227,7 +322,47 @@ export function useDeleteCoupon(options?: UseMutationOptions<{ message: string }
 
 export function useValidateCoupon(options?: UseMutationOptions<CouponValidationResult, Error, { data: ValidateCouponBody }>) {
   return useMutation<CouponValidationResult, Error, { data: ValidateCouponBody }>({
-    mutationFn: ({ data }) => apiFetch<CouponValidationResult>("/coupons/validate", { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: async ({ data }) => {
+      const { code, productId, amount } = data;
+      const { data: coupon, error } = await supabase.from("coupons").select("*").eq("code", code).maybeSingle();
+      if (error) throw error;
+
+      if (!coupon) {
+        return { valid: false, discountAmount: 0, finalAmount: amount, message: "Coupon not found" };
+      }
+
+      if (!coupon.active) {
+        return { valid: false, discountAmount: 0, finalAmount: amount, message: "Coupon is inactive" };
+      }
+
+      if (coupon.expires_at && new Date(coupon.expires_at).getTime() < Date.now()) {
+        return { valid: false, discountAmount: 0, finalAmount: amount, message: "Coupon has expired" };
+      }
+
+      if (coupon.usage_limit && Number(coupon.usage_count ?? 0) >= Number(coupon.usage_limit)) {
+        return { valid: false, discountAmount: 0, finalAmount: amount, message: "Coupon usage limit reached" };
+      }
+
+      const applicableIds = Array.isArray(coupon.applicable_product_ids)
+        ? coupon.applicable_product_ids.map((value: any) => Number(value))
+        : [];
+
+      if (applicableIds.length > 0 && !applicableIds.includes(productId)) {
+        return { valid: false, discountAmount: 0, finalAmount: amount, message: "Coupon does not apply to this product" };
+      }
+
+      const discountAmount =
+        coupon.discount_type === "percentage"
+          ? Math.round((amount * Number(coupon.discount_value)) / 100)
+          : Math.min(Number(coupon.discount_value), amount);
+
+      return {
+        valid: true,
+        discountAmount,
+        finalAmount: Math.max(0, amount - discountAmount),
+        message: "Coupon applied successfully",
+      };
+    },
     ...options,
   });
 }
@@ -294,7 +429,23 @@ export function useGetDashboard(options?: { query?: UseQueryOptions<DashboardSta
 export function useListPaymentSettings(options?: { query?: UseQueryOptions<PaymentSetting[]> }) {
   return useQuery<PaymentSetting[]>({
     queryKey: ["payment-settings"],
-    queryFn: () => apiFetch<PaymentSetting[]>("/payment-settings"),
+    queryFn: async () => {
+      const { data, error } = await supabase.from("payment_settings").select("*").order("sort_order", { ascending: true });
+      if (error) throw error;
+
+      return (data ?? []).map((row: any) => ({
+        id: row.id,
+        method: row.method,
+        label: row.label,
+        enabled: row.enabled ?? true,
+        accountName: row.account_name ?? null,
+        accountNumber: row.account_number ?? null,
+        qrImageUrl: row.qr_image_url ?? null,
+        instructions: row.instructions ?? null,
+        sortOrder: row.sort_order ?? row.sortOrder ?? 0,
+        updatedAt: row.updated_at ?? row.updatedAt,
+      }));
+    },
     ...options?.query,
   });
 }
