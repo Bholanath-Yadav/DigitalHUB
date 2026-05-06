@@ -287,6 +287,7 @@ export function useListOrders(
 export function useGetMyOrders(options?: { query?: UseQueryOptions<Order[]> }) {
   return useQuery<Order[]>({
     queryKey: ["my-orders"],
+    refetchInterval: 5000,
     queryFn: async () => {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError) throw authError;
@@ -326,6 +327,7 @@ export function useGetOrder(
 ) {
   return useQuery<Order>({
     queryKey: ["order", id],
+    refetchInterval: 5000,
     queryFn: async () => {
       const { data: orderRow, error: orderError } = await supabase
         .from("orders")
@@ -823,7 +825,7 @@ export function useUpdateMyProfile(options?: UseMutationOptions<UserProfile, Err
         .update({
           name: data.name ?? null,
           phone: data.phone ?? null,
-          avatar_url: data.avatarUrl ?? null,
+          ...(data.avatarUrl !== undefined ? { avatar_url: data.avatarUrl } : {}),
           updated_at: new Date().toISOString(),
         })
         .eq("supabase_id", user.id)
@@ -863,7 +865,7 @@ export function useSyncUser(options?: UseMutationOptions<UserProfile, Error, { d
           supabase_id: user.id,
           email: data.email ?? user.email ?? "",
           name: data.name ?? user.user_metadata?.name ?? null,
-          avatar_url: data.avatarUrl ?? null,
+          ...(data.avatarUrl !== undefined ? { avatar_url: data.avatarUrl } : {}),
           role: "user",
           is_banned: false,
         }, { onConflict: "supabase_id" })

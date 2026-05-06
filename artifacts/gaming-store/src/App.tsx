@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabase";
 import NotFound from "@/pages/not-found";
 import { PublicLayout } from "@/components/layout/public-layout";
 import { AdminLayout } from "@/components/layout/admin-layout";
+import { OrderRealtimeNotifier } from "@/components/order-realtime-notifier";
 
 const Home = lazy(() => import("@/pages/home"));
 const Products = lazy(() => import("@/pages/products"));
@@ -62,6 +63,7 @@ function AppRoutes() {
         <AuthCacheInvalidator />
         <ThemeProvider>
           <TooltipProvider>
+            <OrderRealtimeNotifier />
             <Suspense
               fallback={
                 <div className="min-h-[40vh] flex items-center justify-center text-sm text-muted-foreground">
