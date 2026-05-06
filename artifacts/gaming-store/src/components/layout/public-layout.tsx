@@ -13,7 +13,7 @@ import { Logo, LogoMark, LogoText } from "@/components/logo";
 import { CustomerReviewsPanel } from "@/components/customer-reviews";
 import { motion } from "framer-motion";
 import {
-  User, LogOut, Menu, Shield, Sun, Moon, Share2,
+  User, LogOut, Menu, Shield, Sun, Moon, Download,
   Gamepad2, Gift, Ticket, Zap, ChevronRight,
 } from "lucide-react";
 
@@ -48,40 +48,56 @@ function ThemeToggle() {
   );
 }
 
-function ShareButton() {
-  const handleShare = async () => {
-    const shareUrl = window.location.href;
-    const shareData = {
-      title: document.title,
-      text: "Digital HUB Nepal",
-      url: shareUrl,
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
+function AppDownloadButton() {
+  const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const standalone = window.matchMedia("(display-mode: standalone)").matches;
+    setIsInstalled(standalone || (navigator as any).standalone === true);
+
+    const onBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setPromptEvent(event as BeforeInstallPromptEvent);
     };
 
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
+    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+    return () => window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+  }, []);
+
+  const handleInstall = async () => {
+    if (isInstalled) return;
+
+    if (promptEvent) {
+      await promptEvent.prompt();
+      const choice = await promptEvent.userChoice;
+      if (choice.outcome === "accepted") {
+        setIsInstalled(true);
       }
-    } catch {
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-      } catch {
-        window.prompt("Copy this link", shareUrl);
-      }
+      setPromptEvent(null);
+      return;
     }
+
+    // Fallback when browser does not support beforeinstallprompt.
+    window.alert("To install the app: open browser menu and choose 'Install app' or 'Add to Home screen'.");
   };
 
   return (
     <Button
-      variant="ghost"
-      size="icon"
-      onClick={handleShare}
-      className="rounded-full w-9 h-9 border border-border hover:border-primary/40 hover:bg-primary/10 transition-all"
-      aria-label="Share page"
-      title="Share page"
+      variant="outline"
+      size="sm"
+      onClick={handleInstall}
+      className="hidden lg:inline-flex gap-1.5 border-primary/35 hover:bg-primary/10"
+      aria-label="Download app"
+      title="Download app"
     >
-      <Share2 className="h-4 w-4" />
+      <Download className="h-4 w-4" />
+      {isInstalled ? "App Installed" : "Download App"}
     </Button>
   );
 }
@@ -161,10 +177,10 @@ function Navbar() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <ShareButton />
 
           {isSignedIn ? (
             <>
+              <AppDownloadButton />
               {isAdmin && (
                 <Button
                   variant="ghost"
@@ -262,6 +278,16 @@ function Navbar() {
                         onClick={() => { setMobileOpen(false); setAccountOpen(true); }}
                       >
                         <User className="h-4 w-4" /> My Account
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full gap-2"
+                        onClick={() => {
+                          setMobileOpen(false);
+                          window.alert("To install the app: open browser menu and choose 'Install app' or 'Add to Home screen'.");
+                        }}
+                      >
+                        <Download className="h-4 w-4" /> Download App
                       </Button>
                       <Button
                         variant="outline"
