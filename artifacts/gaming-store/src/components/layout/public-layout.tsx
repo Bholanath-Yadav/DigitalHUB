@@ -10,6 +10,7 @@ import { useTheme } from "@/components/theme-provider";
 import { AccountModal } from "@/components/account-modal";
 import { SearchTrigger, SearchPalette } from "@/components/search-palette";
 import { Logo, LogoMark, LogoText } from "@/components/logo";
+import { CustomerReviewsPanel } from "@/components/customer-reviews";
 import { motion } from "framer-motion";
 import {
   User, LogOut, Menu, Shield, Sun, Moon,
@@ -279,8 +280,11 @@ function Navbar() {
 
 function Footer() {
   return (
-    <footer className="border-t border-border/50 bg-card/50">
+    <footer className="border-t border-border/50 bg-gradient-to-b from-card/40 to-background">
       <div className="container max-w-screen-xl px-4 md:px-6 py-10">
+        <div className="mb-8">
+          <CustomerReviewsPanel />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
             <div className="mb-3">

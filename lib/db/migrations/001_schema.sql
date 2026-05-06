@@ -167,6 +167,19 @@ CREATE TABLE IF NOT EXISTS payment_settings (
   updated_at     timestamp NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS reviews (
+  id           serial    PRIMARY KEY,
+  user_id      text,
+  guest_name   text      NOT NULL,
+  guest_email  text      NOT NULL,
+  rating       integer   NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  content      text      NOT NULL,
+  approved     boolean   NOT NULL DEFAULT false,
+  rejected     boolean   NOT NULL DEFAULT false,
+  created_at   timestamp NOT NULL DEFAULT now(),
+  updated_at   timestamp NOT NULL DEFAULT now()
+);
+
 
 -- ============================================================
 -- SECTION 3: INDEXES

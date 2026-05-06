@@ -11,6 +11,7 @@ import {
   type UserProfile,
   type ChatMessage,
   type ChatSession,
+  type Review,
   type CouponValidationResult,
   type DashboardStats,
   type OrderStats,
@@ -23,6 +24,7 @@ import {
   type CreateOrderBody,
   type UploadPaymentBody,
   type ValidateCouponBody,
+  type CreateReviewBody,
   type UpdateProfileBody,
 } from "./api-client";
 import { supabase } from "./supabase";
@@ -37,7 +39,7 @@ function qs(params: Record<string, any>): string {
 }
 
 export { setAuthTokenGetter, ListProductsCategory } from "./api-client";
-export type { Product, Order, Banner, Coupon, Payment, PaymentSetting, UserProfile, ChatMessage, ChatSession, CouponValidationResult, DashboardStats, OrderStats, ProductStats, UpdateProfileBody };
+export type { Product, Order, Banner, Coupon, Payment, PaymentSetting, UserProfile, ChatMessage, ChatSession, Review, CouponValidationResult, DashboardStats, OrderStats, ProductStats, UpdateProfileBody };
 
 function mapProduct(row: any): Product {
   return {
@@ -82,6 +84,21 @@ function mapUserProfile(row: any): UserProfile {
     role: row.role,
     isBanned: row.is_banned ?? false,
     createdAt: row.created_at ?? row.createdAt,
+  };
+}
+
+function mapReview(row: any): Review {
+  return {
+    id: row.id,
+    userId: row.user_id ?? null,
+    guestName: row.guest_name ?? "",
+    guestEmail: row.guest_email ?? "",
+    rating: Number(row.rating ?? 0),
+    content: row.content ?? "",
+    approved: row.approved ?? false,
+    rejected: row.rejected ?? false,
+    createdAt: row.created_at ?? row.createdAt,
+    updatedAt: row.updated_at ?? row.updatedAt,
   };
 }
 
@@ -616,6 +633,87 @@ export function useDeleteBanner(options?: UseMutationOptions<{ message: string }
       const { error } = await supabase.from("banners").delete().eq("id", id);
       if (error) throw error;
       return { message: "Banner deleted" };
+    },
+    ...options,
+  });
+}
+
+export function useListApprovedReviews(options?: { query?: UseQueryOptions<Review[]> }) {
+  return useQuery<Review[]>({
+    queryKey: ["reviews", "approved"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("approved", true)
+        .eq("rejected", false)
+        .order("created_at", { ascending: false })
+        .limit(6);
+      if (error) throw error;
+      return (data ?? []).map(mapReview);
+    },
+    ...options?.query,
+  });
+}
+
+export function useListPendingReviews(options?: { query?: UseQueryOptions<Review[]> }) {
+  return useQuery<Review[]>({
+    queryKey: ["admin-reviews"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("approved", false)
+        .eq("rejected", false)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map(mapReview);
+    },
+    ...options?.query,
+  });
+}
+
+export function useCreateReview(options?: UseMutationOptions<Review, Error, { data: CreateReviewBody }>) {
+  return useMutation<Review, Error, { data: CreateReviewBody }>({
+    mutationFn: async ({ data }) => {
+      const { data: authData } = await supabase.auth.getUser();
+      const user = authData.user;
+
+      const { data: inserted, error } = await supabase
+        .from("reviews")
+        .insert({
+          user_id: user?.id ?? null,
+          guest_name: data.guestName,
+          guest_email: data.guestEmail,
+          rating: data.rating,
+          content: data.content,
+          approved: false,
+          rejected: false,
+        })
+        .select("*")
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!inserted) throw new Error("Failed to create review");
+      return mapReview(inserted);
+    },
+    ...options,
+  });
+}
+
+export function useModerateReview(options?: UseMutationOptions<Review, Error, { id: number; data: { approved: boolean; rejected: boolean } }>) {
+  return useMutation<Review, Error, { id: number; data: { approved: boolean; rejected: boolean } }>({
+    mutationFn: async ({ id, data }) => {
+      const { data: updated, error } = await supabase
+        .from("reviews")
+        .update({ approved: data.approved, rejected: data.rejected, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .select("*")
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!updated) throw new Error("Review not found");
+      return mapReview(updated);
     },
     ...options,
   });

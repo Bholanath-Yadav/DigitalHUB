@@ -204,6 +204,26 @@ export interface ChatSession {
   updatedAt: string;
 }
 
+export interface Review {
+  id: number;
+  userId?: string | null;
+  guestName: string;
+  guestEmail: string;
+  rating: number;
+  content: string;
+  approved: boolean;
+  rejected: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateReviewBody {
+  guestName: string;
+  guestEmail: string;
+  rating: number;
+  content: string;
+}
+
 export interface SendChatMessageBody {
   sessionId: string;
   content: string;

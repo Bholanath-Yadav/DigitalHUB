@@ -136,20 +136,21 @@ function GameCard({ product, index }: { product: any; index: number }) {
     <MotionCard variants={fadeUp} className="cursor-pointer group">
       <Link href={`/products/${product.id}`}>
         <div>
-          <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted border border-border/60 group-hover:border-primary/50 transition-colors duration-200 group-hover:shadow-lg group-hover:shadow-primary/8">
+          <div className="relative aspect-square w-full overflow-hidden rounded-[1.1rem] bg-muted border border-border/60 transition-all duration-300 group-hover:-translate-y-1 group-hover:border-primary/45 group-hover:shadow-[0_22px_44px_-28px_rgba(14,165,233,0.55)]">
             {product.imageUrl ? (
               <img
                 src={product.imageUrl}
                 alt={product.name}
                 loading={loadingStrategy}
                 decoding="async"
-                className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-[1.08]"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-card">
                 <Gamepad2 className="h-10 w-10 text-muted-foreground/30" />
               </div>
             )}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             {tags.includes("New") && (
               <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-black px-2 py-1 rounded-bl-xl rounded-tr-xl uppercase tracking-wide">
                 NEW

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useGetMyProfile } from "@/lib/api-hooks";
 import { Link, useLocation, Redirect } from "wouter";
-import { Shield, Package, ShoppingCart, CreditCard, Tag, Image as ImageIcon, Users, MessageSquare, Home, Wallet, Menu, X } from "lucide-react";
+import { Shield, Package, ShoppingCart, CreditCard, Tag, Image as ImageIcon, Users, MessageSquare, Home, Wallet, Menu, X, MessageSquareQuote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -29,6 +29,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     { href: "/admin/banners",           label: "Banners",      icon: ImageIcon },
     { href: "/admin/users",             label: "Users",        icon: Users },
     { href: "/admin/chat",              label: "Chat",         icon: MessageSquare },
+    { href: "/admin/reviews",           label: "Reviews",      icon: MessageSquareQuote },
     { href: "/admin/payment-settings",  label: "Pay Settings", icon: Wallet },
   ];
 

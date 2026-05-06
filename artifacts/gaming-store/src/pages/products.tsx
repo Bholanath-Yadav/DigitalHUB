@@ -38,16 +38,17 @@ function GameCard({ product, index = 99 }: { product: any; index?: number }) {
     <MotionCard variants={fadeUp} className="cursor-pointer group">
       <Link href={`/products/${product.id}`}>
         <div>
-          <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted border border-border/60 group-hover:border-primary/50 transition-colors duration-200 group-hover:shadow-lg group-hover:shadow-primary/8">
+          <div className="relative aspect-square w-full overflow-hidden rounded-[1.1rem] bg-muted border border-border/60 transition-all duration-300 group-hover:-translate-y-1 group-hover:border-primary/45 group-hover:shadow-[0_22px_44px_-28px_rgba(14,165,233,0.55)]">
             {product.imageUrl ? (
               <img src={product.imageUrl} alt={product.name}
                 loading={loadingStrategy} decoding="async"
-                className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" />
+                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-[1.08]" />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-card">
                 <Gamepad2 className="h-10 w-10 text-muted-foreground/30" />
               </div>
             )}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             {tags.includes("New") && (
               <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-black px-2 py-1 rounded-bl-xl rounded-tr-xl uppercase tracking-wide">NEW</div>
             )}
@@ -85,17 +86,18 @@ function ListCard({ product }: { product: any }) {
   return (
     <MotionCard variants={scaleIn} lift={false}>
       <Link href={`/products/${product.id}`}>
-        <div className="group flex gap-4 p-3 rounded-xl bg-card border border-border/60 hover:border-primary/50 transition-all duration-200 hover:shadow-md cursor-pointer hover:-translate-y-0.5">
+        <div className="group flex gap-4 p-3 rounded-2xl bg-card border border-border/60 transition-all duration-300 hover:-translate-y-1 hover:border-primary/45 hover:shadow-[0_18px_36px_-28px_rgba(14,165,233,0.45)] cursor-pointer">
           <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden bg-muted border border-border/40">
             {product.imageUrl ? (
               <img src={product.imageUrl} alt={product.name}
                 loading="lazy" decoding="async"
-                className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300" />
+                className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-[1.08]" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <Gamepad2 className="h-7 w-7 text-muted-foreground/30" />
               </div>
             )}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           </div>
           <div className="flex-1 min-w-0 py-0.5">
             <p className="font-bold text-sm line-clamp-2 group-hover:text-primary transition-colors duration-150 leading-snug">{product.name}</p>

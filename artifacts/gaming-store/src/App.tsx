@@ -27,6 +27,7 @@ const AdminCoupons = lazy(() => import("@/pages/admin/coupons"));
 const AdminBanners = lazy(() => import("@/pages/admin/banners"));
 const AdminUsers = lazy(() => import("@/pages/admin/users"));
 const AdminChat = lazy(() => import("@/pages/admin/chat"));
+const AdminReviews = lazy(() => import("@/pages/admin/reviews"));
 const AdminPaymentSettings = lazy(() => import("@/pages/admin/payment-settings"));
 const AdminProductVariants = lazy(() => import("@/pages/admin/product-variants"));
 const SignInPage = lazy(() => import("@/pages/sign-in"));
@@ -91,6 +92,7 @@ function AppRoutes() {
                 <Route path="/admin/banners" component={() => <AdminLayout><AdminBanners /></AdminLayout>} />
                 <Route path="/admin/users" component={() => <AdminLayout><AdminUsers /></AdminLayout>} />
                 <Route path="/admin/chat" component={() => <AdminLayout><AdminChat /></AdminLayout>} />
+                <Route path="/admin/reviews" component={() => <AdminLayout><AdminReviews /></AdminLayout>} />
                 <Route path="/admin/payment-settings" component={() => <AdminLayout><AdminPaymentSettings /></AdminLayout>} />
                 <Route path="/admin/products/:id/variants" component={() => <AdminLayout><AdminProductVariants /></AdminLayout>} />
 
