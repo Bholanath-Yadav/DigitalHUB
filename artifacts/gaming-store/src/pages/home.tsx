@@ -205,11 +205,11 @@ export default function Home() {
   });
 
   // Single query — no wasted "featured" call
-  const { data: allProducts, isLoading: productsLoading } = useListProducts(
+  const { data: allProducts, isLoading: productsLoading, isError: productsError, error: productsQueryError } = useListProducts(
     {},
     { query: { queryKey: ["products", "all"], staleTime: 5 * 60 * 1000 } }
   );
-  const { data: banners } = useListBanners({
+  const { data: banners, isError: bannersError, error: bannersQueryError } = useListBanners({
     query: { queryKey: ["banners"], staleTime: 5 * 60 * 1000 },
   });
 
@@ -218,6 +218,21 @@ export default function Home() {
       <OrganizationJsonLd />
       <WebSiteJsonLd />
       <FAQJsonLd items={FAQ_ITEMS} />
+
+      {(productsError || bannersError) && (
+        <section className="container max-w-screen-xl px-4 md:px-6 pt-4">
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            <p className="font-semibold">Supabase data did not load.</p>
+            <p className="mt-1 text-destructive/80">
+              Most likely causes: Vercel is missing <span className="font-mono">VITE_SUPABASE_URL</span> or <span className="font-mono">VITE_SUPABASE_ANON_KEY</span>, or the live Supabase project is missing the RLS policies for public reads.
+            </p>
+            <p className="mt-1 text-destructive/70">
+              {productsError && <span>Products: {(productsQueryError as Error)?.message ?? "failed"}. </span>}
+              {bannersError && <span>Banners: {(bannersQueryError as Error)?.message ?? "failed"}.</span>}
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* ── Hero ─────────────────────────────────────────── */}
       <section className="relative gaming-bg hero-glow overflow-hidden">
@@ -320,6 +335,20 @@ export default function Home() {
         {productsLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {Array.from({ length: 12 }).map((_, i) => <ProductSkeleton key={i} />)}
+          </div>
+        ) : productsError ? (
+          <div className="rounded-2xl border border-border bg-card px-4 py-8 text-center">
+            <p className="font-semibold">Unable to load products from Supabase.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Check Vercel env vars and Supabase RLS policies, then redeploy.
+            </p>
+          </div>
+        ) : !allProducts || allProducts.length === 0 ? (
+          <div className="rounded-2xl border border-border bg-card px-4 py-8 text-center">
+            <p className="font-semibold">No products found.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              If this is unexpected, verify the products table has data in Supabase.
+            </p>
           </div>
         ) : (
           <StaggerGrid
