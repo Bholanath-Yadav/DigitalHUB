@@ -211,12 +211,23 @@ function Navbar() {
                 <div className="p-4 border-t border-border space-y-2">
                   {isSignedIn ? (
                     <>
+                      <div className="rounded-xl border border-border bg-muted/40 px-3 py-2 text-left">
+                        <p className="text-xs font-medium text-foreground truncate">{profile?.name || "My Account"}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">{profile?.email || "Signed in"}</p>
+                      </div>
                       <Button
                         variant="outline"
                         className="w-full gap-2"
                         onClick={() => { setMobileOpen(false); setAccountOpen(true); }}
                       >
                         <User className="h-4 w-4" /> My Account
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full gap-2"
+                        onClick={() => { setLocation("/profile"); setMobileOpen(false); }}
+                      >
+                        <User className="h-4 w-4" /> Profile
                       </Button>
                       {isAdmin && (
                         <Button

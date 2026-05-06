@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useListBanners, useCreateBanner, useUpdateBanner, useDeleteBanner } from "@/lib/api-hooks";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Edit, Trash2, Image, Upload, Loader2, X, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash2, Image, Upload, Loader2, X, ExternalLink, RefreshCcw, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { uploadToStorage } from "@/lib/upload";
@@ -31,6 +31,17 @@ export default function AdminBanners() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [search, setSearch] = useState("");
+
+  const filteredBanners = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return banners ?? [];
+    return (banners ?? []).filter((banner) => {
+      return [banner.title, banner.subtitle ?? "", banner.linkUrl ?? "", banner.active ? "active" : "inactive"].some((value) =>
+        String(value).toLowerCase().includes(q)
+      );
+    });
+  }, [banners, search]);
 
   const handleImageUpload = async (file: File) => {
     setUploading(true);
@@ -102,17 +113,26 @@ export default function AdminBanners() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
             <Image className="h-5 w-5 text-primary" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h2 className="text-xl font-bold">Banners</h2>
-            <p className="text-xs text-muted-foreground">{banners?.length ?? 0} banners</p>
+            <p className="text-xs text-muted-foreground">{filteredBanners.length} banners</p>
           </div>
         </div>
-        <Button onClick={openCreate} className="gap-2"><Plus className="h-4 w-4" /> Add Banner</Button>
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+          <div className="relative sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search banners..." className="pl-9" />
+          </div>
+          <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-banners"] })} className="gap-2">
+            <RefreshCcw className="h-4 w-4" /> Refresh
+          </Button>
+          <Button onClick={openCreate} className="gap-2"><Plus className="h-4 w-4" /> Add Banner</Button>
+        </div>
       </div>
 
       <div className="rounded-xl border bg-card overflow-x-auto">
@@ -129,7 +149,7 @@ export default function AdminBanners() {
           </TableHeader>
           <TableBody>
             {isLoading && <TableRow><TableCell colSpan={6} className="text-center py-10 text-muted-foreground">Loading…</TableCell></TableRow>}
-            {banners?.map((b) => (
+            {filteredBanners.map((b) => (
               <TableRow key={b.id}>
                 <TableCell>
                   {b.imageUrl

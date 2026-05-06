@@ -111,6 +111,8 @@ export const PaymentPaymentMethod = {
   esewa: "esewa",
   khalti: "khalti",
   "ime-pay": "ime-pay",
+  connectips: "connectips",
+  bank: "bank",
 } as const;
 
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];
@@ -190,6 +192,7 @@ export interface ChatMessage {
   sender: ChatMessageSender;
   content: string;
   createdAt: string;
+  guestName?: string | null;
 }
 
 export interface ChatSession {

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useListPaymentSettings, useUpdatePaymentSetting } from "@/lib/api-hooks";
 import { uploadToStorage } from "@/lib/upload";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Wallet, Upload, X, ZoomIn, Loader2, Save } from "lucide-react";
+import { Wallet, Upload, X, ZoomIn, Loader2, Save, RefreshCcw, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 
@@ -233,18 +233,38 @@ export default function AdminPaymentSettings() {
   const { data: settings, isLoading } = useListPaymentSettings({
     query: { queryKey: ["payment-settings"] },
   });
+  const [search, setSearch] = useState("");
+
+  const filteredSettings = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return settings ?? [];
+    return (settings ?? []).filter((setting) => [setting.label, setting.method, setting.accountName ?? "", setting.accountNumber ?? ""].some((value) =>
+      String(value).toLowerCase().includes(q)
+    ));
+  }, [settings, search]);
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
           <Wallet className="h-5 w-5 text-primary" />
-        </div>
-        <div>
+          </div>
+          <div className="min-w-0">
           <h2 className="text-xl font-bold">Payment Settings</h2>
           <p className="text-xs text-muted-foreground">
             Configure payment methods shown at checkout — upload QR codes, set account numbers, enable/disable methods
           </p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+          <div className="relative sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search payment method..." className="pl-9" />
+          </div>
+          <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ["payment-settings"] })} className="gap-2">
+            <RefreshCcw className="h-4 w-4" /> Refresh
+          </Button>
         </div>
       </div>
 
@@ -256,7 +276,7 @@ export default function AdminPaymentSettings() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 gap-6">
-          {settings?.map(s => <PaymentCard key={s.method} setting={s} />)}
+          {filteredSettings.map(s => <PaymentCard key={s.method} setting={s} />)}
         </div>
       )}
     </div>

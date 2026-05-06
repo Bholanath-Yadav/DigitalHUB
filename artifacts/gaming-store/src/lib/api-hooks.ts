@@ -15,6 +15,7 @@ import {
   type DashboardStats,
   type OrderStats,
   type ProductStats,
+  type OrdersByStatus,
   type ListProductsParams,
   type ListOrdersParams,
   type ListPaymentsParams,
@@ -67,6 +68,45 @@ function mapBanner(row: any): Banner {
     active: row.active ?? true,
     sortOrder: row.sort_order ?? row.sortOrder ?? 0,
     createdAt: row.created_at ?? row.createdAt,
+  };
+}
+
+function mapUserProfile(row: any): UserProfile {
+  return {
+    id: row.id,
+    supabaseId: row.supabase_id,
+    email: row.email,
+    name: row.name ?? null,
+    phone: row.phone ?? null,
+    avatarUrl: row.avatar_url ?? null,
+    role: row.role,
+    isBanned: row.is_banned ?? false,
+    createdAt: row.created_at ?? row.createdAt,
+  };
+}
+
+function mapOrderRow(row: any, productRow: any, profileRow?: any): Order {
+  const fallbackEmail = profileRow?.email ?? null;
+  const fallbackName = profileRow?.name ?? null;
+  const fallbackPhone = profileRow?.phone ?? null;
+
+  return {
+    id: row.id,
+    userId: row.user_id ?? null,
+    guestName: row.guest_name ?? fallbackName ?? null,
+    guestEmail: row.guest_email ?? fallbackEmail ?? null,
+    guestPhone: row.guest_phone ?? fallbackPhone ?? null,
+    productId: row.product_id,
+    product: mapProduct(productRow),
+    gameDetails: row.game_details ?? {},
+    totalAmount: Number(row.total_amount),
+    discountAmount: Number(row.discount_amount ?? 0),
+    couponCode: row.coupon_code ?? null,
+    status: row.status,
+    paymentScreenshotUrl: row.payment_screenshot_url ?? null,
+    adminNote: row.admin_note ?? null,
+    createdAt: row.created_at ?? row.createdAt,
+    updatedAt: row.updated_at ?? row.updatedAt,
   };
 }
 
@@ -223,6 +263,12 @@ export function useListOrders(
         .order("created_at", { ascending: false });
       if (ordersError) throw ordersError;
 
+      const userIds = [...new Set((orderRows ?? []).map((r: any) => r.user_id).filter(Boolean))];
+      const { data: userRows, error: usersError } = userIds.length > 0
+        ? await supabase.from("users").select("*").in("supabase_id", userIds)
+        : { data: [], error: null };
+      if (usersError) throw usersError;
+
       const productIds = [...new Set((orderRows ?? []).map((r: any) => r.product_id))];
       const { data: productRows, error: productsError } = productIds.length > 0
         ? await supabase.from("products").select("*").in("id", productIds)
@@ -230,25 +276,9 @@ export function useListOrders(
       if (productsError) throw productsError;
 
       const productMap = new Map((productRows ?? []).map((row: any) => [row.id, mapProduct(row)]));
+      const userMap = new Map((userRows ?? []).map((row: any) => [row.supabase_id, mapUserProfile(row)]));
 
-      return (orderRows ?? []).map((row: any) => ({
-        id: row.id,
-        userId: row.user_id ?? null,
-        guestName: row.guest_name ?? null,
-        guestEmail: row.guest_email ?? null,
-        guestPhone: row.guest_phone ?? null,
-        productId: row.product_id,
-        product: productMap.get(row.product_id)!,
-        gameDetails: row.game_details ?? {},
-        totalAmount: Number(row.total_amount),
-        discountAmount: Number(row.discount_amount ?? 0),
-        couponCode: row.coupon_code ?? null,
-        status: row.status,
-        paymentScreenshotUrl: row.payment_screenshot_url ?? null,
-        adminNote: row.admin_note ?? null,
-        createdAt: row.created_at ?? row.createdAt,
-        updatedAt: row.updated_at ?? row.updatedAt,
-      }));
+      return (orderRows ?? []).map((row: any) => mapOrderRow(row, productMap.get(row.product_id)!, userMap.get(row.user_id)));
     },
     ...options?.query,
   });
@@ -277,29 +307,13 @@ export function useGetMyOrders(options?: { query?: UseQueryOptions<Order[]> }) {
       if (productsError) throw productsError;
 
       const productMap = new Map((productRows ?? []).map((row) => [row.id, mapProduct(row)]));
+      const { data: profileRow } = await supabase.from("users").select("*").eq("supabase_id", user.id).maybeSingle();
 
       return (orderRows ?? []).map((row) => {
         const product = productMap.get(row.product_id);
         if (!product) throw new Error("Product not found for order");
 
-        return {
-          id: row.id,
-          userId: row.user_id ?? null,
-          guestName: row.guest_name ?? null,
-          guestEmail: row.guest_email ?? null,
-          guestPhone: row.guest_phone ?? null,
-          productId: row.product_id,
-          product,
-          gameDetails: row.game_details ?? {},
-          totalAmount: Number(row.total_amount),
-          discountAmount: Number(row.discount_amount ?? 0),
-          couponCode: row.coupon_code ?? null,
-          status: row.status,
-          paymentScreenshotUrl: row.payment_screenshot_url ?? null,
-          adminNote: row.admin_note ?? null,
-          createdAt: row.created_at ?? row.createdAt,
-          updatedAt: row.updated_at ?? row.updatedAt,
-        };
+        return mapOrderRow(row, product, profileRow);
       });
     },
     ...options?.query,
@@ -329,24 +343,11 @@ export function useGetOrder(
       if (productError) throw productError;
       if (!productRow) throw new Error("Product not found");
 
-      return {
-        id: orderRow.id,
-        userId: orderRow.user_id ?? null,
-        guestName: orderRow.guest_name ?? null,
-        guestEmail: orderRow.guest_email ?? null,
-        guestPhone: orderRow.guest_phone ?? null,
-        productId: orderRow.product_id,
-        product: mapProduct(productRow),
-        gameDetails: orderRow.game_details ?? {},
-        totalAmount: Number(orderRow.total_amount),
-        discountAmount: Number(orderRow.discount_amount ?? 0),
-        couponCode: orderRow.coupon_code ?? null,
-        status: orderRow.status,
-        paymentScreenshotUrl: orderRow.payment_screenshot_url ?? null,
-        adminNote: orderRow.admin_note ?? null,
-        createdAt: orderRow.created_at ?? orderRow.createdAt,
-        updatedAt: orderRow.updated_at ?? orderRow.updatedAt,
-      };
+      const { data: profileRow } = orderRow.user_id
+        ? await supabase.from("users").select("*").eq("supabase_id", orderRow.user_id).maybeSingle()
+        : { data: null };
+
+      return mapOrderRow(orderRow, productRow, profileRow);
     },
     enabled: !!id,
     ...options?.query,
@@ -448,24 +449,11 @@ export function useUpdateOrderStatus(options?: UseMutationOptions<Order, Error, 
       if (productError) throw productError;
       if (!productRow) throw new Error("Product not found");
 
-      return {
-        id: updated.id,
-        userId: updated.user_id ?? null,
-        guestName: updated.guest_name ?? null,
-        guestEmail: updated.guest_email ?? null,
-        guestPhone: updated.guest_phone ?? null,
-        productId: updated.product_id,
-        product: mapProduct(productRow),
-        gameDetails: updated.game_details ?? {},
-        totalAmount: Number(updated.total_amount ?? 0),
-        discountAmount: Number(updated.discount_amount ?? 0),
-        couponCode: updated.coupon_code ?? null,
-        status: updated.status,
-        paymentScreenshotUrl: updated.payment_screenshot_url ?? null,
-        adminNote: updated.admin_note ?? null,
-        createdAt: updated.created_at ?? updated.createdAt,
-        updatedAt: updated.updated_at ?? updated.updatedAt,
-      };
+      const { data: profileRow } = updated.user_id
+        ? await supabase.from("users").select("*").eq("supabase_id", updated.user_id).maybeSingle()
+        : { data: null };
+
+      return mapOrderRow(updated, productRow, profileRow);
     },
     ...options,
   });
@@ -1190,11 +1178,27 @@ export function useListChatSessions(options?: { query?: UseQueryOptions<ChatSess
     queryFn: async () => {
       const { data, error } = await supabase
         .from("chat_messages")
-        .select("DISTINCT session_id")
+        .select("session_id, user_id, guest_name, content, created_at")
         .order("created_at", { ascending: false });
-      
       if (error) throw error;
-      return (data ?? []).map(row => ({ id: row.session_id }));
+
+      const seen = new Set<string>();
+      const sessions: ChatSession[] = [];
+
+      for (const row of data ?? []) {
+        if (seen.has(row.session_id)) continue;
+        seen.add(row.session_id);
+        sessions.push({
+          sessionId: row.session_id,
+          userId: row.user_id ?? null,
+          guestName: row.guest_name ?? null,
+          lastMessage: row.content ?? null,
+          unreadCount: 0,
+          updatedAt: row.created_at ?? new Date().toISOString(),
+        });
+      }
+
+      return sessions;
     },
     ...options?.query,
   });

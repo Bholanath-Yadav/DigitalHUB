@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useListAdminUsers as useListUsers, useUpdateUserRole, useBanUser, useDeleteAdminUser as useDeleteUser } from "@/lib/api-hooks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import {
   Users, Search, Shield, ShieldOff, Trash2,
-  Crown, User as UserIcon, Briefcase, Ban, CheckCircle,
+  Crown, User as UserIcon, Briefcase, Ban, CheckCircle, RefreshCcw,
 } from "lucide-react";
 
 const ROLE_CONFIG = {
@@ -66,12 +66,12 @@ export default function AdminUsers() {
     );
   };
 
-  const filtered = (users as UserRow[]).filter(u => {
+  const filtered = useMemo(() => (users as UserRow[]).filter(u => {
     const q = search.toLowerCase();
     const matchSearch = !q || (u.name ?? "").toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
     const matchFilter = filter === "all" || (filter === "banned" ? u.isBanned : !u.isBanned);
     return matchSearch && matchFilter;
-  });
+  }), [users, search, filter]);
 
   const counts = {
     all:    (users as UserRow[]).length,
@@ -81,16 +81,19 @@ export default function AdminUsers() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
             <Users className="h-5 w-5 text-primary" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h2 className="text-xl font-bold">Users</h2>
             <p className="text-xs text-muted-foreground">{counts.all} registered · {counts.banned} banned</p>
           </div>
         </div>
+        <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-users"] })} className="gap-2 self-start">
+          <RefreshCcw className="h-4 w-4" /> Refresh
+        </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -166,7 +169,7 @@ export default function AdminUsers() {
                         <span className="font-semibold text-sm truncate">{user.name || "—"}</span>
                         {user.isBanned && <Badge variant="destructive" className="text-xs px-1.5 py-0">Banned</Badge>}
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      <p className="text-xs text-muted-foreground break-all sm:break-normal sm:truncate max-w-full">{user.email}</p>
                     </div>
                   </div>
 

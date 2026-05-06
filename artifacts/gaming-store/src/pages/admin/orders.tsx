@@ -1,10 +1,13 @@
+import { useMemo, useState } from "react";
 import { useListOrders, useUpdateOrderStatus } from "@/lib/api-hooks";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, RefreshCcw, Search } from "lucide-react";
 import { fmtNPR } from "@/lib/currency";
 
 const STATUS_COLORS: Record<string, any> = {
@@ -18,6 +21,21 @@ export default function AdminOrders() {
   const { data: orders, isLoading } = useListOrders(undefined, { query: { queryKey: ["admin-orders"] } });
   const updateStatus = useUpdateOrderStatus();
   const { toast } = useToast();
+  const [search, setSearch] = useState("");
+
+  const filteredOrders = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return orders ?? [];
+    return (orders ?? []).filter((order) => {
+      const customer = `${order.guestName ?? ""} ${order.guestEmail ?? ""} ${order.userId ?? ""}`.toLowerCase();
+      return (
+        String(order.id).includes(q) ||
+        order.product.name.toLowerCase().includes(q) ||
+        customer.includes(q) ||
+        order.status.toLowerCase().includes(q)
+      );
+    });
+  }, [orders, search]);
 
   const handleStatusChange = (id: number, status: "pending" | "verified" | "completed" | "rejected") => {
     updateStatus.mutate(
@@ -34,13 +52,29 @@ export default function AdminOrders() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-          <ShoppingCart className="h-5 w-5 text-primary" />
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <ShoppingCart className="h-5 w-5 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold">Orders</h2>
+            <p className="text-xs text-muted-foreground">{filteredOrders.length} total orders</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-bold">Orders</h2>
-          <p className="text-xs text-muted-foreground">{orders?.length ?? 0} total orders</p>
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+          <div className="relative min-w-0 sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search order, product, customer..."
+              className="pl-9"
+            />
+          </div>
+          <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-orders"] })} className="gap-2">
+            <RefreshCcw className="h-4 w-4" /> Refresh
+          </Button>
         </div>
       </div>
 
@@ -61,12 +95,12 @@ export default function AdminOrders() {
             {isLoading && (
               <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">Loading…</TableCell></TableRow>
             )}
-            {orders?.map((order) => (
+            {filteredOrders.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-mono text-xs">#{order.id}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell className="font-medium max-w-[160px] truncate">{order.product.name}</TableCell>
-                <TableCell className="text-sm text-muted-foreground max-w-[140px] truncate">{order.guestEmail || order.guestName || "Registered User"}</TableCell>
+                <TableCell className="text-sm text-muted-foreground max-w-[220px] truncate" title={order.guestEmail || order.guestName || "Registered User"}>{order.guestEmail || order.guestName || "Registered User"}</TableCell>
                 <TableCell className="font-semibold">{fmtNPR(order.totalAmount)}</TableCell>
                 <TableCell>
                   <Badge variant={STATUS_COLORS[order.status] ?? "secondary"} className="capitalize">

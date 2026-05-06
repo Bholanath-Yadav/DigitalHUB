@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useListCoupons, useCreateCoupon, useUpdateCoupon, useDeleteCoupon } from "@/lib/api-hooks";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Edit, Trash2, Tag } from "lucide-react";
+import { Plus, Edit, Trash2, Tag, RefreshCcw, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 
@@ -29,6 +29,17 @@ export default function AdminCoupons() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<CouponForm>(EMPTY);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+
+  const filteredCoupons = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return coupons ?? [];
+    return (coupons ?? []).filter((coupon) => {
+      return [coupon.code, coupon.discountType, String(coupon.discountValue), coupon.active ? "active" : "inactive"].some((value) =>
+        String(value).toLowerCase().includes(q)
+      );
+    });
+  }, [coupons, search]);
 
   const openCreate = () => { setEditId(null); setForm(EMPTY); setOpen(true); };
   const openEdit = (c: any) => {
@@ -89,17 +100,26 @@ export default function AdminCoupons() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
             <Tag className="h-5 w-5 text-primary" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h2 className="text-xl font-bold">Coupons</h2>
-            <p className="text-xs text-muted-foreground">{coupons?.length ?? 0} coupons</p>
+            <p className="text-xs text-muted-foreground">{filteredCoupons.length} coupons</p>
           </div>
         </div>
-        <Button onClick={openCreate} className="gap-2"><Plus className="h-4 w-4" /> Create Coupon</Button>
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+          <div className="relative sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search coupon..." className="pl-9" />
+          </div>
+          <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-coupons"] })} className="gap-2">
+            <RefreshCcw className="h-4 w-4" /> Refresh
+          </Button>
+          <Button onClick={openCreate} className="gap-2"><Plus className="h-4 w-4" /> Create Coupon</Button>
+        </div>
       </div>
 
       <div className="rounded-xl border bg-card overflow-x-auto">
@@ -116,7 +136,7 @@ export default function AdminCoupons() {
           </TableHeader>
           <TableBody>
             {isLoading && <TableRow><TableCell colSpan={6} className="text-center py-10 text-muted-foreground">Loading…</TableCell></TableRow>}
-            {coupons?.map((c) => (
+            {filteredCoupons.map((c) => (
               <TableRow key={c.id}>
                 <TableCell className="font-mono font-bold tracking-widest">{c.code}</TableCell>
                 <TableCell className="font-semibold">

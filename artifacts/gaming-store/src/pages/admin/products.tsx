@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { useListProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "@/lib/api-hooks";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Edit, Trash2, Package, Layers, Tag, X, Info, Upload, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, Package, Layers, Tag, X, Info, Upload, Loader2, Search, RefreshCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { fmtNPR } from "@/lib/currency";
@@ -162,8 +162,18 @@ export default function AdminProducts() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const imageFileRef = useRef<HTMLInputElement>(null);
+  const [search, setSearch] = useState("");
 
   const f = (k: keyof ProductForm, v: any) => setForm(prev => ({ ...prev, [k]: v }));
+
+  const filteredProducts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return products ?? [];
+    return (products ?? []).filter((product: any) => {
+      const fields = [product.name, product.category, product.description, (product.tags ?? []).join(" ")];
+      return fields.some((value) => String(value ?? "").toLowerCase().includes(q));
+    });
+  }, [products, search]);
 
   const handleImageUpload = async (file: File) => {
     setUploading(true);
@@ -278,19 +288,28 @@ export default function AdminProducts() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
             <Package className="h-5 w-5 text-primary" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h2 className="text-xl font-bold">Products</h2>
-            <p className="text-xs text-muted-foreground">{products?.length ?? 0} products</p>
+            <p className="text-xs text-muted-foreground">{filteredProducts.length} products</p>
           </div>
         </div>
-        <Button onClick={openCreate} className="gap-2">
-          <Plus className="h-4 w-4" /> Add Product
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+          <div className="relative sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..." className="pl-9" />
+          </div>
+          <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-products"] })} className="gap-2">
+            <RefreshCcw className="h-4 w-4" /> Refresh
+          </Button>
+          <Button onClick={openCreate} className="gap-2">
+            <Plus className="h-4 w-4" /> Add Product
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-xl border bg-card overflow-x-auto">
@@ -313,7 +332,7 @@ export default function AdminProducts() {
                 <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">Loading…</TableCell>
               </TableRow>
             )}
-            {products?.map((p) => {
+            {filteredProducts.map((p) => {
               const hasVars = isVariantProduct(p);
               const varCount = hasVars ? (p as any).variants.length : 0;
               const fieldCount = Array.isArray(p.dynamicFields) ? p.dynamicFields.length : 0;

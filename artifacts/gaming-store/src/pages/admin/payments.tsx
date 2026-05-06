@@ -1,7 +1,9 @@
+import { useMemo, useState } from "react";
 import { useListPayments, useVerifyPayment } from "@/lib/api-hooks";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { CheckCircle, XCircle, ExternalLink, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -10,6 +12,20 @@ export default function AdminPayments() {
   const { data: payments, isLoading } = useListPayments(undefined, { query: { queryKey: ["admin-payments"] } });
   const verifyPayment = useVerifyPayment();
   const { toast } = useToast();
+  const [search, setSearch] = useState("");
+
+  const filteredPayments = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return payments ?? [];
+    return (payments ?? []).filter((payment) => {
+      return [
+        String(payment.orderId),
+        payment.paymentMethod,
+        payment.status,
+        payment.adminNote ?? "",
+      ].some((value) => value.toLowerCase().includes(q));
+    });
+  }, [payments, search]);
 
   const handleVerify = (id: number, status: "verified" | "rejected") => {
     verifyPayment.mutate(
@@ -37,6 +53,10 @@ export default function AdminPayments() {
           <h2 className="text-xl font-bold">Payment Verification</h2>
           <p className="text-xs text-muted-foreground">{pending} pending review</p>
         </div>
+        <div className="flex gap-2 items-center">
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search order or method..." className="w-[240px]" />
+          <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-payments"] })}>Refresh</Button>
+        </div>
       </div>
 
       <div className="rounded-xl border bg-card overflow-x-auto">
@@ -55,7 +75,7 @@ export default function AdminPayments() {
             {isLoading && (
               <TableRow><TableCell colSpan={6} className="text-center py-10 text-muted-foreground">Loading…</TableCell></TableRow>
             )}
-            {payments?.map((payment) => (
+            {filteredPayments.map((payment) => (
               <TableRow key={payment.id}>
                 <TableCell className="font-mono text-xs">#{payment.orderId}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{new Date(payment.createdAt).toLocaleDateString()}</TableCell>
