@@ -224,7 +224,20 @@ export function useListPayments(
 ) {
   return useQuery<Payment[]>({
     queryKey: ["payments", params],
-    queryFn: () => apiFetch<Payment[]>(`/payments${qs(params as any)}`),
+    queryFn: async () => {
+      const { data, error } = await supabase.from("payments").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+
+      return (data ?? []).map((row: any) => ({
+        id: row.id,
+        orderId: row.order_id,
+        screenshotUrl: row.screenshot_url,
+        paymentMethod: row.payment_method,
+        status: row.status,
+        adminNote: row.admin_note ?? null,
+        createdAt: row.created_at ?? row.createdAt,
+      }));
+    },
     ...options?.query,
   });
 }
@@ -370,7 +383,32 @@ export function useValidateCoupon(options?: UseMutationOptions<CouponValidationR
 export function useGetMyProfile(options?: { query?: UseQueryOptions<UserProfile> }) {
   return useQuery<UserProfile>({
     queryKey: ["my-profile"],
-    queryFn: () => apiFetch<UserProfile>("/users/me"),
+    queryFn: async () => {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      const user = authData.user;
+      if (!user) throw new Error("Not signed in");
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("supabase_id", user.id)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) throw new Error("Profile not found");
+
+      return {
+        id: data.id,
+        supabaseId: data.supabase_id,
+        email: data.email,
+        name: data.name ?? null,
+        phone: data.phone ?? null,
+        avatarUrl: data.avatar_url ?? null,
+        role: data.role,
+        isBanned: data.is_banned ?? false,
+        createdAt: data.created_at ?? data.createdAt,
+      };
+    },
     ...options?.query,
   });
 }

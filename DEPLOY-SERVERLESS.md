@@ -39,13 +39,9 @@ Done! Your app will be live in ~2 minutes ✅
 
 ## Important: Enable Browser Reads in Supabase
 
-Because the storefront now reads `products`, `banners`, `payment_settings`, and `coupons` directly from the browser, Supabase must allow anonymous SELECT access on those tables.
+Because the storefront now reads `products`, `banners`, `payment_settings`, `coupons`, and some profile tables directly from the browser, Supabase must allow anonymous SELECT access where appropriate.
 
-Run this SQL in the Supabase SQL editor:
-
-```sql
--- from lib/db/migrations/003_public_read_policies.sql
-```
+Run the SQL migration in `lib/db/migrations/003_public_read_policies.sql` in your Supabase SQL editor.
 
 If you skip this step, the website can still build, but public data will not appear.
 

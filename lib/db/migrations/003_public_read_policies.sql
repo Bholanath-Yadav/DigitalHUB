@@ -1,9 +1,11 @@
--- Public read access for storefront data when using Supabase directly from the browser.
+-- Public read/write access for the browser app when using Supabase directly.
 -- Run this in Supabase SQL editor after 001/002 migrations.
 
 ALTER TABLE IF EXISTS products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS banners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS payment_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS coupons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS users ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Public read products" ON products;
 CREATE POLICY "Public read products"
@@ -22,3 +24,28 @@ CREATE POLICY "Public read payment settings"
   ON payment_settings FOR SELECT
   TO anon, authenticated
   USING (true);
+
+DROP POLICY IF EXISTS "Public read coupons" ON coupons;
+CREATE POLICY "Public read coupons"
+  ON coupons FOR SELECT
+  TO authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS "Users read own profile" ON users;
+CREATE POLICY "Users read own profile"
+  ON users FOR SELECT
+  TO authenticated
+  USING (supabase_id = auth.uid()::text);
+
+DROP POLICY IF EXISTS "Users insert own profile" ON users;
+CREATE POLICY "Users insert own profile"
+  ON users FOR INSERT
+  TO authenticated
+  WITH CHECK (supabase_id = auth.uid()::text);
+
+DROP POLICY IF EXISTS "Users update own profile" ON users;
+CREATE POLICY "Users update own profile"
+  ON users FOR UPDATE
+  TO authenticated
+  USING (supabase_id = auth.uid()::text)
+  WITH CHECK (supabase_id = auth.uid()::text);

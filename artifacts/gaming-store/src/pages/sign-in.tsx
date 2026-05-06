@@ -77,12 +77,15 @@ export default function SignInPage() {
       });
       if (error) throw error;
       if (data.session) {
-        const token = data.session.access_token;
-        await fetch("/api/users/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ email, name: name || null }),
-        });
+        const { error: profileError } = await supabase.from("users").upsert({
+          supabase_id: data.session.user.id,
+          email,
+          name: name || email.split("@")[0],
+          role: "user",
+          is_banned: false,
+        }, { onConflict: "supabase_id" });
+        if (profileError) throw profileError;
+
         toast({ title: "Account created!", description: "Welcome to Digital HUB Nepal." });
         setLocation("/");
       } else {
