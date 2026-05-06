@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: digitalhub-api
+    env: node
+    plan: starter
+    rootDir: .
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @workspace/api-server build
+    startCommand: pnpm --filter @workspace/api-server start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ALLOWED_ORIGIN
+        sync: false
+
+  - type: static
+    name: digitalhub-web
+    rootDir: .
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @workspace/gaming-store build
+    publishPath: artifacts/gaming-store/dist/public
+    autoDeploy: true
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false

@@ -284,7 +284,8 @@ export function setAuthTokenGetter(fn: () => Promise<string | null>) {
   _getToken = fn;
 }
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const APP_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? APP_BASE).replace(/\/$/, "");
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
@@ -297,7 +298,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     if (token) headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const resp = await fetch(`${BASE}/api${path}`, { ...init, headers });
+  const resp = await fetch(`${API_BASE}/api${path}`, { ...init, headers });
   if (!resp.ok) {
     const text = await resp.text().catch(() => resp.statusText);
     throw new Error(text || `HTTP ${resp.status}`);

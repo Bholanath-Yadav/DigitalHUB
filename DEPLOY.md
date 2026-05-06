@@ -132,6 +132,34 @@ Then update `ALLOWED_ORIGIN` and add it to your Clerk production instance's allo
 
 ---
 
+## Render Deployment
+
+You can also deploy this project on Render with two services:
+
+- Backend: `@workspace/api-server` as a Render web service
+- Frontend: `@workspace/gaming-store` as a Render static site
+
+The repo now includes a `render.yaml` blueprint that matches this split. Import the repo into Render and then set the secret env vars in the Render dashboard.
+
+### Backend env vars on Render
+
+- `SUPABASE_URL` = your Supabase project URL
+- `SUPABASE_SERVICE_ROLE_KEY` = your Supabase service role key
+- `ALLOWED_ORIGIN` = the final frontend URL on Render
+
+### Frontend env vars on Render
+
+- `VITE_API_BASE_URL` = the public backend URL on Render
+- `VITE_SUPABASE_URL` = your Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` = your Supabase anon/public key
+
+### What changed for Render support
+
+- The frontend API client can now use `VITE_API_BASE_URL` when deployed separately.
+- Without that variable, it still falls back to same-origin development behavior.
+
+---
+
 ## Environment Variables — Quick Reference
 
 | Variable | Required by | When used |
