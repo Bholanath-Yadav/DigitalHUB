@@ -139,21 +139,73 @@ export function useGetProductStats(options?: { query?: UseQueryOptions<ProductSt
 
 export function useCreateProduct(options?: UseMutationOptions<Product, Error, { data: Partial<Product> }>) {
   return useMutation<Product, Error, { data: Partial<Product> }>({
-    mutationFn: ({ data }) => apiFetch<Product>("/products", { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: async ({ data }) => {
+      const { data: inserted, error } = await supabase
+        .from("products")
+        .insert({
+          name: data.name,
+          description: data.description ?? null,
+          price: data.price ?? 0,
+          category: data.category ?? null,
+          image_url: data.imageUrl ?? null,
+          tags: Array.isArray(data.tags) ? data.tags : [],
+          dynamic_fields: Array.isArray(data.dynamicFields) ? data.dynamicFields : [],
+          variants: Array.isArray(data.variants) ? data.variants : [],
+          in_stock: data.inStock ?? false,
+          featured: data.featured ?? false,
+        })
+        .select("*")
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!inserted) throw new Error("Failed to create product");
+
+      return mapProduct(inserted);
+    },
     ...options,
   });
 }
 
 export function useUpdateProduct(options?: UseMutationOptions<Product, Error, { id: number; data: Partial<Product> }>) {
   return useMutation<Product, Error, { id: number; data: Partial<Product> }>({
-    mutationFn: ({ id, data }) => apiFetch<Product>(`/products/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    mutationFn: async ({ id, data }) => {
+      const updatePayload: any = {
+        updated_at: new Date().toISOString(),
+      };
+      if (data.name !== undefined) updatePayload.name = data.name;
+      if (data.description !== undefined) updatePayload.description = data.description;
+      if (data.price !== undefined) updatePayload.price = data.price;
+      if (data.category !== undefined) updatePayload.category = data.category;
+      if (data.imageUrl !== undefined) updatePayload.image_url = data.imageUrl;
+      if (data.tags !== undefined) updatePayload.tags = data.tags;
+      if (data.dynamicFields !== undefined) updatePayload.dynamic_fields = data.dynamicFields;
+      if (data.variants !== undefined) updatePayload.variants = data.variants;
+      if (data.inStock !== undefined) updatePayload.in_stock = data.inStock;
+      if (data.featured !== undefined) updatePayload.featured = data.featured;
+
+      const { data: updated, error } = await supabase
+        .from("products")
+        .update(updatePayload)
+        .eq("id", id)
+        .select("*")
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!updated) throw new Error("Product not found");
+
+      return mapProduct(updated);
+    },
     ...options,
   });
 }
 
 export function useDeleteProduct(options?: UseMutationOptions<{ message: string }, Error, number>) {
   return useMutation<{ message: string }, Error, number>({
-    mutationFn: (id) => apiFetch<{ message: string }>(`/products/${id}`, { method: "DELETE" }),
+    mutationFn: async (id) => {
+      const { error } = await supabase.from("products").delete().eq("id", id);
+      if (error) throw error;
+      return { message: "Product deleted" };
+    },
     ...options,
   });
 }
@@ -164,7 +216,40 @@ export function useListOrders(
 ) {
   return useQuery<Order[]>({
     queryKey: ["orders", params],
-    queryFn: () => apiFetch<Order[]>(`/orders${qs(params as any)}`),
+    queryFn: async () => {
+      const { data: orderRows, error: ordersError } = await supabase
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (ordersError) throw ordersError;
+
+      const productIds = [...new Set((orderRows ?? []).map((r: any) => r.product_id))];
+      const { data: productRows, error: productsError } = productIds.length > 0
+        ? await supabase.from("products").select("*").in("id", productIds)
+        : { data: [], error: null };
+      if (productsError) throw productsError;
+
+      const productMap = new Map((productRows ?? []).map((row: any) => [row.id, mapProduct(row)]));
+
+      return (orderRows ?? []).map((row: any) => ({
+        id: row.id,
+        userId: row.user_id ?? null,
+        guestName: row.guest_name ?? null,
+        guestEmail: row.guest_email ?? null,
+        guestPhone: row.guest_phone ?? null,
+        productId: row.product_id,
+        product: productMap.get(row.product_id)!,
+        gameDetails: row.game_details ?? {},
+        totalAmount: Number(row.total_amount),
+        discountAmount: Number(row.discount_amount ?? 0),
+        couponCode: row.coupon_code ?? null,
+        status: row.status,
+        paymentScreenshotUrl: row.payment_screenshot_url ?? null,
+        adminNote: row.admin_note ?? null,
+        createdAt: row.created_at ?? row.createdAt,
+        updatedAt: row.updated_at ?? row.updatedAt,
+      }));
+    },
     ...options?.query,
   });
 }
@@ -271,7 +356,17 @@ export function useGetOrder(
 export function useGetOrderStats(options?: { query?: UseQueryOptions<OrderStats> }) {
   return useQuery<OrderStats>({
     queryKey: ["order-stats"],
-    queryFn: () => apiFetch<OrderStats>("/orders/stats/summary"),
+    queryFn: async () => {
+      const { data: orders, error } = await supabase.from("orders").select("status");
+      if (error) throw error;
+
+      const summary: Record<string, number> = {};
+      for (const o of (orders ?? [])) {
+        summary[o.status] = (summary[o.status] ?? 0) + 1;
+      }
+
+      return { byStatus: summary, total: (orders ?? []).length } as any;
+    },
     ...options?.query,
   });
 }
@@ -335,7 +430,43 @@ export function useCreateOrder(options?: UseMutationOptions<Order, Error, { data
 
 export function useUpdateOrderStatus(options?: UseMutationOptions<Order, Error, { id: number; data: { status: string; adminNote?: string | null } }>) {
   return useMutation<Order, Error, { id: number; data: { status: string; adminNote?: string | null } }>({
-    mutationFn: ({ id, data }) => apiFetch<Order>(`/orders/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    mutationFn: async ({ id, data }) => {
+      const { data: updated, error } = await supabase
+        .from("orders")
+        .update({ status: data.status, admin_note: data.adminNote ?? null, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .select("*")
+        .maybeSingle();
+      if (error) throw error;
+      if (!updated) throw new Error("Order not found");
+
+      const { data: productRow, error: productError } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", updated.product_id)
+        .maybeSingle();
+      if (productError) throw productError;
+      if (!productRow) throw new Error("Product not found");
+
+      return {
+        id: updated.id,
+        userId: updated.user_id ?? null,
+        guestName: updated.guest_name ?? null,
+        guestEmail: updated.guest_email ?? null,
+        guestPhone: updated.guest_phone ?? null,
+        productId: updated.product_id,
+        product: mapProduct(productRow),
+        gameDetails: updated.game_details ?? {},
+        totalAmount: Number(updated.total_amount ?? 0),
+        discountAmount: Number(updated.discount_amount ?? 0),
+        couponCode: updated.coupon_code ?? null,
+        status: updated.status,
+        paymentScreenshotUrl: updated.payment_screenshot_url ?? null,
+        adminNote: updated.admin_note ?? null,
+        createdAt: updated.created_at ?? updated.createdAt,
+        updatedAt: updated.updated_at ?? updated.updatedAt,
+      };
+    },
     ...options,
   });
 }
@@ -396,7 +527,26 @@ export function useListPayments(
 
 export function useVerifyPayment(options?: UseMutationOptions<Payment, Error, { id: number; data: { status: string; adminNote?: string | null } }>) {
   return useMutation<Payment, Error, { id: number; data: { status: string; adminNote?: string | null } }>({
-    mutationFn: ({ id, data }) => apiFetch<Payment>(`/payments/${id}/verify`, { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: async ({ id, data }) => {
+      const { data: updated, error } = await supabase
+        .from("payments")
+        .update({ status: data.status, admin_note: data.adminNote ?? null, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .select("*")
+        .maybeSingle();
+      if (error) throw error;
+      if (!updated) throw new Error("Payment not found");
+
+      return {
+        id: updated.id,
+        orderId: updated.order_id,
+        screenshotUrl: updated.screenshot_url ?? null,
+        paymentMethod: updated.payment_method,
+        status: updated.status,
+        adminNote: updated.admin_note ?? null,
+        createdAt: updated.created_at ?? updated.createdAt,
+      };
+    },
     ...options,
   });
 }
@@ -419,21 +569,59 @@ export function useListBanners(options?: { query?: UseQueryOptions<Banner[]> }) 
 
 export function useCreateBanner(options?: UseMutationOptions<Banner, Error, { data: Partial<Banner> }>) {
   return useMutation<Banner, Error, { data: Partial<Banner> }>({
-    mutationFn: ({ data }) => apiFetch<Banner>("/banners", { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: async ({ data }) => {
+      const { data: inserted, error } = await supabase
+        .from("banners")
+        .insert({
+          title: data.title,
+          subtitle: data.subtitle ?? null,
+          image_url: data.imageUrl ?? null,
+          link_url: data.linkUrl ?? null,
+          active: data.active ?? true,
+          sort_order: data.sortOrder ?? 0,
+        })
+        .select("*")
+        .maybeSingle();
+      if (error) throw error;
+      if (!inserted) throw new Error("Failed to create banner");
+      return mapBanner(inserted);
+    },
     ...options,
   });
 }
 
 export function useUpdateBanner(options?: UseMutationOptions<Banner, Error, { id: number; data: Partial<Banner> }>) {
   return useMutation<Banner, Error, { id: number; data: Partial<Banner> }>({
-    mutationFn: ({ id, data }) => apiFetch<Banner>(`/banners/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    mutationFn: async ({ id, data }) => {
+      const payload: any = { updated_at: new Date().toISOString() };
+      if (data.title !== undefined) payload.title = data.title;
+      if (data.subtitle !== undefined) payload.subtitle = data.subtitle;
+      if (data.imageUrl !== undefined) payload.image_url = data.imageUrl;
+      if (data.linkUrl !== undefined) payload.link_url = data.linkUrl;
+      if (data.active !== undefined) payload.active = data.active;
+      if (data.sortOrder !== undefined) payload.sort_order = data.sortOrder;
+
+      const { data: updated, error } = await supabase
+        .from("banners")
+        .update(payload)
+        .eq("id", id)
+        .select("*")
+        .maybeSingle();
+      if (error) throw error;
+      if (!updated) throw new Error("Banner not found");
+      return mapBanner(updated);
+    },
     ...options,
   });
 }
 
 export function useDeleteBanner(options?: UseMutationOptions<{ message: string }, Error, number>) {
   return useMutation<{ message: string }, Error, number>({
-    mutationFn: (id) => apiFetch<{ message: string }>(`/banners/${id}`, { method: "DELETE" }),
+    mutationFn: async (id) => {
+      const { error } = await supabase.from("banners").delete().eq("id", id);
+      if (error) throw error;
+      return { message: "Banner deleted" };
+    },
     ...options,
   });
 }
@@ -466,21 +654,85 @@ export function useListCoupons(options?: { query?: UseQueryOptions<Coupon[]> }) 
 
 export function useCreateCoupon(options?: UseMutationOptions<Coupon, Error, { data: Partial<Coupon> }>) {
   return useMutation<Coupon, Error, { data: Partial<Coupon> }>({
-    mutationFn: ({ data }) => apiFetch<Coupon>("/coupons", { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: async ({ data }) => {
+      const { data: inserted, error } = await supabase
+        .from("coupons")
+        .insert({
+          code: data.code,
+          discount_type: data.discountType,
+          discount_value: data.discountValue,
+          expires_at: data.expiresAt ?? null,
+          usage_limit: data.usageLimit ?? null,
+          usage_count: data.usageCount ?? 0,
+          active: data.active ?? true,
+          applicable_product_ids: Array.isArray(data.applicableProductIds) ? data.applicableProductIds : [],
+        })
+        .select("*")
+        .maybeSingle();
+      if (error) throw error;
+      if (!inserted) throw new Error("Failed to create coupon");
+      return {
+        id: inserted.id,
+        code: inserted.code,
+        discountType: inserted.discount_type,
+        discountValue: Number(inserted.discount_value),
+        expiresAt: inserted.expires_at ?? null,
+        usageLimit: inserted.usage_limit ?? null,
+        usageCount: inserted.usage_count ?? 0,
+        active: inserted.active ?? true,
+        applicableProductIds: Array.isArray(inserted.applicable_product_ids) ? inserted.applicable_product_ids.map((v:any)=>Number(v)) : [],
+        createdAt: inserted.created_at ?? inserted.createdAt,
+      };
+    },
     ...options,
   });
 }
 
 export function useUpdateCoupon(options?: UseMutationOptions<Coupon, Error, { id: number; data: Partial<Coupon> }>) {
   return useMutation<Coupon, Error, { id: number; data: Partial<Coupon> }>({
-    mutationFn: ({ id, data }) => apiFetch<Coupon>(`/coupons/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    mutationFn: async ({ id, data }) => {
+      const payload: any = { updated_at: new Date().toISOString() };
+      if (data.code !== undefined) payload.code = data.code;
+      if (data.discountType !== undefined) payload.discount_type = data.discountType;
+      if (data.discountValue !== undefined) payload.discount_value = data.discountValue;
+      if (data.expiresAt !== undefined) payload.expires_at = data.expiresAt;
+      if (data.usageLimit !== undefined) payload.usage_limit = data.usageLimit;
+      if (data.usageCount !== undefined) payload.usage_count = data.usageCount;
+      if (data.active !== undefined) payload.active = data.active;
+      if (data.applicableProductIds !== undefined) payload.applicable_product_ids = data.applicableProductIds;
+
+      const { data: updated, error } = await supabase
+        .from("coupons")
+        .update(payload)
+        .eq("id", id)
+        .select("*")
+        .maybeSingle();
+      if (error) throw error;
+      if (!updated) throw new Error("Coupon not found");
+      return {
+        id: updated.id,
+        code: updated.code,
+        discountType: updated.discount_type,
+        discountValue: Number(updated.discount_value),
+        expiresAt: updated.expires_at ?? null,
+        usageLimit: updated.usage_limit ?? null,
+        usageCount: updated.usage_count ?? 0,
+        active: updated.active ?? true,
+        applicableProductIds: Array.isArray(updated.applicable_product_ids) ? updated.applicable_product_ids.map((v:any)=>Number(v)) : [],
+        createdAt: updated.created_at ?? updated.createdAt,
+      };
+    },
     ...options,
   });
 }
 
 export function useDeleteCoupon(options?: UseMutationOptions<{ message: string }, Error, number>) {
   return useMutation<{ message: string }, Error, number>({
-    mutationFn: (id) => apiFetch<{ message: string }>(`/coupons/${id}`, { method: "DELETE" }),
+    mutationFn: async (id) => {
+      const { error } = await supabase.from("coupons").delete().eq("id", id);
+      if (error) throw error;
+      return { message: "Coupon deleted" };
+    },
     ...options,
   });
 }
@@ -646,28 +898,86 @@ export function useSyncUser(options?: UseMutationOptions<UserProfile, Error, { d
 export function useListAdminUsers(options?: { query?: UseQueryOptions<UserProfile[]> }) {
   return useQuery<UserProfile[]>({
     queryKey: ["admin-users"],
-    queryFn: () => apiFetch<UserProfile[]>("/admin/users"),
+    queryFn: async () => {
+      const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map((row: any) => ({
+        id: row.id,
+        supabaseId: row.supabase_id,
+        email: row.email,
+        name: row.name ?? null,
+        phone: row.phone ?? null,
+        avatarUrl: row.avatar_url ?? null,
+        role: row.role,
+        isBanned: row.is_banned ?? false,
+        createdAt: row.created_at ?? row.createdAt,
+      }));
+    },
     ...options?.query,
   });
 }
 
 export function useUpdateUserRole(options?: UseMutationOptions<UserProfile, Error, { userId: string; data: { role: string } }>) {
   return useMutation<UserProfile, Error, { userId: string; data: { role: string } }>({
-    mutationFn: ({ userId, data }) => apiFetch<UserProfile>(`/admin/users/${userId}/role`, { method: "PUT", body: JSON.stringify(data) }),
+    mutationFn: async ({ userId, data }) => {
+      const { data: updated, error } = await supabase
+        .from("users")
+        .update({ role: data.role, updated_at: new Date().toISOString() })
+        .eq("supabase_id", userId)
+        .select("*")
+        .maybeSingle();
+      if (error) throw error;
+      if (!updated) throw new Error("User not found");
+      return {
+        id: updated.id,
+        supabaseId: updated.supabase_id,
+        email: updated.email,
+        name: updated.name ?? null,
+        phone: updated.phone ?? null,
+        avatarUrl: updated.avatar_url ?? null,
+        role: updated.role,
+        isBanned: updated.is_banned ?? false,
+        createdAt: updated.created_at ?? updated.createdAt,
+      };
+    },
     ...options,
   });
 }
 
 export function useBanUser(options?: UseMutationOptions<UserProfile, Error, { userId: string; data: { isBanned: boolean } }>) {
   return useMutation<UserProfile, Error, { userId: string; data: { isBanned: boolean } }>({
-    mutationFn: ({ userId, data }) => apiFetch<UserProfile>(`/admin/users/${userId}/ban`, { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: async ({ userId, data }) => {
+      const { data: updated, error } = await supabase
+        .from("users")
+        .update({ is_banned: data.isBanned, updated_at: new Date().toISOString() })
+        .eq("supabase_id", userId)
+        .select("*")
+        .maybeSingle();
+      if (error) throw error;
+      if (!updated) throw new Error("User not found");
+      return {
+        id: updated.id,
+        supabaseId: updated.supabase_id,
+        email: updated.email,
+        name: updated.name ?? null,
+        phone: updated.phone ?? null,
+        avatarUrl: updated.avatar_url ?? null,
+        role: updated.role,
+        isBanned: updated.is_banned ?? false,
+        createdAt: updated.created_at ?? updated.createdAt,
+      };
+    },
     ...options,
   });
 }
 
 export function useDeleteAdminUser(options?: UseMutationOptions<{ message: string }, Error, string>) {
   return useMutation<{ message: string }, Error, string>({
-    mutationFn: (userId) => apiFetch<{ message: string }>(`/admin/users/${userId}`, { method: "DELETE" }),
+    mutationFn: async (userId) => {
+      const { error } = await supabase.from("users").delete().eq("supabase_id", userId);
+      if (error) throw error;
+      return { message: "User deleted" };
+    },
     ...options,
   });
 }
@@ -675,7 +985,67 @@ export function useDeleteAdminUser(options?: UseMutationOptions<{ message: strin
 export function useGetDashboard(options?: { query?: UseQueryOptions<DashboardStats> }) {
   return useQuery<DashboardStats>({
     queryKey: ["dashboard"],
-    queryFn: () => apiFetch<DashboardStats>("/admin/dashboard"),
+    queryFn: async () => {
+      const prod = await Promise.all([
+        supabase.from("products").select("id", { head: true, count: "exact" }),
+        supabase.from("users").select("id", { head: true, count: "exact" }),
+        supabase.from("orders").select("id", { head: true, count: "exact" }),
+        supabase.from("payments").select("id", { head: true, count: "exact" }),
+      ]);
+
+      const totalProducts = prod[0].count ?? 0;
+      const totalUsers = prod[1].count ?? 0;
+      const totalOrders = prod[2].count ?? 0;
+      const totalPayments = prod[3].count ?? 0;
+
+      const { data: orders, error: ordersError } = await supabase.from("orders").select("status,total_amount,created_at,product_id").order("created_at", { ascending: false }).limit(10);
+      if (ordersError) throw ordersError;
+
+      const ordersByStatus: any = {};
+      let totalRevenue = 0;
+      for (const o of (orders ?? [])) {
+        ordersByStatus[o.status] = (ordersByStatus[o.status] ?? 0) + 1;
+        totalRevenue += Number(o.total_amount ?? 0);
+      }
+
+      const productIds = [...new Set((orders ?? []).map((r: any) => r.product_id))];
+      const { data: productRows } = productIds.length > 0 ? await supabase.from("products").select("*").in("id", productIds) : { data: [] };
+      const productMap = new Map((productRows ?? []).map((r:any)=>[r.id,mapProduct(r)]));
+
+      const recentOrders = (orders ?? []).map((row:any) => ({
+        id: row.id,
+        userId: row.user_id ?? null,
+        guestName: row.guest_name ?? null,
+        guestEmail: row.guest_email ?? null,
+        guestPhone: row.guest_phone ?? null,
+        productId: row.product_id,
+        product: productMap.get(row.product_id) ?? ({} as any),
+        gameDetails: row.game_details ?? {},
+        totalAmount: Number(row.total_amount ?? 0),
+        discountAmount: Number(row.discount_amount ?? 0),
+        couponCode: row.coupon_code ?? null,
+        status: row.status,
+        paymentScreenshotUrl: row.payment_screenshot_url ?? null,
+        adminNote: row.admin_note ?? null,
+        createdAt: row.created_at ?? row.createdAt,
+        updatedAt: row.updated_at ?? row.updatedAt,
+      }));
+
+      return {
+        totalRevenue,
+        totalOrders,
+        pendingOrders: ordersByStatus.pending ?? 0,
+        totalUsers,
+        totalProducts,
+        totalCatalogValue: 0,
+        soldValue: totalRevenue,
+        inStockValue: 0,
+        ordersByStatus: ordersByStatus as OrdersByStatus,
+        productsByCategory: [],
+        recentOrders,
+        revenueByDay: [],
+      } as DashboardStats;
+    },
     ...options?.query,
   });
 }
@@ -706,7 +1076,38 @@ export function useListPaymentSettings(options?: { query?: UseQueryOptions<Payme
 
 export function useUpdatePaymentSetting(options?: UseMutationOptions<PaymentSetting, Error, { method: string; data: Partial<PaymentSetting> }>) {
   return useMutation<PaymentSetting, Error, { method: string; data: Partial<PaymentSetting> }>({
-    mutationFn: ({ method, data }) => apiFetch<PaymentSetting>(`/admin/payment-settings/${method}`, { method: "PUT", body: JSON.stringify(data) }),
+    mutationFn: async ({ method, data }) => {
+      const payload: any = { updated_at: new Date().toISOString() };
+      if (data.label !== undefined) payload.label = data.label;
+      if (data.enabled !== undefined) payload.enabled = data.enabled;
+      if (data.accountName !== undefined) payload.account_name = data.accountName;
+      if (data.accountNumber !== undefined) payload.account_number = data.accountNumber;
+      if (data.qrImageUrl !== undefined) payload.qr_image_url = data.qrImageUrl;
+      if (data.instructions !== undefined) payload.instructions = data.instructions;
+      if (data.sortOrder !== undefined) payload.sort_order = data.sortOrder;
+
+      const { data: updated, error } = await supabase
+        .from("payment_settings")
+        .update(payload)
+        .eq("method", method)
+        .select("*")
+        .maybeSingle();
+      if (error) throw error;
+      if (!updated) throw new Error("Payment setting not found");
+
+      return {
+        id: updated.id,
+        method: updated.method,
+        label: updated.label,
+        enabled: updated.enabled ?? true,
+        accountName: updated.account_name ?? null,
+        accountNumber: updated.account_number ?? null,
+        qrImageUrl: updated.qr_image_url ?? null,
+        instructions: updated.instructions ?? null,
+        sortOrder: updated.sort_order ?? updated.sortOrder ?? 0,
+        updatedAt: updated.updated_at ?? updated.updatedAt,
+      };
+    },
     ...options,
   });
 }
