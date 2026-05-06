@@ -1,6 +1,6 @@
 # Database Migrations
 
-Run these two files in order in the **Supabase SQL Editor** to set up a fresh database.
+Run these files in order in the **Supabase SQL Editor** to set up a fresh database or a live production project.
 
 ## Files
 
@@ -8,6 +8,8 @@ Run these two files in order in the **Supabase SQL Editor** to set up a fresh da
 |------|-------------|
 | `001_schema.sql` | Creates all enums, tables, indexes, the storage bucket, and all RLS policies |
 | `002_seed.sql` | Inserts demo products, banners, payment methods, and coupon codes |
+| `003_public_read_policies.sql` | Enables browser reads/writes needed by the Vercel frontend |
+| `004_production_seed.sql` | Idempotent production seed data for the live Supabase project |
 
 ---
 
@@ -20,11 +22,15 @@ Go to [supabase.com](https://supabase.com) → New project.
 - Open **SQL Editor** in your Supabase dashboard
 - Paste the contents of `001_schema.sql` and click **Run**
 
-### 3. Run the seed data (optional)
-- Paste the contents of `002_seed.sql` and click **Run**
-- This adds 10 demo products, 3 banners, 4 payment methods, and 3 coupon codes
+### 3. Apply browser RLS policies
+- Paste the contents of `003_public_read_policies.sql` and click **Run**
+- This enables the public storefront to read products, banners, payment settings, and chat messages
 
-### 4. Create your admin user
+### 4. Seed production data
+- Paste the contents of `004_production_seed.sql` and click **Run**
+- This is safe to re-run and will upsert the production product catalog, banners, payment methods, and coupon codes
+
+### 5. Create your admin user
 - Go to **Authentication → Users → Invite user** (or Add user)
 - Create a user with your admin email and set a password
 - Copy their **UUID** from the users list
@@ -36,7 +42,7 @@ VALUES ('<paste-uuid-here>', 'admin@yourdomain.com', 'Admin', 'admin')
 ON CONFLICT (supabase_id) DO UPDATE SET role = 'admin';
 ```
 
-### 5. Configure your environment variables
+### 6. Configure your environment variables
 
 Add these to your Replit Secrets (or `.env` file):
 
@@ -56,7 +62,7 @@ Add these to your Replit Secrets (or `.env` file):
 ### Tables
 | Table | Purpose |
 |-------|---------|
-| `users` | Synced from Supabase Auth on first login via `/api/users/me` |
+| `users` | Synced from Supabase Auth on first login via browser Supabase client |
 | `products` | Game top-ups, gift cards, subscriptions, vouchers |
 | `orders` | Customer orders — supports both logged-in users and guests |
 | `payments` | Payment proof screenshots linked to orders |

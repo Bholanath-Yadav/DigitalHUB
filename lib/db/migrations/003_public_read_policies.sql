@@ -28,7 +28,7 @@ CREATE POLICY "Public read payment settings"
 DROP POLICY IF EXISTS "Public read coupons" ON coupons;
 CREATE POLICY "Public read coupons"
   ON coupons FOR SELECT
-  TO authenticated
+  TO anon, authenticated
   USING (true);
 
 DROP POLICY IF EXISTS "Users read own profile" ON users;
@@ -61,5 +61,4 @@ DROP POLICY IF EXISTS "Public insert chat messages" ON chat_messages;
 CREATE POLICY "Public insert chat messages"
   ON chat_messages FOR INSERT
   TO anon, authenticated
-  WITH CHECK (true)
-  WITH CHECK (supabase_id = auth.uid()::text);
+  WITH CHECK (true);
