@@ -228,6 +228,8 @@ export default function ProductDetails() {
           guestEmail: isSignedIn ? null : guestEmail,
           guestPhone: isSignedIn ? null : guestPhone,
           couponCode: validatedCoupon?.code || null,
+          totalAmount: effectivePrice,
+          discountAmount: validatedCoupon ? validatedCoupon.discount : 0,
         },
       },
       {

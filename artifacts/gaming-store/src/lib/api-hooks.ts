@@ -172,7 +172,51 @@ export function useListOrders(
 export function useGetMyOrders(options?: { query?: UseQueryOptions<Order[]> }) {
   return useQuery<Order[]>({
     queryKey: ["my-orders"],
-    queryFn: () => apiFetch<Order[]>("/orders/my"),
+    queryFn: async () => {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      const user = authData.user;
+      if (!user) return [];
+
+      const { data: orderRows, error: ordersError } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (ordersError) throw ordersError;
+
+      const productIds = [...new Set((orderRows ?? []).map((row) => row.product_id))];
+      const { data: productRows, error: productsError } = productIds.length > 0
+        ? await supabase.from("products").select("*").in("id", productIds)
+        : { data: [], error: null };
+      if (productsError) throw productsError;
+
+      const productMap = new Map((productRows ?? []).map((row) => [row.id, mapProduct(row)]));
+
+      return (orderRows ?? []).map((row) => {
+        const product = productMap.get(row.product_id);
+        if (!product) throw new Error("Product not found for order");
+
+        return {
+          id: row.id,
+          userId: row.user_id ?? null,
+          guestName: row.guest_name ?? null,
+          guestEmail: row.guest_email ?? null,
+          guestPhone: row.guest_phone ?? null,
+          productId: row.product_id,
+          product,
+          gameDetails: row.game_details ?? {},
+          totalAmount: Number(row.total_amount),
+          discountAmount: Number(row.discount_amount ?? 0),
+          couponCode: row.coupon_code ?? null,
+          status: row.status,
+          paymentScreenshotUrl: row.payment_screenshot_url ?? null,
+          adminNote: row.admin_note ?? null,
+          createdAt: row.created_at ?? row.createdAt,
+          updatedAt: row.updated_at ?? row.updatedAt,
+        };
+      });
+    },
     ...options?.query,
   });
 }
@@ -183,7 +227,42 @@ export function useGetOrder(
 ) {
   return useQuery<Order>({
     queryKey: ["order", id],
-    queryFn: () => apiFetch<Order>(`/orders/${id}`),
+    queryFn: async () => {
+      const { data: orderRow, error: orderError } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (orderError) throw orderError;
+      if (!orderRow) throw new Error("Order not found");
+
+      const { data: productRow, error: productError } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", orderRow.product_id)
+        .maybeSingle();
+      if (productError) throw productError;
+      if (!productRow) throw new Error("Product not found");
+
+      return {
+        id: orderRow.id,
+        userId: orderRow.user_id ?? null,
+        guestName: orderRow.guest_name ?? null,
+        guestEmail: orderRow.guest_email ?? null,
+        guestPhone: orderRow.guest_phone ?? null,
+        productId: orderRow.product_id,
+        product: mapProduct(productRow),
+        gameDetails: orderRow.game_details ?? {},
+        totalAmount: Number(orderRow.total_amount),
+        discountAmount: Number(orderRow.discount_amount ?? 0),
+        couponCode: orderRow.coupon_code ?? null,
+        status: orderRow.status,
+        paymentScreenshotUrl: orderRow.payment_screenshot_url ?? null,
+        adminNote: orderRow.admin_note ?? null,
+        createdAt: orderRow.created_at ?? orderRow.createdAt,
+        updatedAt: orderRow.updated_at ?? orderRow.updatedAt,
+      };
+    },
     enabled: !!id,
     ...options?.query,
   });
@@ -199,7 +278,57 @@ export function useGetOrderStats(options?: { query?: UseQueryOptions<OrderStats>
 
 export function useCreateOrder(options?: UseMutationOptions<Order, Error, { data: CreateOrderBody }>) {
   return useMutation<Order, Error, { data: CreateOrderBody }>({
-    mutationFn: ({ data }) => apiFetch<Order>("/orders", { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: async ({ data }) => {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData.user?.id ?? null;
+
+      const { data: insertedOrder, error: insertError } = await supabase
+        .from("orders")
+        .insert({
+          user_id: userId,
+          guest_name: data.guestName ?? null,
+          guest_email: data.guestEmail ?? null,
+          guest_phone: data.guestPhone ?? null,
+          product_id: data.productId,
+          game_details: data.gameDetails,
+          total_amount: data.totalAmount,
+          discount_amount: data.discountAmount ?? 0,
+          coupon_code: data.couponCode ?? null,
+          status: "pending",
+        })
+        .select("*")
+        .single();
+
+      if (insertError) throw insertError;
+
+      const { data: productRow, error: productError } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", insertedOrder.product_id)
+        .maybeSingle();
+
+      if (productError) throw productError;
+      if (!productRow) throw new Error("Product not found");
+
+      return {
+        id: insertedOrder.id,
+        userId: insertedOrder.user_id ?? null,
+        guestName: insertedOrder.guest_name ?? null,
+        guestEmail: insertedOrder.guest_email ?? null,
+        guestPhone: insertedOrder.guest_phone ?? null,
+        productId: insertedOrder.product_id,
+        product: mapProduct(productRow),
+        gameDetails: insertedOrder.game_details ?? {},
+        totalAmount: Number(insertedOrder.total_amount ?? 0),
+        discountAmount: Number(insertedOrder.discount_amount ?? 0),
+        couponCode: insertedOrder.coupon_code ?? null,
+        status: insertedOrder.status,
+        paymentScreenshotUrl: insertedOrder.payment_screenshot_url ?? null,
+        adminNote: insertedOrder.admin_note ?? null,
+        createdAt: insertedOrder.created_at ?? insertedOrder.createdAt,
+        updatedAt: insertedOrder.updated_at ?? insertedOrder.updatedAt,
+      };
+    },
     ...options,
   });
 }
@@ -213,7 +342,30 @@ export function useUpdateOrderStatus(options?: UseMutationOptions<Order, Error, 
 
 export function useUploadPaymentScreenshot(options?: UseMutationOptions<Payment, Error, { data: UploadPaymentBody }>) {
   return useMutation<Payment, Error, { data: UploadPaymentBody }>({
-    mutationFn: ({ data }) => apiFetch<Payment>("/payments/upload", { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: async ({ data }) => {
+      const { data: insertedPayment, error } = await supabase
+        .from("payments")
+        .insert({
+          order_id: data.orderId,
+          screenshot_url: data.screenshotUrl,
+          payment_method: data.paymentMethod,
+          status: "pending",
+        })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+
+      return {
+        id: insertedPayment.id,
+        orderId: insertedPayment.order_id,
+        screenshotUrl: insertedPayment.screenshot_url,
+        paymentMethod: insertedPayment.payment_method,
+        status: insertedPayment.status,
+        adminNote: insertedPayment.admin_note ?? null,
+        createdAt: insertedPayment.created_at ?? insertedPayment.createdAt,
+      };
+    },
     ...options,
   });
 }
@@ -415,14 +567,78 @@ export function useGetMyProfile(options?: { query?: UseQueryOptions<UserProfile>
 
 export function useUpdateMyProfile(options?: UseMutationOptions<UserProfile, Error, { data: UpdateProfileBody }>) {
   return useMutation<UserProfile, Error, { data: UpdateProfileBody }>({
-    mutationFn: ({ data }) => apiFetch<UserProfile>("/users/me", { method: "PUT", body: JSON.stringify(data) }),
+    mutationFn: async ({ data }) => {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      const user = authData.user;
+      if (!user) throw new Error("Not signed in");
+
+      const { data: updated, error } = await supabase
+        .from("users")
+        .update({
+          name: data.name ?? null,
+          phone: data.phone ?? null,
+          avatar_url: data.avatarUrl ?? null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("supabase_id", user.id)
+        .select("*")
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!updated) throw new Error("Profile not found");
+
+      return {
+        id: updated.id,
+        supabaseId: updated.supabase_id,
+        email: updated.email,
+        name: updated.name ?? null,
+        phone: updated.phone ?? null,
+        avatarUrl: updated.avatar_url ?? null,
+        role: updated.role,
+        isBanned: updated.is_banned ?? false,
+        createdAt: updated.created_at ?? updated.createdAt,
+      };
+    },
     ...options,
   });
 }
 
 export function useSyncUser(options?: UseMutationOptions<UserProfile, Error, { data: { email?: string; name?: string; avatarUrl?: string } }>) {
   return useMutation<UserProfile, Error, { data: { email?: string; name?: string; avatarUrl?: string } }>({
-    mutationFn: ({ data }) => apiFetch<UserProfile>("/users/sync", { method: "POST", body: JSON.stringify(data) }),
+    mutationFn: async ({ data }) => {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      const user = authData.user;
+      if (!user) throw new Error("Not signed in");
+
+      const { data: upserted, error } = await supabase
+        .from("users")
+        .upsert({
+          supabase_id: user.id,
+          email: data.email ?? user.email ?? "",
+          name: data.name ?? user.user_metadata?.name ?? null,
+          avatar_url: data.avatarUrl ?? null,
+          role: "user",
+          is_banned: false,
+        }, { onConflict: "supabase_id" })
+        .select("*")
+        .single();
+
+      if (error) throw error;
+
+      return {
+        id: upserted.id,
+        supabaseId: upserted.supabase_id,
+        email: upserted.email,
+        name: upserted.name ?? null,
+        phone: upserted.phone ?? null,
+        avatarUrl: upserted.avatar_url ?? null,
+        role: upserted.role,
+        isBanned: upserted.is_banned ?? false,
+        createdAt: upserted.created_at ?? upserted.createdAt,
+      };
+    },
     ...options,
   });
 }

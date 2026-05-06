@@ -3,6 +3,8 @@
 
 ALTER TABLE IF EXISTS products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS banners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS payment_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS coupons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS users ENABLE ROW LEVEL SECURITY;
@@ -24,6 +26,18 @@ CREATE POLICY "Public read payment settings"
   ON payment_settings FOR SELECT
   TO anon, authenticated
   USING (true);
+
+DROP POLICY IF EXISTS "Public read orders" ON orders;
+CREATE POLICY "Public read orders"
+  ON orders FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS "Public insert orders" ON orders;
+CREATE POLICY "Public insert orders"
+  ON orders FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public read coupons" ON coupons;
 CREATE POLICY "Public read coupons"
@@ -56,9 +70,40 @@ CREATE POLICY "Public read chat messages"
   TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "Public read payments" ON payments;
+CREATE POLICY "Public read payments"
+  ON payments FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS "Public insert payments" ON payments;
+CREATE POLICY "Public insert payments"
+  ON payments FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+
 -- Chat messages: allow anyone to insert messages (guest or authenticated)
 DROP POLICY IF EXISTS "Public insert chat messages" ON chat_messages;
 CREATE POLICY "Public insert chat messages"
   ON chat_messages FOR INSERT
   TO anon, authenticated
   WITH CHECK (true);
+
+-- Storage uploads used by the browser app
+DROP POLICY IF EXISTS "Public upload payment screenshots" ON storage.objects;
+CREATE POLICY "Public upload payment screenshots"
+  ON storage.objects FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (
+    bucket_id = 'gaming-store'
+    AND (storage.foldername(name))[1] = 'payment-screenshots'
+  );
+
+DROP POLICY IF EXISTS "Auth upload content images" ON storage.objects;
+CREATE POLICY "Auth upload content images"
+  ON storage.objects FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    bucket_id = 'gaming-store'
+    AND (storage.foldername(name))[1] IN ('product-images', 'banner-images', 'qr-codes')
+  );

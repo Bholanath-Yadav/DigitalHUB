@@ -1,4 +1,4 @@
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { supabase, STORAGE_BUCKET } from "@/lib/supabase";
 
 /**
  * Compress and resize an image file using the browser Canvas API.
@@ -65,20 +65,15 @@ export async function uploadToStorage(
   if (!file.type.startsWith("image/")) throw new Error("Only image files are allowed");
   if (file.size > 10 * 1024 * 1024) throw new Error("File must be under 10 MB");
 
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("folder", folder);
+  const ext = file.name.split(".").pop() ?? "jpg";
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-  const res = await fetch(`${BASE}/api/storage/upload`, {
-    method: "POST",
-    body: formData,
-  });
+  const { error } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: true });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Upload failed" }));
-    throw new Error(err.error ?? "Upload failed");
-  }
+  if (error) throw new Error(`Upload failed: ${error.message}`);
 
-  const { url } = await res.json();
-  return url as string;
+  const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
 }

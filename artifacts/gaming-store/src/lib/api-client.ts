@@ -92,6 +92,8 @@ export interface CreateOrderBody {
   guestPhone?: string | null;
   gameDetails: { [key: string]: string };
   couponCode?: string | null;
+  totalAmount: number;
+  discountAmount?: number;
 }
 
 export interface OrderStats {
