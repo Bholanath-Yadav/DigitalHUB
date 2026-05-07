@@ -88,7 +88,7 @@ function VariantCard({
           )}
         </div>
         <div className="flex items-baseline gap-2 mt-0.5">
-          <span className="text-base font-black text-primary">{fmtNPR(v.price)}</span>
+          <span className="text-base font-black text-black dark:text-white">{fmtNPR(v.price)}</span>
           {v.originalPrice && (
             <span className="text-xs text-muted-foreground line-through">{fmtNPR(v.originalPrice)}</span>
           )}
@@ -159,7 +159,7 @@ function VariantFormDialog({
                   )}
                 </div>
                 <div className="flex items-baseline gap-1.5 mt-0.5">
-                  {form.price && <span className="text-sm font-black text-primary">{fmtNPR(parseFloat(form.price) || 0)}</span>}
+                  {form.price && <span className="text-sm font-black text-black dark:text-white">{fmtNPR(parseFloat(form.price) || 0)}</span>}
                   {form.originalPrice && (
                     <span className="text-xs text-muted-foreground line-through">{fmtNPR(parseFloat(form.originalPrice) || 0)}</span>
                   )}

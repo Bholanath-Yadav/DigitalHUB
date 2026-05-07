@@ -203,7 +203,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
                           {/* Price + arrow */}
                           <div className="flex items-center gap-2 shrink-0">
                             {price && (
-                              <span className="text-sm font-black text-primary">{price}</span>
+                              <span className="text-sm font-black text-black dark:text-white">{price}</span>
                             )}
                             {!product.inStock && (
                               <span className="text-[10px] font-bold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full">

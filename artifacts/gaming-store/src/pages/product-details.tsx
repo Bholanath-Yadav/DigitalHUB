@@ -441,7 +441,7 @@ export default function ProductDetails() {
                 <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex items-center justify-between">
                   <div>
                     <div className="text-sm text-muted-foreground">Price</div>
-                    <div className="text-2xl font-black text-primary">{fmtNPR(product.price)}</div>
+                    <div className="text-2xl font-black text-black dark:text-white">{fmtNPR(product.price)}</div>
                   </div>
                   {!product.inStock && <Badge variant="destructive">Out of Stock</Badge>}
                 </div>
@@ -496,7 +496,7 @@ export default function ProductDetails() {
                         <>
                           <div className="text-sm font-semibold text-foreground">{selectedVariantObj.name}</div>
                           <div className="flex items-baseline gap-2">
-                            <span className="text-xl font-black text-primary">{fmtNPR(finalNpr)}</span>
+                            <span className="text-xl font-black text-black dark:text-white">{fmtNPR(finalNpr)}</span>
                             {validatedCoupon && (
                               <span className="text-sm text-muted-foreground line-through">{fmtNPR(effectivePrice)}</span>
                             )}
@@ -511,7 +511,7 @@ export default function ProductDetails() {
                         <>
                           <div className="text-sm text-muted-foreground">Total</div>
                           <div className="flex items-baseline gap-2">
-                            <span className="text-xl font-black text-primary">{fmtNPR(finalNpr)}</span>
+                            <span className="text-xl font-black text-black dark:text-white">{fmtNPR(finalNpr)}</span>
                             {validatedCoupon && (
                               <span className="text-sm text-muted-foreground line-through">{fmtNPR(effectivePrice)}</span>
                             )}

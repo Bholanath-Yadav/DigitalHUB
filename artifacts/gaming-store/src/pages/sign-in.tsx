@@ -124,6 +124,9 @@ export default function SignInPage() {
           alt=""
           className="w-full h-full object-cover object-center"
           aria-hidden="true"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-black/75 via-black/60 to-black/80" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -225,7 +228,7 @@ export default function SignInPage() {
       </div>
 
       {/* ── Right form panel ── */}
-      <div className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-8 sm:px-8">
+      <div className="flex-1 relative z-10 flex flex-col items-center justify-center px-4 py-6 sm:px-8">
 
         {/* Mobile logo */}
         <div className="lg:hidden mb-6 self-start ml-2">
@@ -236,10 +239,10 @@ export default function SignInPage() {
         </div>
 
         {/* Glass card */}
-        <div className="w-full max-w-[420px] rounded-2xl border border-white/15 bg-white/10 backdrop-blur-2xl shadow-2xl p-6 sm:p-8">
+        <div className="w-full max-w-[min(420px,100%)] rounded-2xl border border-white/15 bg-white/10 backdrop-blur-2xl shadow-2xl p-5 sm:p-8 mx-auto">
 
           {/* Tab switcher */}
-          <div className="flex rounded-xl p-1 gap-1 mb-6 bg-black/20 border border-white/10">
+          <div className="flex rounded-xl p-1 gap-1 mb-6 bg-black/20 border border-white/10 overflow-hidden">
             {(["sign-in", "sign-up"] as const).map(t => (
               <button
                 key={t}

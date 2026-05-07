@@ -173,7 +173,7 @@ function GameCard({ product, index }: { product: any; index: number }) {
             {priceInfo && (
               <div className="mt-1.5 flex items-baseline gap-0.5">
                 {priceInfo.prefix && <span className="text-[11px] text-muted-foreground">{priceInfo.prefix}</span>}
-                <span className="font-black text-sm text-primary">{priceInfo.label}</span>
+                <span className="font-black text-sm text-black dark:text-white">{priceInfo.label}</span>
               </div>
             )}
           </div>
