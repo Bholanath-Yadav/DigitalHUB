@@ -95,7 +95,7 @@ export default function AdminChat() {
   const selectedSessionData = sessions?.find(s => s.sessionId === selectedSession);
 
   return (
-    <div className="p-4 md:p-6 h-full flex flex-col gap-4">
+    <div className="relative p-4 md:p-6 h-full flex flex-col gap-4">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
           <MessageSquare className="h-5 w-5 text-primary" />

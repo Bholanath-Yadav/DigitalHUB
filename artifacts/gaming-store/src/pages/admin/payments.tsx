@@ -44,7 +44,7 @@ export default function AdminPayments() {
   const pending = payments?.filter(p => p.status === "pending").length ?? 0;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="relative p-4 md:p-6 space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
           <CreditCard className="h-5 w-5 text-primary" />

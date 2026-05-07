@@ -112,7 +112,7 @@ export default function AdminBanners() {
   const f = (k: keyof BannerForm, v: any) => setForm(p => ({ ...p, [k]: v }));
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="relative p-4 md:p-6 space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
