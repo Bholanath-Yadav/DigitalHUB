@@ -4,6 +4,7 @@ import { supabase, STORAGE_BUCKET } from "@/lib/supabase";
 import { compressImage } from "@/lib/upload";
 import { useGetMyOrders, useGetMyProfile, useUpdateMyProfile } from "@/lib/api-hooks";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,6 +50,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
   const { theme, toggleTheme } = useTheme();
 
   const [section, setSection] = useState<Section>("profile");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [avatarLoading, setAvatarLoading] = useState(false);
@@ -71,7 +73,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
   }, [profile]);
 
   useEffect(() => {
-    if (!open) { setAvatarPreview(null); setSection("profile"); setNewPassword(""); setConfirmPassword(""); }
+    if (!open) { setAvatarPreview(null); setSection("profile"); setNewPassword(""); setConfirmPassword(""); setMobileNavOpen(false); }
   }, [open]);
 
   if (!isSignedIn) return null;
@@ -181,7 +183,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
         <DialogTitle className="sr-only">Account</DialogTitle>
 
         {/* ── Left Sidebar ── */}
-        <div className="w-full lg:w-56 shrink-0 bg-muted/40 border-b lg:border-b-0 lg:border-r border-border flex flex-col">
+        <div className="hidden lg:flex w-full lg:w-56 shrink-0 bg-muted/40 border-b lg:border-b-0 lg:border-r border-border flex-col">
           <div className="p-4 sm:p-5 border-b border-border">
             <h2 className="font-bold text-base">Account</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Manage your account info.</p>
@@ -211,19 +213,65 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
         {/* ── Right Content ── */}
         <div className="flex-1 flex flex-col min-w-0 bg-background">
           <div className="px-4 sm:px-7 py-4 sm:py-5 border-b border-border shrink-0">
-            <h3 className="font-bold text-lg">{NAV_ITEMS.find(n => n.id === section)?.label}</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">{NAV_ITEMS.find(n => n.id === section)?.sub}</p>
+            <div className="flex items-start justify-between gap-3 lg:hidden mb-3">
+              <div className="min-w-0">
+                <h3 className="font-bold text-lg">{NAV_ITEMS.find(n => n.id === section)?.label}</h3>
+                <p className="text-sm text-muted-foreground mt-0.5">{NAV_ITEMS.find(n => n.id === section)?.sub}</p>
+              </div>
+              <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="shrink-0 gap-2">
+                    <Settings className="h-4 w-4" /> Sections
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-[72vh] rounded-t-2xl p-0">
+                  <SheetTitle className="sr-only">Account Sections</SheetTitle>
+                  <div className="p-4 border-b border-border">
+                    <h3 className="font-semibold text-base">Account Sections</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Choose a section to view.</p>
+                  </div>
+                  <div className="p-3 grid gap-2 overflow-y-auto pb-4">
+                    {NAV_ITEMS.map(({ id, icon: Icon, label, sub }) => (
+                      <button
+                        key={id}
+                        onClick={() => { setSection(id); setMobileNavOpen(false); }}
+                        className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl transition-all min-h-[3.75rem]
+                          ${section === id ? "bg-primary/10 text-primary shadow-sm" : "text-foreground/70 hover:text-foreground hover:bg-muted"}`}
+                      >
+                        <Icon className={`h-4 w-4 shrink-0 ${section === id ? "text-primary" : "text-muted-foreground"}`} />
+                        <div className="min-w-0">
+                          <div className={`text-sm font-medium ${section === id ? "text-primary" : ""}`}>{label}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5 leading-tight truncate">{sub}</div>
+                        </div>
+                      </button>
+                    ))}
+                    <div className="pt-2">
+                      <button
+                        onClick={() => { setMobileNavOpen(false); onClose(); signOut(); }}
+                        className="w-full flex items-center justify-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10"
+                      >
+                        <LogOut className="h-4 w-4" /> Sign Out
+                      </button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+            <div className="hidden lg:block">
+              <h3 className="font-bold text-lg">{NAV_ITEMS.find(n => n.id === section)?.label}</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">{NAV_ITEMS.find(n => n.id === section)?.sub}</p>
+            </div>
           </div>
 
-          <ScrollArea className="flex-1">
-            <div className="px-4 sm:px-7 py-5 sm:py-6 space-y-5 sm:space-y-6">
+          <ScrollArea className="flex-1 scroll-smooth">
+            <div className="px-4 sm:px-7 py-5 sm:py-6 space-y-4 sm:space-y-6">
 
               {/* ── PROFILE ── */}
               {section === "profile" && (
                 <>
                   <div className="rounded-2xl border border-border overflow-hidden">
                     <div className="h-20 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/10 relative">
-                      <div className="absolute -bottom-10 left-6 flex items-end gap-4">
+                      <div className="absolute -bottom-10 left-4 sm:left-6 flex items-end gap-4">
                         <div className="relative">
                           <div className="w-20 h-20 rounded-2xl bg-muted border-4 border-background shadow-lg overflow-hidden">
                             {displayAvatar
@@ -244,7 +292,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                         </div>
                       </div>
                     </div>
-                    <div className="pt-12 px-6 pb-5">
+                    <div className="pt-12 px-4 sm:px-6 pb-5">
                       <div className="flex items-center gap-3 mb-1">
                         <p className="font-semibold text-sm">Profile Image</p>
                         {profile?.role && (
@@ -252,12 +300,12 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground mb-3">JPG, PNG or WEBP — max 5 MB</p>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => avatarInputRef.current?.click()} disabled={avatarLoading}>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Button size="sm" variant="outline" className="w-full sm:w-auto gap-1.5" onClick={() => avatarInputRef.current?.click()} disabled={avatarLoading}>
                           <Upload className="h-3.5 w-3.5" /> Upload
                         </Button>
                         {displayAvatar && (
-                          <Button size="sm" variant="outline" className="gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30" onClick={handleRemoveAvatar} disabled={avatarLoading}>
+                          <Button size="sm" variant="outline" className="w-full sm:w-auto gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30" onClick={handleRemoveAvatar} disabled={avatarLoading}>
                             <Trash2 className="h-3.5 w-3.5" /> Remove
                           </Button>
                         )}
@@ -268,9 +316,9 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                   <div className="rounded-2xl border border-border p-4 sm:p-6 space-y-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="acc-email" className="text-sm font-medium">Email address</Label>
-                      <div className="flex gap-2">
-                        <Input id="acc-email" value={profile?.email || user?.email || ""} disabled className="bg-muted text-muted-foreground flex-1" />
-                        <Badge variant="secondary" className="self-center px-3 py-1.5 text-xs shrink-0">Primary</Badge>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Input id="acc-email" value={profile?.email || user?.email || ""} disabled className="bg-muted text-muted-foreground w-full flex-1" />
+                        <Badge variant="secondary" className="self-start sm:self-center px-3 py-1.5 text-xs shrink-0">Primary</Badge>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -352,8 +400,8 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                       { key: "promotions"   as const, icon: Tag,     label: "Promotions & deals", sub: "Coupons, flash sales, special offers" },
                       { key: "newArrivals"  as const, icon: Bell,    label: "New arrivals", sub: "New game top-ups and gift cards" },
                     ].map(({ key, icon: Icon, label, sub }, i, arr) => (
-                      <div key={key} className={`flex items-center justify-between px-5 py-3.5 ${i < arr.length - 1 ? "border-b border-border" : ""}`}>
-                        <div className="flex items-center gap-3 min-w-0">
+                      <div key={key} className={`flex items-center justify-between gap-4 px-4 sm:px-5 py-3.5 ${i < arr.length - 1 ? "border-b border-border" : ""}`}>
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
                           <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
                           <div className="min-w-0"><p className="text-sm font-medium">{label}</p><p className="text-xs text-muted-foreground">{sub}</p></div>
                         </div>
@@ -378,7 +426,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                     </div>
                   </div>
 
-                  <Button onClick={() => savePrefs(prefs)} className="gap-2 bg-gradient-to-r from-primary to-secondary text-white border-none hover:opacity-90">
+                  <Button onClick={() => savePrefs(prefs)} className="w-full sm:w-auto gap-2 bg-gradient-to-r from-primary to-secondary text-white border-none hover:opacity-90">
                     Save Preferences
                   </Button>
                 </>
@@ -392,7 +440,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                       <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center"><KeyRound className="h-4 w-4 text-orange-500" /></div>
                       <div><p className="font-semibold text-sm">Change Password</p><p className="text-xs text-muted-foreground">Update your account password</p></div>
                     </div>
-                    <div className="px-5 py-4 space-y-3">
+                    <div className="px-4 sm:px-5 py-4 space-y-3">
                       <div className="space-y-1.5">
                         <Label htmlFor="new-pass" className="text-sm">New Password</Label>
                         <Input id="new-pass" type="password" placeholder="Min. 8 characters" value={newPassword} onChange={e => setNewPassword(e.target.value)} disabled={passwordLoading} />
@@ -401,7 +449,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                         <Label htmlFor="confirm-pass" className="text-sm">Confirm Password</Label>
                         <Input id="confirm-pass" type="password" placeholder="Repeat new password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} disabled={passwordLoading} />
                       </div>
-                      <Button onClick={handleChangePassword} disabled={passwordLoading || !newPassword || !confirmPassword} className="gap-2">
+                      <Button onClick={handleChangePassword} disabled={passwordLoading || !newPassword || !confirmPassword} className="w-full sm:w-auto gap-2">
                         {passwordLoading ? <><Loader2 className="h-4 w-4 animate-spin" /> Updating…</> : <><KeyRound className="h-4 w-4" /> Update Password</>}
                       </Button>
                     </div>
@@ -412,7 +460,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                       <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center"><Smartphone className="h-4 w-4 text-blue-500" /></div>
                       <div><p className="font-semibold text-sm">Account Info</p><p className="text-xs text-muted-foreground">Your account details</p></div>
                     </div>
-                    <div className="px-5 py-4 space-y-2">
+                    <div className="px-4 sm:px-5 py-4 space-y-2">
                       <p className="text-sm text-muted-foreground">Email: <span className="font-medium text-foreground">{user?.email}</span></p>
                       <p className="text-sm text-muted-foreground">Member since: <span className="font-medium text-foreground">{profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : "—"}</span></p>
                       <p className="text-sm text-muted-foreground">Role: <span className="font-medium text-foreground capitalize">{profile?.role || "user"}</span></p>
