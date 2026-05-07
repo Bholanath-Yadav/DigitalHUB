@@ -876,7 +876,7 @@ export const ListUsersResponse = zod.array(ListUsersResponseItem);
  * @summary Update user role (admin)
  */
 export const UpdateUserRoleParams = zod.object({
-  clerkId: zod.coerce.string(),
+  userId: zod.coerce.string(),
 });
 
 export const UpdateUserRoleBody = zod.object({
@@ -899,7 +899,7 @@ export const UpdateUserRoleResponse = zod.object({
  * @summary Ban or unban a user (admin)
  */
 export const BanUserParams = zod.object({
-  clerkId: zod.coerce.string(),
+  userId: zod.coerce.string(),
 });
 
 export const BanUserBody = zod.object({
@@ -922,7 +922,7 @@ export const BanUserResponse = zod.object({
  * @summary Delete a user (admin)
  */
 export const DeleteUserParams = zod.object({
-  clerkId: zod.coerce.string(),
+  userId: zod.coerce.string(),
 });
 
 export const DeleteUserResponse = zod.object({

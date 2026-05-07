@@ -2733,16 +2733,16 @@ export function useListUsers<
 /**
  * @summary Update user role (admin)
  */
-export const getUpdateUserRoleUrl = (clerkId: string) => {
-  return `/api/admin/users/${clerkId}/role`;
+export const getUpdateUserRoleUrl = (userId: string) => {
+  return `/api/admin/users/${userId}/role`;
 };
 
 export const updateUserRole = async (
-  clerkId: string,
+  userId: string,
   updateUserRoleBody: UpdateUserRoleBody,
   options?: RequestInit,
 ): Promise<UserProfile> => {
-  return customFetch<UserProfile>(getUpdateUserRoleUrl(clerkId), {
+  return customFetch<UserProfile>(getUpdateUserRoleUrl(userId), {
     ...options,
     method: "PUT",
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -2757,14 +2757,14 @@ export const getUpdateUserRoleMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateUserRole>>,
     TError,
-    { clerkId: string; data: BodyType<UpdateUserRoleBody> },
+    { userId: string; data: BodyType<UpdateUserRoleBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateUserRole>>,
   TError,
-  { clerkId: string; data: BodyType<UpdateUserRoleBody> },
+  { userId: string; data: BodyType<UpdateUserRoleBody> },
   TContext
 > => {
   const mutationKey = ["updateUserRole"];
@@ -2778,11 +2778,11 @@ export const getUpdateUserRoleMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateUserRole>>,
-    { clerkId: string; data: BodyType<UpdateUserRoleBody> }
+    { userId: string; data: BodyType<UpdateUserRoleBody> }
   > = (props) => {
-    const { clerkId, data } = props ?? {};
+    const { userId, data } = props ?? {};
 
-    return updateUserRole(clerkId, data, requestOptions);
+    return updateUserRole(userId, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -2804,14 +2804,14 @@ export const useUpdateUserRole = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateUserRole>>,
     TError,
-    { clerkId: string; data: BodyType<UpdateUserRoleBody> },
+    { userId: string; data: BodyType<UpdateUserRoleBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof updateUserRole>>,
   TError,
-  { clerkId: string; data: BodyType<UpdateUserRoleBody> },
+  { userId: string; data: BodyType<UpdateUserRoleBody> },
   TContext
 > => {
   return useMutation(getUpdateUserRoleMutationOptions(options));
@@ -2820,16 +2820,16 @@ export const useUpdateUserRole = <
 /**
  * @summary Ban or unban a user (admin)
  */
-export const getBanUserUrl = (clerkId: string) => {
-  return `/api/admin/users/${clerkId}/ban`;
+export const getBanUserUrl = (userId: string) => {
+  return `/api/admin/users/${userId}/ban`;
 };
 
 export const banUser = async (
-  clerkId: string,
+  userId: string,
   banUserBody: BanUserBody,
   options?: RequestInit,
 ): Promise<UserProfile> => {
-  return customFetch<UserProfile>(getBanUserUrl(clerkId), {
+  return customFetch<UserProfile>(getBanUserUrl(userId), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -2844,14 +2844,14 @@ export const getBanUserMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof banUser>>,
     TError,
-    { clerkId: string; data: BodyType<BanUserBody> },
+    { userId: string; data: BodyType<BanUserBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof banUser>>,
   TError,
-  { clerkId: string; data: BodyType<BanUserBody> },
+  { userId: string; data: BodyType<BanUserBody> },
   TContext
 > => {
   const mutationKey = ["banUser"];
@@ -2865,11 +2865,11 @@ export const getBanUserMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof banUser>>,
-    { clerkId: string; data: BodyType<BanUserBody> }
+    { userId: string; data: BodyType<BanUserBody> }
   > = (props) => {
-    const { clerkId, data } = props ?? {};
+    const { userId, data } = props ?? {};
 
-    return banUser(clerkId, data, requestOptions);
+    return banUser(userId, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -2891,14 +2891,14 @@ export const useBanUser = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof banUser>>,
     TError,
-    { clerkId: string; data: BodyType<BanUserBody> },
+    { userId: string; data: BodyType<BanUserBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof banUser>>,
   TError,
-  { clerkId: string; data: BodyType<BanUserBody> },
+  { userId: string; data: BodyType<BanUserBody> },
   TContext
 > => {
   return useMutation(getBanUserMutationOptions(options));
@@ -2907,15 +2907,15 @@ export const useBanUser = <
 /**
  * @summary Delete a user (admin)
  */
-export const getDeleteUserUrl = (clerkId: string) => {
-  return `/api/admin/users/${clerkId}`;
+export const getDeleteUserUrl = (userId: string) => {
+  return `/api/admin/users/${userId}`;
 };
 
 export const deleteUser = async (
-  clerkId: string,
+  userId: string,
   options?: RequestInit,
 ): Promise<MessageResponse> => {
-  return customFetch<MessageResponse>(getDeleteUserUrl(clerkId), {
+  return customFetch<MessageResponse>(getDeleteUserUrl(userId), {
     ...options,
     method: "DELETE",
   });
@@ -2928,14 +2928,14 @@ export const getDeleteUserMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteUser>>,
     TError,
-    { clerkId: string },
+    { userId: string },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteUser>>,
   TError,
-  { clerkId: string },
+  { userId: string },
   TContext
 > => {
   const mutationKey = ["deleteUser"];
@@ -2949,11 +2949,11 @@ export const getDeleteUserMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteUser>>,
-    { clerkId: string }
+    { userId: string }
   > = (props) => {
-    const { clerkId } = props ?? {};
+    const { userId } = props ?? {};
 
-    return deleteUser(clerkId, requestOptions);
+    return deleteUser(userId, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -2975,14 +2975,14 @@ export const useDeleteUser = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteUser>>,
     TError,
-    { clerkId: string },
+    { userId: string },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof deleteUser>>,
   TError,
-  { clerkId: string },
+  { userId: string },
   TContext
 > => {
   return useMutation(getDeleteUserMutationOptions(options));

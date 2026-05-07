@@ -395,7 +395,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Is my account information safe?",
-    a: "Yes. We use Clerk for secure authentication and never store your payment details. Your personal information is only used to process and deliver your order.",
+    a: "Yes. We use Supabase for secure authentication and never store your payment details. Your personal information is only used to process and deliver your order.",
   },
   {
     q: "Can I get a refund?",

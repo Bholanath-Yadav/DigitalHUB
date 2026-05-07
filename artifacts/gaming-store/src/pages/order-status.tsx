@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, CheckCircle, XCircle, AlertCircle, ExternalLink, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { fmtNPR } from "@/lib/currency";
 
 export default function OrderStatus() {
   const [, params] = useRoute("/orders/:id");
@@ -73,7 +74,7 @@ export default function OrderStatus() {
                 <div>
                   <h3 className="font-bold text-lg">{order.product.name}</h3>
                   <p className="text-muted-foreground">{order.product.category}</p>
-                  <p className="font-bold text-primary mt-1">${(order.totalAmount - order.discountAmount).toFixed(2)}</p>
+                  <p className="font-bold text-primary mt-1">{fmtNPR(order.totalAmount - order.discountAmount)}</p>
                 </div>
               </div>
 
@@ -118,17 +119,17 @@ export default function OrderStatus() {
               <div className="pt-4 border-t space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>${order.totalAmount.toFixed(2)}</span>
+                  <span>{fmtNPR(order.totalAmount)}</span>
                 </div>
                 {order.discountAmount > 0 && (
                   <div className="flex justify-between text-green-500">
                     <span>Discount</span>
-                    <span>-${order.discountAmount.toFixed(2)}</span>
+                    <span>-{fmtNPR(order.discountAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold text-base pt-2">
                   <span>Total Paid</span>
-                  <span>${(order.totalAmount - order.discountAmount).toFixed(2)}</span>
+                  <span>{fmtNPR(order.totalAmount - order.discountAmount)}</span>
                 </div>
               </div>
             </CardContent>

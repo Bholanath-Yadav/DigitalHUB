@@ -344,13 +344,18 @@ function Navbar() {
 }
 
 function Footer() {
+  const [location] = useLocation();
+  const isCheckoutPage = location === "/checkout" || location.startsWith("/checkout/");
+
   return (
     <footer className="relative border-t border-border/50 bg-gradient-to-b from-background via-card/25 to-background overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
       <div className="container max-w-screen-xl px-4 md:px-6 py-10 md:py-12 relative">
-        <div className="mb-8 rounded-[2rem] border border-border/60 bg-card/70 backdrop-blur-md shadow-[0_24px_60px_-40px_rgba(0,0,0,0.35)] p-4 sm:p-6">
-          <CustomerReviewsPanel />
-        </div>
+        {!isCheckoutPage && (
+          <div className="mb-8 rounded-[2rem] border border-border/60 bg-card/70 backdrop-blur-md shadow-[0_24px_60px_-40px_rgba(0,0,0,0.35)] p-4 sm:p-6">
+            <CustomerReviewsPanel />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 items-start text-left">
           <div className="lg:col-span-5">
