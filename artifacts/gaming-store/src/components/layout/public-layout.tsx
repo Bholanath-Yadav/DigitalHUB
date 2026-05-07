@@ -171,11 +171,10 @@ function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden lg:flex flex-1 justify-end mr-3">
-          <SearchTrigger onOpen={() => setSearchOpen(true)} />
-        </div>
-
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2">
+          <div className="hidden lg:flex items-center mr-1">
+            <SearchTrigger onOpen={() => setSearchOpen(true)} />
+          </div>
           <ThemeToggle />
 
           {isSignedIn ? (
