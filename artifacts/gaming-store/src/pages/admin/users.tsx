@@ -1,9 +1,12 @@
 import { useMemo, useState } from "react";
-import { useListAdminUsers as useListUsers, useUpdateUserRole, useBanUser, useDeleteAdminUser as useDeleteUser } from "@/lib/api-hooks";
+import { useListAdminUsers as useListUsers, useUpdateUserRole, useBanUser, useDeleteAdminUser as useDeleteUser, useCreateAdminUser } from "@/lib/api-hooks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
@@ -13,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import {
   Users, Search, Shield, ShieldOff, Trash2,
-  Crown, User as UserIcon, Briefcase, Ban, CheckCircle, RefreshCcw,
+  Crown, User as UserIcon, Briefcase, Ban, CheckCircle, RefreshCcw, Plus,
 } from "lucide-react";
 
 const ROLE_CONFIG = {
@@ -33,14 +36,42 @@ export default function AdminUsers() {
   const updateRole = useUpdateUserRole();
   const banUser    = useBanUser();
   const deleteUser = useDeleteUser();
+  const createUser = useCreateAdminUser();
   const { toast }  = useToast();
 
   const [search, setSearch]         = useState("");
   const [filter, setFilter]         = useState<"all" | "active" | "banned">("all");
   const [confirmDelete, setConfirmDelete] = useState<UserRow | null>(null);
   const [confirmBan, setConfirmBan]       = useState<{ user: UserRow; ban: boolean } | null>(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({ email: "", name: "", role: "user" as const });
+  const [createErrors, setCreateErrors] = useState<{ email?: string; name?: string }>({});
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+
+  const handleCreateUser = () => {
+    const errors: { email?: string; name?: string } = {};
+    if (!createForm.email || !createForm.email.includes("@")) errors.email = "Valid email required";
+    setCreateErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    createUser.mutate(
+      { data: { email: createForm.email, name: createForm.name || undefined, role: createForm.role } },
+      {
+        onSuccess: () => {
+          toast({ title: "User created successfully" });
+          setCreateDialogOpen(false);
+          setCreateForm({ email: "", name: "", role: "user" });
+          invalidate();
+        },
+        onError: (err: any) => {
+          const msg = err?.message || "Failed to create user";
+          if (msg.includes("already exists")) setCreateErrors({ email: msg });
+          else toast({ title: msg, variant: "destructive" });
+        },
+      }
+    );
+  };
 
   const handleRoleChange = (supabaseId: string, role: "user" | "staff" | "admin") => {
     updateRole.mutate(

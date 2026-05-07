@@ -1021,6 +1021,33 @@ export function useListAdminUsers(options?: { query?: UseQueryOptions<UserProfil
   });
 }
 
+export function useCreateAdminUser(options?: UseMutationOptions<UserProfile, Error, { data: { email: string; name?: string; role?: string } }>) {
+  return useMutation<UserProfile, Error, { data: { email: string; name?: string; role?: string } }>({
+    mutationFn: async (input) => {
+      const { data: newUser, error } = await supabase.from("users").insert({
+        email: input.data.email,
+        name: input.data.name ?? null,
+        role: input.data.role ?? "user",
+        is_banned: false,
+      }).select().single();
+      if (error) throw error;
+      if (!newUser) throw new Error("Failed to create user");
+      return {
+        id: newUser.id,
+        supabaseId: newUser.supabase_id,
+        email: newUser.email,
+        name: newUser.name ?? null,
+        phone: newUser.phone ?? null,
+        avatarUrl: newUser.avatar_url ?? null,
+        role: newUser.role,
+        isBanned: newUser.is_banned ?? false,
+        createdAt: newUser.created_at ?? newUser.createdAt,
+      };
+    },
+    ...options,
+  });
+}
+
 export function useUpdateUserRole(options?: UseMutationOptions<UserProfile, Error, { userId: string; data: { role: string } }>) {
   return useMutation<UserProfile, Error, { userId: string; data: { role: string } }>({
     mutationFn: async ({ userId, data }) => {

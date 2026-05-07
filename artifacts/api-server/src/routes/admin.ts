@@ -22,6 +22,37 @@ router.get("/admin/users", requireAdmin, async (req, res) => {
   } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
 });
 
+router.post("/admin/users", requireAdmin, async (req, res) => {
+  try {
+    const { email, name, role } = req.body as { email?: string; name?: string; role?: string };
+    if (!email) return res.status(400).json({ error: "Email is required" });
+    
+    // Check if user already exists
+    const { data: existingUser, error: checkError } = await supabase
+      .from("users")
+      .select("supabase_id")
+      .eq("email", email)
+      .maybeSingle();
+    if (checkError) throw checkError;
+    if (existingUser) return res.status(409).json({ error: "User with this email already exists" });
+    
+    // Create a new user record (admin creates user without Supabase auth)
+    const { data: newUser, error } = await supabase
+      .from("users")
+      .insert({
+        email,
+        name: name || null,
+        role: role || "user",
+        is_banned: false,
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    if (!newUser) return res.status(500).json({ error: "Failed to create user" });
+    return res.status(201).json(formatUser(newUser));
+  } catch (err) { req.log.error(err); return res.status(500).json({ error: "Internal error" }); }
+});
+
 router.put("/admin/users/:userId/role", requireAdmin, async (req, res) => {
   try {
     const { role } = req.body;
