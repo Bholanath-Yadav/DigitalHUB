@@ -17,6 +17,8 @@ import {
   Gamepad2, Gift, Ticket, Zap, ChevronRight,
 } from "lucide-react";
 
+const APK_DOWNLOAD_URL = "https://github.com/Bholanath-Yadav/DigitalHUB/releases/latest/download/DigitalHUB.apk";
+
 export function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -48,56 +50,20 @@ function ThemeToggle() {
   );
 }
 
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
-};
-
 function AppDownloadButton() {
-  const [promptEvent, setPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-
-  useEffect(() => {
-    const standalone = window.matchMedia("(display-mode: standalone)").matches;
-    setIsInstalled(standalone || (navigator as any).standalone === true);
-
-    const onBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setPromptEvent(event as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
-    return () => window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
-  }, []);
-
-  const handleInstall = async () => {
-    if (isInstalled) return;
-
-    if (promptEvent) {
-      await promptEvent.prompt();
-      const choice = await promptEvent.userChoice;
-      if (choice.outcome === "accepted") {
-        setIsInstalled(true);
-      }
-      setPromptEvent(null);
-      return;
-    }
-
-    // Fallback when browser does not support beforeinstallprompt.
-    window.alert("To install the app: open browser menu and choose 'Install app' or 'Add to Home screen'.");
-  };
-
   return (
     <Button
+      asChild
       variant="outline"
       size="sm"
-      onClick={handleInstall}
       className="hidden lg:inline-flex gap-1.5 border-primary/35 hover:bg-primary/10"
       aria-label="Download app"
       title="Download app"
     >
-      <Download className="h-4 w-4" />
-      {isInstalled ? "App Installed" : "Download App"}
+      <a href={APK_DOWNLOAD_URL} download="DigitalHUB.apk">
+        <Download className="h-4 w-4" />
+        Download App
+      </a>
     </Button>
   );
 }
@@ -279,14 +245,14 @@ function Navbar() {
                         <User className="h-4 w-4" /> My Account
                       </Button>
                       <Button
+                        asChild
                         variant="outline"
                         className="w-full gap-2"
-                        onClick={() => {
-                          setMobileOpen(false);
-                          window.alert("To install the app: open browser menu and choose 'Install app' or 'Add to Home screen'.");
-                        }}
+                        onClick={() => setMobileOpen(false)}
                       >
-                        <Download className="h-4 w-4" /> Download App
+                        <a href={APK_DOWNLOAD_URL} download="DigitalHUB.apk">
+                          <Download className="h-4 w-4" /> Download App
+                        </a>
                       </Button>
                       <Button
                         variant="outline"
