@@ -51,19 +51,21 @@ function ThemeToggle() {
 }
 
 function AppDownloadButton() {
+  const handleDownload = () => {
+    window.location.href = APK_DOWNLOAD_URL;
+  };
+
   return (
     <Button
-      asChild
       variant="outline"
       size="sm"
       className="hidden lg:inline-flex gap-1.5 border-primary/35 hover:bg-primary/10"
       aria-label="Download app"
       title="Download app"
+      onClick={handleDownload}
     >
-      <a href={APK_DOWNLOAD_URL} download="DigitalHUB.apk">
-        <Download className="h-4 w-4" />
-        Download App
-      </a>
+      <Download className="h-4 w-4" />
+      Download App
     </Button>
   );
 }
@@ -245,14 +247,14 @@ function Navbar() {
                         <User className="h-4 w-4" /> My Account
                       </Button>
                       <Button
-                        asChild
                         variant="outline"
                         className="w-full gap-2"
-                        onClick={() => setMobileOpen(false)}
+                        onClick={() => {
+                          setMobileOpen(false);
+                          window.location.href = APK_DOWNLOAD_URL;
+                        }}
                       >
-                        <a href={APK_DOWNLOAD_URL} download="DigitalHUB.apk">
-                          <Download className="h-4 w-4" /> Download App
-                        </a>
+                        <Download className="h-4 w-4" /> Download App
                       </Button>
                       <Button
                         variant="outline"
