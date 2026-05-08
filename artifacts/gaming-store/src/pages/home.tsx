@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useListProducts, useListBanners } from "@/lib/api-hooks";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Gift, Tv, Ticket, ArrowRight, Zap, ShieldCheck, Clock, ChevronDown } from "lucide-react";
+import { Gamepad2, Gift, Tv, Ticket, ArrowRight, Zap, ShieldCheck, Clock, ChevronDown, Wrench, Sparkles, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 import { fmtNPR } from "@/lib/currency";
 import { BannerCarousel } from "@/components/banner-carousel";
@@ -103,10 +103,12 @@ function HeroTypewriter() {
 }
 
 const CATEGORIES = [
-  { value: "game-topups",   label: "Game Top-ups",  icon: <Gamepad2 className="h-5 w-5" />, color: "from-cyan-500 to-blue-600" },
-  { value: "gift-cards",    label: "Gift Cards",     icon: <Gift className="h-5 w-5" />,     color: "from-purple-500 to-pink-600" },
-  { value: "subscriptions", label: "Subscriptions",  icon: <Tv className="h-5 w-5" />,       color: "from-orange-500 to-red-600" },
-  { value: "vouchers",      label: "Vouchers",       icon: <Ticket className="h-5 w-5" />,   color: "from-green-500 to-emerald-600" },
+  { value: "digital-tools",  label: "Digital Tools",  icon: <Wrench className="h-6 w-6" />,    color: "from-slate-500 to-gray-600" },
+  { value: "gaming",         label: "Gaming",         icon: <Gamepad2 className="h-6 w-6" />, color: "from-cyan-500 to-blue-600" },
+  { value: "gift-cards",     label: "Gift Cards",     icon: <Gift className="h-6 w-6" />,     color: "from-purple-500 to-pink-600" },
+  { value: "social-boost",   label: "Social Boost",   icon: <Sparkles className="h-6 w-6" />, color: "from-yellow-500 to-orange-600" },
+  { value: "streaming",      label: "Streaming",      icon: <Tv className="h-6 w-6" />,       color: "from-orange-500 to-red-600" },
+  { value: "vpn-privacy",    label: "VPN & Privacy",  icon: <Shield className="h-6 w-6" />,   color: "from-indigo-500 to-purple-600" },
 ];
 
 const TRUST_BADGES = [
@@ -308,21 +310,21 @@ export default function Home() {
       </section>
 
       {/* ── Categories ───────────────────────────────────── */}
-      <section className="container max-w-screen-xl px-4 md:px-6 pt-10 pb-4">
+      <section className="container max-w-screen-xl px-4 md:px-6 pt-12 pb-8">
         <FadeUp>
-          <h2 className="text-xl font-black tracking-tight mb-5">Browse by Category</h2>
+          <h2 className="text-2xl font-black tracking-tight mb-6">Shop by Category</h2>
         </FadeUp>
-        <StaggerGrid fast className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <StaggerGrid fast className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {CATEGORIES.map(cat => (
-            <motion.div key={cat.value} variants={scaleIn}>
+            <motion.div key={cat.value} variants={scaleIn} className="h-full">
               <Link href={`/products?category=${cat.value}`}>
-                <div className="group relative overflow-hidden rounded-xl border border-border bg-card hover:border-primary/50 transition-all duration-200 hover:-translate-y-1 hover:shadow-md cursor-pointer p-4">
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white mb-3 group-hover:scale-110 transition-transform duration-200`}>
+                <div className="group relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card to-muted hover:border-primary/60 transition-all duration-300 hover:-translate-y-2 hover:shadow-lg cursor-pointer p-5 h-full flex flex-col items-center justify-center text-center">
+                  <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${cat.color} flex items-center justify-center text-white mb-3 group-hover:scale-125 transition-transform duration-300 shadow-lg`}>
                     {cat.icon}
                   </div>
-                  <p className="font-bold text-sm">{cat.label}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {allProducts?.filter(p => p.category === cat.value).length ?? "—"} items
+                  <p className="font-bold text-sm leading-tight">{cat.label}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {allProducts?.filter(p => p.category === cat.value).length ?? "0"} items
                   </p>
                 </div>
               </Link>
