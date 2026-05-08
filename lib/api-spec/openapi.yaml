@@ -84,7 +84,7 @@ paths:
           in: query
           schema:
             type: string
-            enum: [game-topups, gift-cards, subscriptions, vouchers]
+            enum: [digital-tools, gaming, gift-cards, social-boost, streaming, vpn-privacy]
         - name: search
           in: query
           schema:
@@ -770,7 +770,7 @@ components:
           type: number
         category:
           type: string
-          enum: [game-topups, gift-cards, subscriptions, vouchers]
+          enum: [digital-tools, gaming, gift-cards, social-boost, streaming, vpn-privacy]
         imageUrl:
           type: string
           nullable: true
@@ -837,7 +837,7 @@ components:
           type: number
         category:
           type: string
-          enum: [game-topups, gift-cards, subscriptions, vouchers]
+          enum: [digital-tools, gaming, gift-cards, social-boost, streaming, vpn-privacy]
         imageUrl:
           type: string
           nullable: true

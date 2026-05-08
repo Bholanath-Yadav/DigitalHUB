@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Search, Gamepad2, Gift, Tv, Ticket, Zap, LayoutGrid, List } from "lucide-react";
+import { Search, Gamepad2, Gift, Tv, Ticket, Zap, LayoutGrid, List, Wrench, Sparkles, Shield } from "lucide-react";
 import { fmtNPR } from "@/lib/currency";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageWrapper, FadeUp, MotionCard, fadeUp, scaleIn, staggerFast } from "@/components/motion";
@@ -11,11 +11,13 @@ import { useSEO } from "@/hooks/use-seo";
 import { BreadcrumbJsonLd } from "@/components/json-ld";
 
 const CATEGORIES = [
-  { value: "all",           label: "All",           icon: <LayoutGrid className="h-3.5 w-3.5" /> },
-  { value: "game-topups",   label: "Top-ups",        icon: <Gamepad2 className="h-3.5 w-3.5" /> },
-  { value: "gift-cards",    label: "Gift Cards",     icon: <Gift className="h-3.5 w-3.5" /> },
-  { value: "subscriptions", label: "Subscriptions",  icon: <Tv className="h-3.5 w-3.5" /> },
-  { value: "vouchers",      label: "Vouchers",       icon: <Ticket className="h-3.5 w-3.5" /> },
+  { value: "all",           label: "All",          icon: <LayoutGrid className="h-3.5 w-3.5" /> },
+  { value: "digital-tools", label: "Digital Tools", icon: <Wrench className="h-3.5 w-3.5" /> },
+  { value: "gaming",        label: "Gaming",        icon: <Gamepad2 className="h-3.5 w-3.5" /> },
+  { value: "gift-cards",    label: "Gift Cards",    icon: <Gift className="h-3.5 w-3.5" /> },
+  { value: "social-boost",  label: "Social Boost",  icon: <Sparkles className="h-3.5 w-3.5" /> },
+  { value: "streaming",     label: "Streaming",     icon: <Tv className="h-3.5 w-3.5" /> },
+  { value: "vpn-privacy",   label: "VPN & Privacy", icon: <Shield className="h-3.5 w-3.5" /> },
 ];
 
 function getPriceLabel(product: any): { label: string; prefix?: string } | null {
@@ -138,10 +140,12 @@ function ShimmerListCard() {
 }
 
 const CATEGORY_SEO: Record<string, { title: string; desc: string; kw: string }> = {
-  "game-topups":   { title: "Buy Game Top-ups in Nepal",        desc: "Top up Free Fire Diamonds, PUBG UC, Mobile Legends and more. Instant delivery in Nepal. Pay with eSewa, Khalti or IME Pay.",       kw: "free fire diamonds nepal, pubg uc nepal, mobile legends nepal, game top-up nepal, tiktok coins nepal" },
-  "gift-cards":    { title: "Buy Gift Cards in Nepal",          desc: "Buy Google Play, Steam, Apple and other gift cards in Nepal. Instant digital delivery via Digital HUB.",                            kw: "google play gift card nepal, steam wallet nepal, apple gift card nepal, gift cards nepal" },
-  subscriptions:   { title: "Buy Subscriptions in Nepal",       desc: "Buy Netflix, Spotify, YouTube Premium and other digital subscriptions in Nepal. Pay with eSewa or Khalti.",                         kw: "netflix nepal, spotify nepal, youtube premium nepal, disney plus nepal, digital subscriptions nepal" },
-  vouchers:        { title: "Buy Digital Vouchers in Nepal",    desc: "Buy digital vouchers and prepaid codes in Nepal. Instant delivery. All major games and platforms available.",                        kw: "vouchers nepal, digital vouchers nepal, prepaid codes nepal, gaming vouchers nepal" },
+  "digital-tools": { title: "Buy Digital Tools in Nepal",      desc: "Software, apps, and digital tools. Instant activation and delivery. Pay with eSewa, Khalti or IME Pay.",                            kw: "digital tools nepal, software nepal, apps nepal" },
+  "gaming":        { title: "Buy Gaming Products in Nepal",    desc: "Game top-ups, codes, and gaming content. Free Fire, PUBG, Mobile Legends and more. Instant delivery in Nepal.",                  kw: "free fire nepal, pubg nepal, mobile legends nepal, gaming nepal" },
+  "gift-cards":    { title: "Buy Gift Cards in Nepal",         desc: "Google Play, Steam, Apple and other gift cards in Nepal. Instant digital delivery via Digital HUB.",                               kw: "google play gift card nepal, steam wallet nepal, apple gift card nepal" },
+  "social-boost":  { title: "Buy Social Boost Services in Nepal", desc: "Instagram, TikTok, YouTube and other social media services. Boost your presence instantly.",                                        kw: "social boost nepal, instagram nepal, tiktok nepal, youtube nepal" },
+  "streaming":     { title: "Buy Streaming Services in Nepal",  desc: "Netflix, Spotify, YouTube Premium and other digital subscriptions in Nepal. Pay with eSewa or Khalti.",                          kw: "netflix nepal, spotify nepal, youtube premium nepal, streaming nepal" },
+  "vpn-privacy":   { title: "Buy VPN & Privacy Tools in Nepal", desc: "VPN services, privacy tools, and digital security products. Protect your online presence.",                                          kw: "vpn nepal, privacy tools nepal, digital security nepal" },
 };
 
 export default function Products() {
