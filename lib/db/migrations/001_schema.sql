@@ -20,7 +20,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE product_category AS ENUM ('game-topups', 'gift-cards', 'subscriptions', 'vouchers');
+  CREATE TYPE product_category AS ENUM ('digital-tools', 'gaming', 'gift-cards', 'social-boost', 'streaming', 'vpn-privacy');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at   timestamp   NOT NULL DEFAULT now()
 );
 
--- Products (game top-ups, gift cards, subscriptions, vouchers)
+-- Products (digital tools, gaming, gift cards, social boost, streaming, VPN & privacy)
 CREATE TABLE IF NOT EXISTS products (
   id             serial           PRIMARY KEY,
   name           text             NOT NULL,

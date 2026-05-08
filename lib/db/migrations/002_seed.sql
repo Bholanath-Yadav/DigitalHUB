@@ -17,7 +17,7 @@ VALUES
   (
     'Free Fire Diamonds',
     'Top up your Free Fire account instantly with diamonds. Fast delivery, best rates in Nepal.',
-    199.00, 'game-topups',
+    199.00, 'gaming',
     'https://images.unsplash.com/photo-1614294149010-950b698f72c0?w=400',
     '["free fire","diamonds","garena"]',
     '[{"label":"Player ID","name":"playerId","type":"text","required":true,"placeholder":"Enter your Free Fire UID"},{"label":"Server","name":"server","type":"select","required":true,"options":["IND","BD","MENA","SEA"]}]',
@@ -27,7 +27,7 @@ VALUES
   (
     'PUBG Mobile UC',
     'Purchase Unknown Cash (UC) for PUBG Mobile. Unlock skins, crates, and Battle Pass.',
-    299.00, 'game-topups',
+    299.00, 'gaming',
     'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400',
     '["pubg","uc","tencent"]',
     '[{"label":"Player ID","name":"playerId","type":"text","required":true,"placeholder":"Enter your PUBG Player ID"},{"label":"Season","name":"season","type":"text","required":false,"placeholder":"Current season (optional)"}]',
@@ -37,7 +37,7 @@ VALUES
   (
     'Mobile Legends Diamonds',
     'Recharge your Mobile Legends: Bang Bang account with diamonds. Instant top-up.',
-    149.00, 'game-topups',
+    149.00, 'gaming',
     'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400',
     '["mobile legends","mlbb","diamonds"]',
     '[{"label":"User ID","name":"userId","type":"text","required":true,"placeholder":"Enter your MLBB User ID"},{"label":"Zone ID","name":"zoneId","type":"text","required":true,"placeholder":"Enter your Zone ID"}]',
@@ -47,7 +47,7 @@ VALUES
   (
     'TikTok Coins',
     'Buy TikTok coins to send gifts to your favourite creators. Instant delivery.',
-    199.00, 'game-topups',
+    199.00, 'gaming',
     'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400',
     '["tiktok","coins","social"]',
     '[{"label":"TikTok Username","name":"username","type":"text","required":true,"placeholder":"@yourusername"}]',
@@ -57,7 +57,7 @@ VALUES
   (
     'Call of Duty Mobile CP',
     'Top up COD Points for Call of Duty Mobile. Buy operators, blueprints and Battle Pass.',
-    399.00, 'game-topups',
+    399.00, 'gaming',
     'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=400',
     '["cod","codm","cp","activision"]',
     '[{"label":"Activision ID","name":"activisionId","type":"text","required":true,"placeholder":"Name#1234567"}]',
@@ -77,7 +77,7 @@ VALUES
   (
     'Spotify Premium',
     'Spotify Premium subscription — ad-free music, offline listening, unlimited skips.',
-    599.00, 'subscriptions',
+    599.00, 'streaming',
     'https://images.unsplash.com/photo-1614680376739-414d95ff43df?w=400',
     '["spotify","music","subscription"]',
     '[{"label":"Spotify Email","name":"email","type":"email","required":true,"placeholder":"your@spotify.com"}]',
@@ -87,7 +87,7 @@ VALUES
   (
     'YouTube Premium',
     'YouTube Premium — no ads, background play, YouTube Music included.',
-    499.00, 'subscriptions',
+    499.00, 'streaming',
     'https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=400',
     '["youtube","premium","subscription","google"]',
     '[{"label":"Google Account Email","name":"email","type":"email","required":true,"placeholder":"your@gmail.com"}]',
@@ -97,7 +97,7 @@ VALUES
   (
     'Steam Wallet Code',
     'Steam wallet code for purchasing games, DLCs, and items on Steam.',
-    999.00, 'vouchers',
+    999.00, 'gift-cards',
     'https://images.unsplash.com/photo-1603481588273-2f908a9a7a1b?w=400',
     '["steam","valve","pc gaming","wallet"]',
     '[{"label":"Delivery Email","name":"email","type":"email","required":true,"placeholder":"your@email.com"}]',
@@ -107,7 +107,7 @@ VALUES
   (
     'Razer Gold',
     'Razer Gold — the gaming currency accepted across 3,500+ games worldwide.',
-    499.00, 'vouchers',
+    499.00, 'gift-cards',
     'https://images.unsplash.com/photo-1542751110-97427bbecf20?w=400',
     '["razer","gold","gaming","voucher"]',
     '[{"label":"Razer ID / Email","name":"razerId","type":"email","required":true,"placeholder":"your@razer.com"}]',
@@ -127,7 +127,7 @@ VALUES
     'Dominate Every Game',
     'Top up Free Fire, PUBG, MLBB and more — instant delivery, best prices in Nepal.',
     'https://images.unsplash.com/photo-1614294149010-950b698f72c0?w=1200',
-    '/products?category=game-topups',
+    '/products?category=gaming',
     true, 0
   ),
   (
