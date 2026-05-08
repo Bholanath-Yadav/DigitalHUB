@@ -145,7 +145,60 @@ function Navbar() {
           </div>
           <ThemeToggle />
 
-          {/* Removed account/cart/orders/account quick actions per request */}
+          {!isSignedIn ? (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden lg:inline-flex"
+                onClick={() => setLocation("/sign-in")}
+              >
+                Sign In
+              </Button>
+              <Button
+                size="sm"
+                className="hidden lg:inline-flex"
+                onClick={() => setLocation("/sign-up")}
+              >
+                Sign Up
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden lg:inline-flex gap-1.5"
+                onClick={() => setAccountOpen(true)}
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Button>
+              {isAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden lg:inline-flex gap-1.5"
+                  onClick={() => setLocation("/admin")}
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden lg:inline-flex gap-1.5"
+                onClick={async () => {
+                  await signOut();
+                  setLocation("/");
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </>
+          )}
 
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
@@ -181,7 +234,43 @@ function Navbar() {
                     </Link>
                   ))}
                 </nav>
-                {/* account / profile actions removed from mobile menu per request */}
+                <div className="border-t border-border p-4 space-y-2">
+                  {!isSignedIn ? (
+                    <>
+                      <Button className="w-full" onClick={() => { setMobileOpen(false); setLocation("/sign-in"); }}>
+                        Sign In
+                      </Button>
+                      <Button variant="outline" className="w-full" onClick={() => { setMobileOpen(false); setLocation("/sign-up"); }}>
+                        Sign Up
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outline" className="w-full gap-2" onClick={() => { setMobileOpen(false); setAccountOpen(true); }}>
+                        <User className="h-4 w-4" />
+                        Account
+                      </Button>
+                      {isAdmin && (
+                        <Button variant="outline" className="w-full gap-2" onClick={() => { setMobileOpen(false); setLocation("/admin"); }}>
+                          <Shield className="h-4 w-4" />
+                          Admin Dashboard
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        className="w-full gap-2"
+                        onClick={async () => {
+                          setMobileOpen(false);
+                          await signOut();
+                          setLocation("/");
+                        }}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             </SheetContent>
           </Sheet>
