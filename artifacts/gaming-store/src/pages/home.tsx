@@ -8,6 +8,7 @@ import { fmtNPR } from "@/lib/currency";
 import { BannerCarousel } from "@/components/banner-carousel";
 import { useSEO } from "@/hooks/use-seo";
 import { FAQJsonLd, OrganizationJsonLd, WebSiteJsonLd } from "@/components/json-ld";
+import SafeImage from "@/components/safe-image";
 import {
   PageWrapper,
   StaggerGrid,
@@ -335,7 +336,7 @@ export default function Home() {
               <Link href={`/products?category=${cat.value}`}>
                 <div className="group relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card to-muted hover:border-primary/60 transition-all duration-300 hover:-translate-y-2 hover:shadow-lg cursor-pointer p-5 h-full flex flex-col items-center justify-center text-center">
                   <div className="w-20 h-20 rounded-xl overflow-hidden mb-3 shadow-md group-hover:scale-110 transition-transform duration-300">
-                    <img src={cat.image} alt={cat.label} className="w-full h-full object-cover" />
+                    <SafeImage src={cat.image} alt={cat.label} className="w-full h-full object-cover" />
                   </div>
                   <p className="font-bold text-sm leading-tight">{cat.label}</p>
                   <p className="text-xs text-muted-foreground mt-2">

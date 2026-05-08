@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import SafeImage from "@/components/safe-image";
 
 type BannerItem = {
   title: string;
@@ -131,8 +132,9 @@ export function BannerCarousel({ banners }: { banners: BannerItem[] }) {
 
           {/* Full bleed image (desaturated/dimmed) */}
           {banner.imageUrl && (
-            <img
-              src={banner.imageUrl} alt=""
+            <SafeImage
+              src={banner.imageUrl}
+              alt=""
               loading="eager"
               decoding="async"
               className="absolute inset-0 w-full h-full object-cover"
@@ -141,13 +143,14 @@ export function BannerCarousel({ banners }: { banners: BannerItem[] }) {
           )}
 
           {/* Sharp right-side image panel */}
-          {banner.imageUrl && (
+              {banner.imageUrl && (
             <div
               className="absolute right-0 top-0 bottom-0 w-[52%] hidden sm:block"
               style={{ maskImage: "linear-gradient(to left, black 50%, transparent 100%)" }}
             >
-              <img
-                src={banner.imageUrl} alt=""
+              <SafeImage
+                src={banner.imageUrl}
+                alt=""
                 loading="lazy"
                 decoding="async"
                 className="w-full h-full object-cover object-center"
@@ -266,7 +269,7 @@ export function BannerCarousel({ banners }: { banners: BannerItem[] }) {
                       className="relative w-full h-full rounded-2xl overflow-hidden"
                       style={{ border: `1.5px solid ${g.accent}44`, boxShadow: `0 0 0 1px ${g.accent}18 inset` }}
                     >
-                      <img src={banner.imageUrl} alt={banner.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                      <SafeImage src={banner.imageUrl} alt={banner.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                       {/* Tint overlay */}
                       <div className="absolute inset-0"
                         style={{ background: `linear-gradient(135deg, transparent 55%, ${g.accent}18 100%)` }} />

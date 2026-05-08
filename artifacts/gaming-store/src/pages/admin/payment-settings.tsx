@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Wallet, Upload, X, ZoomIn, Loader2, Save, RefreshCcw, Search } from "lucide-react";
+import SafeImage from "@/components/safe-image";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 
@@ -105,7 +106,7 @@ function PaymentCard({ setting }: { setting: any }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {logo
-                ? <img src={logo} alt={form.label} className="h-10 object-contain max-w-[90px]" />
+                ? <SafeImage src={logo} alt={form.label} className="h-10 object-contain max-w-[90px]" />
                 : <div className="h-10 w-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
                     style={{ background: color }}>{form.label[0]}</div>
               }
@@ -169,11 +170,11 @@ function PaymentCard({ setting }: { setting: any }) {
             {form.qrImageUrl ? (
               <div className="flex items-start gap-4">
                 {/* QR preview */}
-                <div className="relative group w-36 h-36 rounded-xl border-2 overflow-hidden shrink-0 cursor-zoom-in bg-white"
+                  <div className="relative group w-36 h-36 rounded-xl border-2 overflow-hidden shrink-0 cursor-zoom-in bg-white"
                   style={{ borderColor: color }}
                   onClick={() => setLightbox(true)}
                 >
-                  <img src={form.qrImageUrl} alt="QR" className="w-full h-full object-contain p-1" />
+                  <SafeImage src={form.qrImageUrl} alt="QR" className="w-full h-full object-contain p-1" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <ZoomIn className="h-6 w-6 text-white" />
                   </div>
@@ -222,7 +223,7 @@ function PaymentCard({ setting }: { setting: any }) {
           <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
             <X className="h-5 w-5" />
           </button>
-          <img src={form.qrImageUrl} alt="QR" className="max-w-sm max-h-[80vh] object-contain rounded-xl bg-white p-4" />
+          <SafeImage src={form.qrImageUrl} alt="QR" className="max-w-sm max-h-[80vh] object-contain rounded-xl bg-white p-4" />
         </div>
       )}
     </>

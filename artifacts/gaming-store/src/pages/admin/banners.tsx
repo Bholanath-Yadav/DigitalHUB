@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Edit, Trash2, Image, Upload, Loader2, X, ExternalLink, RefreshCcw, Search } from "lucide-react";
+import SafeImage from "@/components/safe-image";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { uploadToStorage } from "@/lib/upload";
@@ -153,7 +154,7 @@ export default function AdminBanners() {
               <TableRow key={b.id}>
                 <TableCell>
                   {b.imageUrl
-                    ? <img src={b.imageUrl} className="h-12 w-20 object-cover rounded-lg border" alt="" />
+                    ? <SafeImage src={b.imageUrl} className="h-12 w-20 object-cover rounded-lg border" alt="" />
                     : <div className="h-12 w-20 rounded-lg bg-muted flex items-center justify-center text-muted-foreground/40"><Image className="h-5 w-5" /></div>}
                 </TableCell>
                 <TableCell className="font-medium max-w-[160px] truncate">{b.title}</TableCell>
@@ -197,9 +198,9 @@ export default function AdminBanners() {
               <Label>Banner Image</Label>
               <input ref={fileRef} type="file" accept="image/*" className="hidden"
                 onChange={e => { const file = e.target.files?.[0]; if (file) handleImageUpload(file); }} />
-              {form.imageUrl ? (
+                  {form.imageUrl ? (
                 <div className="relative rounded-lg overflow-hidden border border-border group">
-                  <img src={form.imageUrl} alt="preview" className="w-full h-28 object-cover" />
+                  <SafeImage src={form.imageUrl} alt="preview" className="w-full h-28 object-cover" />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <Button size="sm" variant="outline" className="gap-1.5 h-7 text-xs bg-white/10 border-white/20 text-white hover:bg-white/20"
                       onClick={() => fileRef.current?.click()} disabled={uploading}>

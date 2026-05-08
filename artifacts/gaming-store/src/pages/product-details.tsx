@@ -11,6 +11,7 @@ import { useAuth } from "@/context/auth-context";
 import { Link } from "wouter";
 import { fmtNPR } from "@/lib/currency";
 import { motion, AnimatePresence } from "framer-motion";
+import SafeImage from "@/components/safe-image";
 import { PageWrapper } from "@/components/motion";
 import { useSEO } from "@/hooks/use-seo";
 import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/json-ld";
@@ -301,7 +302,7 @@ export default function ProductDetails() {
             <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
                 {product.imageUrl ? (
-                  <img src={product.imageUrl} alt={product.name} className="object-cover w-full h-full" />
+                  <SafeImage src={product.imageUrl} alt={product.name} className="object-cover w-full h-full" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <Gamepad2 className="h-16 w-16 text-muted-foreground/20" />

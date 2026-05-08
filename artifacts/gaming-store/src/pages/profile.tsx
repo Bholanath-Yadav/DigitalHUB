@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingBag, Settings, LogOut, Clock, CheckCircle, XCircle, Camera, Loader2 } from "lucide-react";
+import SafeImage from "@/components/safe-image";
 import { queryClient } from "@/lib/queryClient";
 import { fmtNPR } from "@/lib/currency";
 
@@ -116,7 +117,7 @@ export default function Profile() {
             <div className="relative mb-4 group">
               <div className="w-24 h-24 rounded-full bg-muted border-4 border-background shadow-md overflow-hidden">
                 {displayAvatar
-                  ? <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                  ? <SafeImage src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
                   : <div className="w-full h-full flex items-center justify-center text-3xl font-black text-muted-foreground">
                       {(profile?.name || user?.email || "?")[0]?.toUpperCase()}
                     </div>
@@ -196,7 +197,7 @@ export default function Profile() {
                       <div className="p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                         <div className="flex items-center gap-3">
                           {order.product.imageUrl && (
-                            <img src={order.product.imageUrl} className="h-14 w-14 rounded-lg object-cover border border-border shrink-0" alt="" />
+                            <SafeImage src={order.product.imageUrl} className="h-14 w-14 rounded-lg object-cover border border-border shrink-0" alt="" />
                           )}
                           <div>
                             <h4 className="font-semibold text-sm">{order.product.name}</h4>

@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Edit, Trash2, Package, Layers, Tag, X, Info, Upload, Loader2, Search, RefreshCcw } from "lucide-react";
+import SafeImage from "@/components/safe-image";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { fmtNPR } from "@/lib/currency";
@@ -492,7 +493,7 @@ export default function AdminProducts() {
                 onChange={e => { const file = e.target.files?.[0]; if (file) handleImageUpload(file); }} />
               {form.imageUrl ? (
                 <div className="flex items-center gap-3">
-                  <img src={form.imageUrl} alt="preview" className="h-16 w-16 rounded-lg object-cover border border-border" />
+                  <SafeImage src={form.imageUrl} alt="preview" className="h-16 w-16 rounded-lg object-cover border border-border" />
                   <div className="flex flex-col gap-1.5">
                     <Button type="button" size="sm" variant="outline" className="gap-1.5 h-7 text-xs"
                       onClick={() => imageFileRef.current?.click()} disabled={uploading}>

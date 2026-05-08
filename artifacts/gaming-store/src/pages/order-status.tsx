@@ -3,6 +3,7 @@ import { useRoute, Link, useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, CheckCircle, XCircle, AlertCircle, ExternalLink, ChevronRight } from "lucide-react";
+import SafeImage from "@/components/safe-image";
 import { Button } from "@/components/ui/button";
 import { fmtNPR } from "@/lib/currency";
 
@@ -67,7 +68,7 @@ export default function OrderStatus() {
             <CardContent className="space-y-6">
               <div className="flex gap-4">
                 {order.product.imageUrl ? (
-                  <img src={order.product.imageUrl} className="h-20 w-20 rounded-md object-cover border border-border" alt="" />
+                  <SafeImage src={order.product.imageUrl} className="h-20 w-20 rounded-md object-cover border border-border" alt="" />
                 ) : (
                   <div className="h-20 w-20 rounded-md bg-muted border border-border"></div>
                 )}

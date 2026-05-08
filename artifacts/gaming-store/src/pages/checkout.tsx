@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, ImagePlus, Upload, X, ZoomIn, Loader2 } from "lucide-react";
 import { fmtNPR } from "@/lib/currency";
 import { uploadToStorage } from "@/lib/upload";
+import SafeImage from "@/components/safe-image";
 
 const METHOD_LOGOS: Record<string, string> = {
   esewa:      "/esewa-logo.png",
@@ -156,7 +157,7 @@ export default function Checkout() {
             <CardContent className="space-y-4">
               <div className="flex gap-3">
                 {order.product.imageUrl && (
-                  <img src={order.product.imageUrl} className="h-14 w-14 rounded-lg object-cover border border-border shrink-0" alt="" />
+                  <SafeImage src={order.product.imageUrl} className="h-14 w-14 rounded-lg object-cover border border-border shrink-0" alt="" />
                 )}
                 <div>
                   <div className="font-semibold text-sm">{order.product.name}</div>
@@ -229,7 +230,7 @@ export default function Checkout() {
                         style={isActive ? { borderColor: color, background: `${color}14` } : {}}
                       >
                         {logo
-                          ? <img src={logo} alt={m.label} className="h-8 w-full object-contain" draggable={false} />
+                          ? <SafeImage src={logo} alt={m.label} className="h-8 w-full object-contain" draggable={false} />
                           : <div className="h-8 w-16 rounded flex items-center justify-center text-white text-xs font-bold"
                               style={{ background: color }}>{m.label}</div>
                         }
@@ -252,7 +253,7 @@ export default function Checkout() {
                   <div className="w-44 h-44 bg-white p-2 rounded-xl border-4 shadow-sm flex items-center justify-center"
                     style={{ borderColor: accentColor }}>
                     {activeMethod.qrImageUrl ? (
-                      <img
+                      <SafeImage
                         src={activeMethod.qrImageUrl}
                         alt="Payment QR"
                         className="w-full h-full object-contain"
@@ -374,7 +375,7 @@ export default function Checkout() {
           <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20">
             <X className="h-5 w-5" />
           </button>
-          <img src={previewUrl} alt="Screenshot" className="max-w-full max-h-[90vh] object-contain rounded-lg" />
+          <SafeImage src={previewUrl} alt="Screenshot" className="max-w-full max-h-[90vh] object-contain rounded-lg" />
         </div>
       )}
     </div>

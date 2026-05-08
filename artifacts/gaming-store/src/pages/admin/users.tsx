@@ -18,6 +18,7 @@ import {
   Users, Search, Shield, ShieldOff, Trash2,
   Crown, User as UserIcon, Briefcase, Ban, CheckCircle, RefreshCcw, Plus,
 } from "lucide-react";
+import SafeImage from "@/components/safe-image";
 
 const ROLE_CONFIG = {
   admin: { label: "Admin",  icon: Crown,    cls: "bg-purple-500/10 text-purple-500 border-purple-500/20" },
@@ -185,7 +186,7 @@ export default function AdminUsers() {
                       <div className={`w-10 h-10 rounded-full overflow-hidden border-2 flex items-center justify-center text-sm font-bold
                         ${user.isBanned ? "border-destructive/40 opacity-60" : "border-border"}`}>
                         {user.avatarUrl
-                          ? <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                          ? <SafeImage src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
                           : <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20 text-foreground">{initials}</div>
                         }
                       </div>

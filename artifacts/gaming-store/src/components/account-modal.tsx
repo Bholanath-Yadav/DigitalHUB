@@ -21,6 +21,7 @@ import {
   Clock, CheckCircle, XCircle, Sun, Moon, Bell, Tag, Package,
   KeyRound, Smartphone, ChevronRight, Upload, Trash2,
 } from "lucide-react";
+import SafeImage from "@/components/safe-image";
 
 type Section = "profile" | "orders" | "preferences" | "security";
 
@@ -275,7 +276,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                         <div className="relative">
                           <div className="w-20 h-20 rounded-2xl bg-muted border-4 border-background shadow-lg overflow-hidden">
                             {displayAvatar
-                              ? <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                              ? <SafeImage src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
                               : <div className="w-full h-full flex items-center justify-center text-2xl font-black text-muted-foreground bg-gradient-to-br from-primary/20 to-secondary/20">{initials}</div>
                             }
                             {avatarLoading && (
@@ -367,7 +368,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
                           </div>
                           <div className="flex items-center gap-3 px-4 py-3">
                             {order.product.imageUrl && (
-                              <img src={order.product.imageUrl} className="h-12 w-12 rounded-lg object-cover border border-border shrink-0" alt="" />
+                              <SafeImage src={order.product.imageUrl} className="h-12 w-12 rounded-lg object-cover border border-border shrink-0" alt="" />
                             )}
                             <div className="flex-1 min-w-0">
                               <p className="font-semibold text-sm truncate">{order.product.name}</p>
