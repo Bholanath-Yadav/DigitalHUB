@@ -912,13 +912,34 @@ export function useGetMyProfile(options?: { query?: UseQueryOptions<UserProfile>
       const user = authData.user;
       if (!user) throw new Error("Not signed in");
 
-      const { data, error } = await supabase
+      const { data: existing, error } = await supabase
         .from("users")
         .select("*")
         .eq("supabase_id", user.id)
         .maybeSingle();
       if (error) throw error;
-      if (!data) throw new Error("Profile not found");
+      let data = existing;
+
+      if (!data) {
+        const fallbackName = user.user_metadata?.name ?? user.email?.split("@")[0] ?? null;
+        const fallbackAvatar = user.user_metadata?.avatar_url ?? null;
+        const { data: created, error: createError } = await supabase
+          .from("users")
+          .upsert(
+            {
+              supabase_id: user.id,
+              email: user.email ?? "",
+              name: fallbackName,
+              avatar_url: fallbackAvatar,
+              is_banned: false,
+            },
+            { onConflict: "supabase_id" }
+          )
+          .select("*")
+          .single();
+        if (createError) throw createError;
+        data = created;
+      }
 
       return {
         id: data.id,
@@ -957,18 +978,41 @@ export function useUpdateMyProfile(options?: UseMutationOptions<UserProfile, Err
         .maybeSingle();
 
       if (error) throw error;
-      if (!updated) throw new Error("Profile not found");
+
+      let resolved = updated;
+      if (!resolved) {
+        const fallbackName = data.name ?? user.user_metadata?.name ?? user.email?.split("@")[0] ?? null;
+        const fallbackAvatar = data.avatarUrl ?? user.user_metadata?.avatar_url ?? null;
+        const { data: upserted, error: upsertError } = await supabase
+          .from("users")
+          .upsert(
+            {
+              supabase_id: user.id,
+              email: user.email ?? "",
+              name: fallbackName,
+              phone: data.phone ?? null,
+              ...(data.avatarUrl !== undefined ? { avatar_url: data.avatarUrl } : { avatar_url: fallbackAvatar }),
+              is_banned: false,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "supabase_id" }
+          )
+          .select("*")
+          .single();
+        if (upsertError) throw upsertError;
+        resolved = upserted;
+      }
 
       return {
-        id: updated.id,
-        supabaseId: updated.supabase_id,
-        email: updated.email,
-        name: updated.name ?? null,
-        phone: updated.phone ?? null,
-        avatarUrl: updated.avatar_url ?? null,
-        role: updated.role,
-        isBanned: updated.is_banned ?? false,
-        createdAt: updated.created_at ?? updated.createdAt,
+        id: resolved.id,
+        supabaseId: resolved.supabase_id,
+        email: resolved.email,
+        name: resolved.name ?? null,
+        phone: resolved.phone ?? null,
+        avatarUrl: resolved.avatar_url ?? null,
+        role: resolved.role,
+        isBanned: resolved.is_banned ?? false,
+        createdAt: resolved.created_at ?? resolved.createdAt,
       };
     },
     ...options,

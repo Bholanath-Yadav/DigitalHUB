@@ -14,6 +14,7 @@ Run these files in order in the **Supabase SQL Editor** to set up a fresh databa
 | `006_payment_method_enum.sql` | Defines payment method types (khalti, esewa, etc.) |
 | `007_reviews.sql` | Creates product reviews table and RLS policies |
 | `008_migrate_categories.sql` | Migrates existing products from old categories (game-topups, subscriptions, vouchers) to new ones (gaming, streaming, gift-cards, digital-tools, social-boost, vpn-privacy) |
+| `009_fix_action_policies.sql` | Repairs RLS/storage policies so admin actions and profile/avatar updates work after DB resets |
 
 ---
 
@@ -63,6 +64,10 @@ Add these to your Replit Secrets (or `.env` file):
 | `VITE_SUPABASE_ANON_KEY` | Project Settings → API → `anon` / `public` key |
 
 > **Important:** Use the **Transaction pooler** connection string (port 6543), not the direct connection (port 5432). Direct connections are often blocked in hosted environments.
+
+### 7. Fix action/policy issues (if admin updates fail)
+- If creating products/coupons, approving payments, or updating profile/avatar fails, run `009_fix_action_policies.sql`
+- This script re-creates missing table/storage policies used by the browser app and admin dashboard
 
 ---
 
