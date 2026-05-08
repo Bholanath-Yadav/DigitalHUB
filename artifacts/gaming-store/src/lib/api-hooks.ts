@@ -41,13 +41,21 @@ function qs(params: Record<string, any>): string {
 export { setAuthTokenGetter, ListProductsCategory } from "./api-client";
 export type { Product, Order, Banner, Coupon, Payment, PaymentSetting, UserProfile, ChatMessage, ChatSession, Review, CouponValidationResult, DashboardStats, OrderStats, ProductStats, UpdateProfileBody };
 
+function normalizeProductCategory(category: string | null | undefined): string {
+  if (!category) return "";
+  if (category === "game-topups") return "gaming";
+  if (category === "subscriptions") return "streaming";
+  if (category === "vouchers") return "gift-cards";
+  return category;
+}
+
 function mapProduct(row: any): Product {
   return {
     id: row.id,
     name: row.name,
     description: row.description,
     price: Number(row.price),
-    category: row.category,
+    category: normalizeProductCategory(row.category),
     imageUrl: row.image_url ?? row.imageUrl ?? null,
     tags: Array.isArray(row.tags) ? row.tags : [],
     dynamicFields: Array.isArray(row.dynamic_fields ?? row.dynamicFields)
@@ -129,7 +137,13 @@ function mapOrderRow(row: any, productRow: any, profileRow?: any): Order {
 
 async function fetchProducts(params: ListProductsParams = {}): Promise<Product[]> {
   let query = supabase.from("products").select("*");
-  if (params.category) query = query.eq("category", params.category);
+  if (params.category) {
+    const category = String(params.category);
+    if (category === "gaming") query = query.in("category", ["gaming", "game-topups"]);
+    else if (category === "streaming") query = query.in("category", ["streaming", "subscriptions"]);
+    else if (category === "gift-cards") query = query.in("category", ["gift-cards", "vouchers"]);
+    else query = query.eq("category", category);
+  }
   if (params.featured === true) query = query.eq("featured", true);
   if (params.search) query = query.ilike("name", `%${params.search}%`);
 
@@ -178,7 +192,8 @@ export function useGetProductStats(options?: { query?: UseQueryOptions<ProductSt
       let outOfStock = 0;
 
       for (const product of data ?? []) {
-        byCategory[product.category] = (byCategory[product.category] ?? 0) + 1;
+        const category = normalizeProductCategory(product.category);
+        byCategory[category] = (byCategory[category] ?? 0) + 1;
         if (product.in_stock) inStock += 1;
         else outOfStock += 1;
       }

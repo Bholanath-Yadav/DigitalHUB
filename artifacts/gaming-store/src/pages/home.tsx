@@ -117,6 +117,16 @@ const TRUST_BADGES = [
   { icon: <Clock className="h-5 w-5" />,       title: "24/7 Support",      desc: "Live chat always available" },
 ];
 
+const PRODUCT_IMAGE_FALLBACK = "/opengraph.jpg";
+
+function normalizeCategory(category?: string | null): string {
+  if (!category) return "";
+  if (category === "game-topups") return "gaming";
+  if (category === "subscriptions") return "streaming";
+  if (category === "vouchers") return "gift-cards";
+  return category;
+}
+
 function getPriceLabel(product: any): { label: string; prefix?: string } | null {
   const hasVars = Array.isArray(product.variants) && product.variants.length > 0;
   if (hasVars) {
@@ -145,6 +155,11 @@ function GameCard({ product, index }: { product: any; index: number }) {
                 alt={product.name}
                 loading={loadingStrategy}
                 decoding="async"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  img.onerror = null;
+                  img.src = PRODUCT_IMAGE_FALLBACK;
+                }}
                 className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-[1.08]"
               />
             ) : (
@@ -324,7 +339,7 @@ export default function Home() {
                   </div>
                   <p className="font-bold text-sm leading-tight">{cat.label}</p>
                   <p className="text-xs text-muted-foreground mt-2">
-                    {allProducts?.filter(p => p.category === cat.value).length ?? "0"} items
+                    {allProducts?.filter(p => normalizeCategory(p.category) === cat.value).length ?? "0"} items
                   </p>
                 </div>
               </Link>

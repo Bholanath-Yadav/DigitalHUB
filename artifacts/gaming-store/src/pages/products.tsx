@@ -20,6 +20,22 @@ const CATEGORIES = [
   { value: "vpn-privacy",   label: "VPN & Privacy", icon: <Shield className="h-3.5 w-3.5" /> },
 ];
 
+const PRODUCT_IMAGE_FALLBACK = "/opengraph.jpg";
+
+function normalizeCategory(category?: string | null): string {
+  if (!category) return "";
+  if (category === "game-topups") return "gaming";
+  if (category === "subscriptions") return "streaming";
+  if (category === "vouchers") return "gift-cards";
+  return category;
+}
+
+function formatCategoryLabel(category?: string | null): string {
+  const normalized = normalizeCategory(category);
+  if (!normalized) return "";
+  return normalized.replace(/-/g, " ");
+}
+
 function getPriceLabel(product: any): { label: string; prefix?: string } | null {
   const hasVars = Array.isArray(product.variants) && product.variants.length > 0;
   if (hasVars) {
@@ -44,6 +60,11 @@ function GameCard({ product, index = 99 }: { product: any; index?: number }) {
             {product.imageUrl ? (
               <img src={product.imageUrl} alt={product.name}
                 loading={loadingStrategy} decoding="async"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  img.onerror = null;
+                  img.src = PRODUCT_IMAGE_FALLBACK;
+                }}
                 className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-[1.08]" />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-card">
@@ -68,7 +89,7 @@ function GameCard({ product, index = 99 }: { product: any; index?: number }) {
           </div>
           <div className="mt-2 px-0.5">
             <p className="font-bold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-150">{product.name}</p>
-            <p className="text-xs text-muted-foreground capitalize mt-0.5">{product.category?.replace(/-/g, " ")}</p>
+            <p className="text-xs text-muted-foreground capitalize mt-0.5">{formatCategoryLabel(product.category)}</p>
             {priceInfo && (
               <div className="mt-1.5 flex items-baseline gap-0.5">
                 {priceInfo.prefix && <span className="text-[11px] text-muted-foreground">{priceInfo.prefix}</span>}
@@ -93,6 +114,11 @@ function ListCard({ product }: { product: any }) {
             {product.imageUrl ? (
               <img src={product.imageUrl} alt={product.name}
                 loading="lazy" decoding="async"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  img.onerror = null;
+                  img.src = PRODUCT_IMAGE_FALLBACK;
+                }}
                 className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-[1.08]" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
@@ -103,7 +129,7 @@ function ListCard({ product }: { product: any }) {
           </div>
           <div className="flex-1 min-w-0 py-0.5">
             <p className="font-bold text-sm line-clamp-2 group-hover:text-primary transition-colors duration-150 leading-snug">{product.name}</p>
-            <p className="text-xs text-muted-foreground capitalize mt-0.5">{product.category?.replace(/-/g, " ")}</p>
+            <p className="text-xs text-muted-foreground capitalize mt-0.5">{formatCategoryLabel(product.category)}</p>
             {priceInfo && (
               <div className="mt-2 flex items-baseline gap-0.5">
                 {priceInfo.prefix && <span className="text-[11px] text-muted-foreground">{priceInfo.prefix}</span>}
