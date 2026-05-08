@@ -114,6 +114,186 @@ VALUES
     '[{"name":"$5 Gold","price":699},{"name":"$10 Gold","price":1349},{"name":"$25 Gold","price":3299}]',
     true, false
   )
+  (
+    'Google Play Gift Card',
+    'Download apps, games, movies, and books on Google Play. Instant code delivery.',
+    500.00, 'gift-cards',
+    'https://images.unsplash.com/photo-1512941691920-25bde4e32ae1?w=400',
+    '["google play","android","apps","games"]',
+    '[{"label":"Email Address","name":"email","type":"email","required":true,"placeholder":"your@email.com"}]',
+    '[{"name":"NPR 500","price":500},{"name":"NPR 1,000","price":1000},{"name":"NPR 2,500","price":2500},{"name":"NPR 5,000","price":5000}]',
+    true, false
+  ),
+  (
+    'PSN Store Credit',
+    'PlayStation Network store credit for games, DLC, and subscriptions.',
+    2000.00, 'gaming',
+    'https://images.unsplash.com/photo-1556994212-d5682f35c67c?w=400',
+    '["psn","playstation","ps5","ps4"]',
+    '[{"label":"PSN Email","name":"psn_email","type":"email","required":true,"placeholder":"your@psn.com"}]',
+    '[{"name":"$10 USD","price":1349},{"name":"$20 USD","price":2699},{"name":"$50 USD","price":6699}]',
+    true, false
+  ),
+  (
+    'Xbox Game Pass',
+    'Access 100+ games on Xbox and PC. Play new releases day one.',
+    3000.00, 'streaming',
+    'https://images.unsplash.com/photo-1552820728-8ac41f1ce891?w=400',
+    '["xbox","game pass","microsoft","gaming"]',
+    '[{"label":"Microsoft Email","name":"ms_email","type":"email","required":true,"placeholder":"your@outlook.com"}]',
+    '[{"name":"1 Month","price":3000},{"name":"3 Months","price":8500},{"name":"12 Months","price":29999}]',
+    true, false
+  ),
+  (
+    'Amazon Prime Video',
+    'Stream movies, TV shows, and exclusive original series. Ad-free viewing.',
+    999.00, 'streaming',
+    'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=400',
+    '["amazon","prime video","streaming","movies"]',
+    '[{"label":"Amazon Email","name":"amazon_email","type":"email","required":true,"placeholder":"your@amazon.com"}]',
+    '[{"name":"1 Month","price":999},{"name":"3 Months","price":2799},{"name":"Annual","price":9999}]',
+    true, false
+  ),
+  (
+    'Discord Nitro',
+    'Discord Nitro — higher quality streams, custom emojis, priority support.',
+    499.00, 'streaming',
+    'https://images.unsplash.com/photo-1611532736579-6b16e2b50449?w=400',
+    '["discord","nitro","gaming","streaming"]',
+    '[{"label":"Discord Email","name":"discord_email","type":"email","required":true,"placeholder":"your@discord.com"}]',
+    '[{"name":"1 Month","price":499},{"name":"3 Months","price":1399},{"name":"Annual","price":4999}]',
+    true, false
+  ),
+  (
+    'TikTok Creator Fund Support',
+    'Boost your TikTok presence. Get verified, increase followers organically.',
+    999.00, 'social-boost',
+    'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400',
+    '["tiktok","followers","social media","boost"]',
+    '[{"label":"TikTok Username","name":"tiktok_username","type":"text","required":true,"placeholder":"@yourusername"}]',
+    '[{"name":"Starter Plan","price":999},{"name":"Pro Plan","price":2499},{"name":"Elite Plan","price":4999}]',
+    true, false
+  ),
+  (
+    'Instagram Engagement Pack',
+    'Increase followers, likes, and engagement on Instagram naturally.',
+    1499.00, 'social-boost',
+    'https://images.unsplash.com/photo-1611532736579-6b16e2b50449?w=400',
+    '["instagram","followers","likes","social media","boost"]',
+    '[{"label":"Instagram Username","name":"ig_username","type":"text","required":true,"placeholder":"yourusername"}]',
+    '[{"name":"Starter Pack","price":1499},{"name":"Pro Pack","price":2999},{"name":"Elite Pack","price":5499}]',
+    true, false
+  ),
+  (
+    'YouTube Channel Growth',
+    'Boost your YouTube channel with subscribers, views, and engagement.',
+    1999.00, 'social-boost',
+    'https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=400',
+    '["youtube","subscribers","views","channel growth","boost"]',
+    '[{"label":"YouTube Channel URL","name":"yt_url","type":"text","required":true,"placeholder":"https://youtube.com/@yourchannel"}]',
+    '[{"name":"Growth Pack 100","price":1999},{"name":"Growth Pack 500","price":4999},{"name":"Growth Pack 1000","price":8999}]',
+    true, false
+  ),
+  (
+    'Microsoft Windows License',
+    'Genuine Windows 10/11 Professional license. Lifetime activation.',
+    2999.00, 'digital-tools',
+    'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400',
+    '["windows","license","microsoft","pro"]',
+    '[{"label":"Email Address","name":"email","type":"email","required":true,"placeholder":"your@email.com"}]',
+    '[{"name":"Windows 11 Pro","price":2999},{"name":"Windows 11 Home","price":1999}]',
+    true, false
+  ),
+  (
+    'Microsoft Office 365',
+    'One year subscription to Office 365 — Word, Excel, PowerPoint, OneDrive.',
+    1799.00, 'digital-tools',
+    'https://images.unsplash.com/photo-1516321318423-f06f70504cff?w=400',
+    '["office","microsoft","productivity","subscription"]',
+    '[{"label":"Microsoft Email","name":"ms_email","type":"email","required":true,"placeholder":"your@outlook.com"}]',
+    '[{"name":"1 Year Office 365","price":1799}]',
+    true, false
+  ),
+  (
+    'Norton Antivirus 360',
+    'Norton Antivirus 360 — real-time protection for your PC. 1 year license.',
+    1299.00, 'digital-tools',
+    'https://images.unsplash.com/photo-1516321318423-f06f70504cff?w=400',
+    '["antivirus","norton","security","protection"]',
+    '[{"label":"Email Address","name":"email","type":"email","required":true,"placeholder":"your@email.com"}]',
+    '[{"name":"1 Year License","price":1299},{"name":"2 Year License","price":2299}]',
+    true, false
+  ),
+  (
+    'ExpressVPN Premium',
+    'ExpressVPN — secure, anonymous browsing. 30+ countries available.',
+    2499.00, 'vpn-privacy',
+    'https://images.unsplash.com/photo-1549887534-7da96e5b3446?w=400',
+    '["vpn","expressvpn","privacy","security"]',
+    '[{"label":"Email Address","name":"email","type":"email","required":true,"placeholder":"your@email.com"}]',
+    '[{"name":"1 Month","price":499},{"name":"6 Months","price":2499},{"name":"12 Months","price":4499}]',
+    true, false
+  ),
+  (
+    'NordVPN Subscription',
+    'NordVPN — fast VPN with military-grade encryption. 60+ countries.',
+    1999.00, 'vpn-privacy',
+    'https://images.unsplash.com/photo-1549887534-7da96e5b3446?w=400',
+    '["vpn","nordvpn","privacy","security","encrypted"]',
+    '[{"label":"Email Address","name":"email","type":"email","required":true,"placeholder":"your@email.com"}]',
+    '[{"name":"1 Month","price":399},{"name":"1 Year","price":1999},{"name":"2 Years","price":3299}]',
+    true, false
+  ),
+  (
+    'Surfshark VPN',
+    'Surfshark VPN — unlimited simultaneous connections. Unblock anything.',
+    1499.00, 'vpn-privacy',
+    'https://images.unsplash.com/photo-1549887534-7da96e5b3446?w=400',
+    '["vpn","surfshark","privacy","security","streaming"]',
+    '[{"label":"Email Address","name":"email","type":"email","required":true,"placeholder":"your@email.com"}]',
+    '[{"name":"1 Month","price":299},{"name":"1 Year","price":1499},{"name":"2 Years","price":2299}]',
+    true, false
+  ),
+  (
+    'ProtonVPN Plus',
+    'ProtonVPN Plus — Swiss privacy, no-logs VPN. Secure core servers.',
+    1799.00, 'vpn-privacy',
+    'https://images.unsplash.com/photo-1549887534-7da96e5b3446?w=400',
+    '["vpn","protonvpn","privacy","security","swiss"]',
+    '[{"label":"Email Address","name":"email","type":"email","required":true,"placeholder":"your@email.com"}]',
+    '[{"name":"1 Month","price":499},{"name":"1 Year","price":1799},{"name":"2 Years","price":2999}]',
+    true, false
+  ),
+  (
+    'Adobe Creative Cloud',
+    'Adobe Creative Cloud — Photoshop, Illustrator, Premiere Pro & more. 1 year.',
+    4999.00, 'digital-tools',
+    'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400',
+    '["adobe","creative cloud","photoshop","design"]',
+    '[{"label":"Adobe Email","name":"adobe_email","type":"email","required":true,"placeholder":"your@adobe.com"}]',
+    '[{"name":"Creative Cloud 1 Year","price":4999}]',
+    true, false
+  ),
+  (
+    'Valorant Points Bundle',
+    'Valorant Points for your Riot account. Buy agents, skins, and battle pass.',
+    799.00, 'gaming',
+    'https://images.unsplash.com/photo-1614613534308-eb5ec670a36a?w=400',
+    '["valorant","riot","vp","points"]',
+    '[{"label":"Riot ID","name":"riot_id","type":"text","required":true,"placeholder":"YourName#123"}]',
+    '[{"name":"475 VP","price":399},{"name":"1000 VP","price":799},{"name":"2000 VP","price":1549}]',
+    true, false
+  ),
+  (
+    'Dota 2 Battle Pass',
+    'Dota 2 Battle Pass — unlock cosmetics, battles, and exclusive rewards.',
+    1299.00, 'gaming',
+    'https://images.unsplash.com/photo-1538481143235-a9d08266d8b8?w=400',
+    '["dota 2","steam","battle pass","valve"]',
+    '[{"label":"Steam Account Email","name":"steam_email","type":"email","required":true,"placeholder":"your@steam.com"}]',
+    '[{"name":"Battle Pass Level 1","price":799},{"name":"Battle Pass Level 10","price":1299}]',
+    true, false
+  )
 ON CONFLICT DO NOTHING;
 
 

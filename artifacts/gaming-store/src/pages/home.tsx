@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useListProducts, useListBanners } from "@/lib/api-hooks";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Gift, Tv, Ticket, ArrowRight, Zap, ShieldCheck, Clock, ChevronDown, Wrench, Sparkles, Shield } from "lucide-react";
+import { Gamepad2, Gift, Tv, Ticket, ArrowRight, Zap, ShieldCheck, Clock, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { fmtNPR } from "@/lib/currency";
 import { BannerCarousel } from "@/components/banner-carousel";
@@ -103,12 +103,12 @@ function HeroTypewriter() {
 }
 
 const CATEGORIES = [
-  { value: "digital-tools",  label: "Digital Tools",  icon: <Wrench className="h-6 w-6" />,    color: "from-slate-500 to-gray-600" },
-  { value: "gaming",         label: "Gaming",         icon: <Gamepad2 className="h-6 w-6" />, color: "from-cyan-500 to-blue-600" },
-  { value: "gift-cards",     label: "Gift Cards",     icon: <Gift className="h-6 w-6" />,     color: "from-purple-500 to-pink-600" },
-  { value: "social-boost",   label: "Social Boost",   icon: <Sparkles className="h-6 w-6" />, color: "from-yellow-500 to-orange-600" },
-  { value: "streaming",      label: "Streaming",      icon: <Tv className="h-6 w-6" />,       color: "from-orange-500 to-red-600" },
-  { value: "vpn-privacy",    label: "VPN & Privacy",  icon: <Shield className="h-6 w-6" />,   color: "from-indigo-500 to-purple-600" },
+  { value: "digital-tools",  label: "Digital Tools",  image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop", color: "from-slate-500 to-gray-600" },
+  { value: "gaming",         label: "Gaming",         image: "https://images.unsplash.com/photo-1535869066000-16633b1f4e27?w=400&h=400&fit=crop", color: "from-cyan-500 to-blue-600" },
+  { value: "gift-cards",     label: "Gift Cards",     image: "https://images.unsplash.com/photo-1609042231696-d4bfaa8e8b6f?w=400&h=400&fit=crop", color: "from-purple-500 to-pink-600" },
+  { value: "social-boost",   label: "Social Boost",   image: "https://images.unsplash.com/photo-1611532736579-1b1b7b2b6c3f?w=400&h=400&fit=crop", color: "from-yellow-500 to-orange-600" },
+  { value: "streaming",      label: "Streaming",      image: "https://images.unsplash.com/photo-1522869635100-ce306e08592b?w=400&h=400&fit=crop", color: "from-orange-500 to-red-600" },
+  { value: "vpn-privacy",    label: "VPN & Privacy",  image: "https://images.unsplash.com/photo-1549887534-7da96e5b3446?w=400&h=400&fit=crop", color: "from-indigo-500 to-purple-600" },
 ];
 
 const TRUST_BADGES = [
@@ -319,8 +319,8 @@ export default function Home() {
             <motion.div key={cat.value} variants={scaleIn} className="h-full">
               <Link href={`/products?category=${cat.value}`}>
                 <div className="group relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card to-muted hover:border-primary/60 transition-all duration-300 hover:-translate-y-2 hover:shadow-lg cursor-pointer p-5 h-full flex flex-col items-center justify-center text-center">
-                  <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${cat.color} flex items-center justify-center text-white mb-3 group-hover:scale-125 transition-transform duration-300 shadow-lg`}>
-                    {cat.icon}
+                  <div className="w-20 h-20 rounded-xl overflow-hidden mb-3 shadow-md group-hover:scale-110 transition-transform duration-300">
+                    <img src={cat.image} alt={cat.label} className="w-full h-full object-cover" />
                   </div>
                   <p className="font-bold text-sm leading-tight">{cat.label}</p>
                   <p className="text-xs text-muted-foreground mt-2">
