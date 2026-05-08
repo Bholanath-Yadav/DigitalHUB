@@ -7,7 +7,7 @@ Run these files in order in the **Supabase SQL Editor** to set up a fresh databa
 | File | What it does |
 |------|-------------|
 | `001_schema.sql` | Creates all enums, tables, indexes, the storage bucket, and all RLS policies |
-| `002_seed.sql` | Inserts demo products, banners, payment methods, and coupon codes |
+| `002_seed.sql` | Clears existing data and inserts demo products, banners, payment methods, and coupon codes |
 | `003_public_read_policies.sql` | Enables browser reads/writes needed by the Vercel frontend |
 | `004_production_seed.sql` | Idempotent production seed data for the live Supabase project |
 | `005_admin_write_policies.sql` | Adds admin-only write permissions for dashboard operations |
@@ -31,7 +31,8 @@ Go to [supabase.com](https://supabase.com) → New project.
 - This enables the public storefront to read products, banners, payment settings, and chat messages
 
 ### 4. Seed production data
-- Paste the contents of `004_production_seed.sql` and click **Run**
+- Paste the contents of `002_seed.sql` to clear and refresh the database with demo data
+- Use `004_production_seed.sql` only for idempotent production upserts, not for wiping data
 
 ### 5. Apply category migration (if upgrading from old category system)
 - If you have an existing database with old product categories (game-topups, subscriptions, vouchers), run `008_migrate_categories.sql` to convert them to the new categories (gaming, streaming, gift-cards, digital-tools, social-boost, vpn-privacy)

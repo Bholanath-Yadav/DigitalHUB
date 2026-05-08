@@ -4,13 +4,25 @@
 --
 -- HOW TO RUN:
 --   Run this AFTER 001_schema.sql in the Supabase SQL Editor.
---   Safe to re-run: uses ON CONFLICT DO NOTHING / DO UPDATE.
+--   Safe to re-run: clears existing table data, then inserts a fresh seed set.
 -- ============================================================
 
 
 -- ============================================================
 -- PRODUCTS
 -- ============================================================
+
+TRUNCATE TABLE
+  reviews,
+  chat_messages,
+  payments,
+  orders,
+  coupons,
+  banners,
+  payment_settings,
+  products,
+  users
+RESTART IDENTITY CASCADE;
 
 INSERT INTO products (name, description, price, category, image_url, tags, dynamic_fields, variants, in_stock, featured)
 VALUES
@@ -113,7 +125,7 @@ VALUES
     '[{"label":"Razer ID / Email","name":"razerId","type":"email","required":true,"placeholder":"your@razer.com"}]',
     '[{"name":"$5 Gold","price":699},{"name":"$10 Gold","price":1349},{"name":"$25 Gold","price":3299}]',
     true, false
-  )
+  ),
   (
     'Google Play Gift Card',
     'Download apps, games, movies, and books on Google Play. Instant code delivery.',
