@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Gift Cards">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f2937"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+    <linearGradient id="box1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" rx="44" fill="url(#bg)"/>
+  <circle cx="74" cy="86" r="44" fill="#f472b6" opacity="0.12"/>
+  <circle cx="332" cy="312" r="72" fill="#fde68a" opacity="0.10"/>
+  <rect x="94" y="140" width="212" height="112" rx="18" fill="url(#box1)"/>
+  <rect x="184" y="140" width="32" height="112" fill="#f8fafc" opacity="0.9"/>
+  <rect x="94" y="184" width="212" height="20" fill="#f8fafc" opacity="0.88"/>
+  <path d="M200 140c-18-22-38-34-54-34-14 0-24 10-24 24 0 20 17 31 49 31h29v-21Zm0 0c18-22 38-34 54-34 14 0 24 10 24 24 0 20-17 31-49 31h-29v-21Z" fill="#f8fafc" opacity="0.98"/>
+  <text x="200" y="332" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#f8fafc">Gift Cards</text>
+</svg>

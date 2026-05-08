@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Digital Tools">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" rx="44" fill="url(#bg)"/>
+  <circle cx="320" cy="74" r="48" fill="#22c55e" opacity="0.12"/>
+  <circle cx="84" cy="318" r="62" fill="#38bdf8" opacity="0.10"/>
+  <rect x="74" y="92" width="252" height="174" rx="18" fill="#111827" stroke="#e2e8f0" stroke-opacity="0.16"/>
+  <rect x="92" y="110" width="216" height="138" rx="10" fill="url(#screen)" opacity="0.95"/>
+  <rect x="114" y="132" width="44" height="44" rx="10" fill="#ffffff" opacity="0.9"/>
+  <rect x="170" y="132" width="44" height="44" rx="10" fill="#ffffff" opacity="0.85"/>
+  <rect x="226" y="132" width="44" height="44" rx="10" fill="#ffffff" opacity="0.75"/>
+  <rect x="114" y="188" width="44" height="44" rx="10" fill="#ffffff" opacity="0.76"/>
+  <rect x="170" y="188" width="44" height="44" rx="10" fill="#ffffff" opacity="0.68"/>
+  <rect x="226" y="188" width="44" height="44" rx="10" fill="#ffffff" opacity="0.6"/>
+  <rect x="152" y="278" width="96" height="18" rx="9" fill="#cbd5e1"/>
+  <rect x="132" y="296" width="136" height="14" rx="7" fill="#94a3b8" opacity="0.75"/>
+  <text x="200" y="364" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#e2e8f0">Digital Tools</text>
+</svg>

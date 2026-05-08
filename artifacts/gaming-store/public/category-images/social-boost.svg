@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Social Boost">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="bubble" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f472b6"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" rx="44" fill="url(#bg)"/>
+  <circle cx="82" cy="76" r="44" fill="#f472b6" opacity="0.14"/>
+  <circle cx="324" cy="96" r="28" fill="#60a5fa" opacity="0.16"/>
+  <circle cx="330" cy="300" r="60" fill="#f59e0b" opacity="0.12"/>
+  <rect x="102" y="148" width="196" height="118" rx="32" fill="url(#bubble)"/>
+  <path d="M180 266 164 300 204 272Z" fill="#f8fafc"/>
+  <circle cx="164" cy="186" r="14" fill="#f8fafc" opacity="0.95"/>
+  <circle cx="196" cy="186" r="14" fill="#f8fafc" opacity="0.95"/>
+  <circle cx="228" cy="186" r="14" fill="#f8fafc" opacity="0.95"/>
+  <path d="M146 216c18-16 34-20 54-20s36 4 54 20" stroke="#f8fafc" stroke-width="14" stroke-linecap="round" fill="none" opacity="0.95"/>
+  <text x="200" y="332" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#f8fafc">Social Boost</text>
+</svg>
