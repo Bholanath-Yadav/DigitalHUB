@@ -21,7 +21,14 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
   CREATE TYPE product_category AS ENUM ('digital-tools', 'gaming', 'gift-cards', 'social-boost', 'streaming', 'vpn-privacy');
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+EXCEPTION WHEN duplicate_object THEN
+  ALTER TYPE product_category ADD VALUE IF NOT EXISTS 'digital-tools';
+  ALTER TYPE product_category ADD VALUE IF NOT EXISTS 'gaming';
+  ALTER TYPE product_category ADD VALUE IF NOT EXISTS 'gift-cards';
+  ALTER TYPE product_category ADD VALUE IF NOT EXISTS 'social-boost';
+  ALTER TYPE product_category ADD VALUE IF NOT EXISTS 'streaming';
+  ALTER TYPE product_category ADD VALUE IF NOT EXISTS 'vpn-privacy';
+END $$;
 
 DO $$ BEGIN
   CREATE TYPE order_status AS ENUM ('pending', 'verified', 'rejected', 'completed');
