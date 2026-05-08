@@ -145,58 +145,7 @@ function Navbar() {
           </div>
           <ThemeToggle />
 
-          {isSignedIn ? (
-            <>
-              <AppDownloadButton />
-              {isAdmin && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setLocation("/admin")}
-                  className="gap-1.5 hidden lg:flex border border-border hover:border-secondary/40 hover:bg-secondary/10 hover:text-secondary"
-                >
-                  <Shield className="h-4 w-4" />
-                  Admin
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setAccountOpen(true)}
-                className="rounded-full w-9 h-9 border border-border hover:border-primary/40 hover:bg-primary/10"
-                title="My Account"
-              >
-                <User className="h-4 w-4" />
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setLocation("/sign-in")}
-                className="rounded-full w-9 h-9 border border-border hover:border-primary/40 hover:bg-primary/10"
-                title="Profile / Sign in"
-              >
-                <User className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setLocation("/sign-in")}
-                className="hidden lg:flex text-foreground/70 hover:text-foreground"
-              >
-                Sign In
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setLocation("/sign-in")}
-                className="hidden lg:flex bg-gradient-to-r from-primary to-secondary text-white border-none hover:opacity-90 shadow-sm"
-              >
-                Sign Up
-              </Button>
-            </>
-          )}
+          {/* Removed account/cart/orders/account quick actions per request */}
 
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
@@ -232,72 +181,7 @@ function Navbar() {
                     </Link>
                   ))}
                 </nav>
-                <div className="p-4 border-t border-border space-y-2">
-                  {isSignedIn ? (
-                    <>
-                      <div className="rounded-xl border border-border bg-muted/40 px-3 py-2 text-left">
-                        <p className="text-xs font-medium text-foreground truncate">{profile?.name || "My Account"}</p>
-                        <p className="text-[11px] text-muted-foreground truncate">{profile?.email || "Signed in"}</p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        className="w-full gap-2"
-                        onClick={() => { setMobileOpen(false); setAccountOpen(true); }}
-                      >
-                        <User className="h-4 w-4" /> My Account
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full gap-2"
-                        onClick={() => {
-                          setMobileOpen(false);
-                          window.location.href = APK_DOWNLOAD_URL;
-                        }}
-                      >
-                        <Download className="h-4 w-4" /> Download App
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full gap-2"
-                        onClick={() => { setLocation("/profile"); setMobileOpen(false); }}
-                      >
-                        <User className="h-4 w-4" /> Profile
-                      </Button>
-                      {isAdmin && (
-                        <Button
-                          variant="outline"
-                          className="w-full gap-2"
-                          onClick={() => { setLocation("/admin"); setMobileOpen(false); }}
-                        >
-                          <Shield className="h-4 w-4" /> Admin Panel
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => { signOut(); setLocation("/"); }}
-                      >
-                        <LogOut className="h-4 w-4" /> Sign Out
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        className="w-full bg-gradient-to-r from-primary to-secondary text-white border-none"
-                        onClick={() => { setLocation("/sign-in"); setMobileOpen(false); }}
-                      >
-                        Sign Up
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => { setLocation("/sign-in"); setMobileOpen(false); }}
-                      >
-                        Sign In
-                      </Button>
-                    </>
-                  )}
-                </div>
+                {/* account / profile actions removed from mobile menu per request */}
               </div>
             </SheetContent>
           </Sheet>
@@ -374,7 +258,7 @@ function Footer() {
           <p className="inline-flex flex-wrap gap-x-2 gap-y-1">Accepts: <span className="font-medium text-foreground/80">eSewa</span> · <span className="font-medium text-foreground/80">Khalti</span> · <span className="font-medium text-foreground/80">IME Pay</span></p>
         </div>
         <p className="mt-4 text-center text-xs text-muted-foreground/60 tracking-wide">
-          Made with ❤️ and ☕ in Nepal
+          Made with ❤️ and ☕ By Prince
         </p>
       </div>
     </footer>
