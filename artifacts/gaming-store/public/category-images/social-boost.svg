@@ -1,23 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Social Boost">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#111827"/>
-      <stop offset="100%" stop-color="#f59e0b"/>
+    <linearGradient id="bgSB" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="100%" stop-color="#92400e"/>
     </linearGradient>
-    <linearGradient id="bubble" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f472b6"/>
-      <stop offset="100%" stop-color="#60a5fa"/>
+    <linearGradient id="meg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#fb923c"/>
     </linearGradient>
   </defs>
-  <rect width="400" height="400" rx="44" fill="url(#bg)"/>
-  <circle cx="82" cy="76" r="44" fill="#f472b6" opacity="0.14"/>
-  <circle cx="324" cy="96" r="28" fill="#60a5fa" opacity="0.16"/>
-  <circle cx="330" cy="300" r="60" fill="#f59e0b" opacity="0.12"/>
-  <rect x="102" y="148" width="196" height="118" rx="32" fill="url(#bubble)"/>
-  <path d="M180 266 164 300 204 272Z" fill="#f8fafc"/>
-  <circle cx="164" cy="186" r="14" fill="#f8fafc" opacity="0.95"/>
-  <circle cx="196" cy="186" r="14" fill="#f8fafc" opacity="0.95"/>
-  <circle cx="228" cy="186" r="14" fill="#f8fafc" opacity="0.95"/>
-  <path d="M146 216c18-16 34-20 54-20s36 4 54 20" stroke="#f8fafc" stroke-width="14" stroke-linecap="round" fill="none" opacity="0.95"/>
-  <text x="200" y="332" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#f8fafc">Social Boost</text>
+
+  <rect width="400" height="400" rx="44" fill="url(#bgSB)"/>
+  <circle cx="84" cy="80" r="44" fill="#facc15" opacity="0.12"/>
+  <circle cx="324" cy="116" r="34" fill="#fb923c" opacity="0.10"/>
+
+  <g transform="translate(72,120)">
+    <rect x="16" y="16" width="256" height="168" rx="18" fill="#fff7ed"/>
+    <!-- megaphone -->
+    <path d="M56 88 L128 64 L200 64 L232 84 L200 104 L128 104 Z" fill="url(#meg)"/>
+    <rect x="44" y="96" width="120" height="16" rx="8" fill="#92400e" opacity="0.9"/>
+    <circle cx="216" cy="84" r="8" fill="#fff"/>
+
+    <!-- audience dots -->
+    <circle cx="80" cy="140" r="8" fill="#111827"/>
+    <circle cx="110" cy="150" r="6" fill="#111827"/>
+    <circle cx="140" cy="142" r="7" fill="#111827"/>
+  </g>
+
+  <text x="200" y="348" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#fff">Social Boost</text>
 </svg>

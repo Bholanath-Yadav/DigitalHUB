@@ -1,20 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Gift Cards">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1f2937"/>
-      <stop offset="100%" stop-color="#ec4899"/>
+    <linearGradient id="bgGC" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
     </linearGradient>
-    <linearGradient id="box1" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fde68a"/>
-      <stop offset="100%" stop-color="#fb7185"/>
+    <linearGradient id="ribbon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f472b6"/>
+      <stop offset="100%" stop-color="#fb923c"/>
     </linearGradient>
   </defs>
-  <rect width="400" height="400" rx="44" fill="url(#bg)"/>
-  <circle cx="74" cy="86" r="44" fill="#f472b6" opacity="0.12"/>
-  <circle cx="332" cy="312" r="72" fill="#fde68a" opacity="0.10"/>
-  <rect x="94" y="140" width="212" height="112" rx="18" fill="url(#box1)"/>
-  <rect x="184" y="140" width="32" height="112" fill="#f8fafc" opacity="0.9"/>
-  <rect x="94" y="184" width="212" height="20" fill="#f8fafc" opacity="0.88"/>
-  <path d="M200 140c-18-22-38-34-54-34-14 0-24 10-24 24 0 20 17 31 49 31h29v-21Zm0 0c18-22 38-34 54-34 14 0 24 10 24 24 0 20-17 31-49 31h-29v-21Z" fill="#f8fafc" opacity="0.98"/>
-  <text x="200" y="332" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#f8fafc">Gift Cards</text>
+
+  <rect width="400" height="400" rx="44" fill="url(#bgGC)"/>
+  <circle cx="88" cy="72" r="44" fill="#f472b6" opacity="0.12"/>
+  <circle cx="320" cy="118" r="34" fill="#fb923c" opacity="0.10"/>
+
+  <g transform="translate(72,116)">
+    <rect x="16" y="16" width="256" height="168" rx="18" fill="#fff"/>
+    <rect x="36" y="36" width="216" height="128" rx="12" fill="#fde68a"/>
+
+    <!-- ribbon -->
+    <path d="M108 56c0-18 26-32 44-32s44 14 44 32-26 32-44 32-44-14-44-32z" fill="url(#ribbon)"/>
+    <circle cx="176" cy="88" r="8" fill="#fff"/>
+    <path d="M120 120c12 12 36 12 48 0" stroke="#f97316" stroke-width="6" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <text x="200" y="348" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#fff">Gift Cards</text>
 </svg>
