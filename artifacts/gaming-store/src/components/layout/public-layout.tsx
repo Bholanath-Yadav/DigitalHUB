@@ -72,32 +72,14 @@ function AppDownloadButton() {
 
 function Navbar() {
   const { isSignedIn, signOut } = useAuth();
-  const [, setLocation] = useLocation();
-  const [location] = useLocation();
+      import {
+        User, LogOut, Menu, Shield, Sun, Moon,
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-
-  const handleGlobalKey = useCallback((e: KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-      e.preventDefault();
-      setSearchOpen(prev => !prev);
-    }
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleGlobalKey);
-    return () => document.removeEventListener("keydown", handleGlobalKey);
-  }, [handleGlobalKey]);
-
-  const { data: profile } = useGetMyProfile({
-    query: { queryKey: ["my-profile"], retry: false, enabled: isSignedIn },
-  });
-  const isAdmin = profile?.role === "admin";
-
-  const navLinks = [
-    { href: "/products", label: "All Products", icon: <Zap className="h-4 w-4" /> },
-    { href: "/products?category=game-topups", label: "Top-ups", icon: <Gamepad2 className="h-4 w-4" /> },
+ 
+ 
+ 
     { href: "/products?category=gift-cards", label: "Gift Cards", icon: <Gift className="h-4 w-4" /> },
     { href: "/products?category=vouchers", label: "Vouchers", icon: <Ticket className="h-4 w-4" /> },
   ];
