@@ -136,7 +136,10 @@ function mapOrderRow(row: any, productRow: any, profileRow?: any): Order {
 }
 
 async function fetchProducts(params: ListProductsParams = {}): Promise<Product[]> {
-  let query = supabase.from("products").select("*");
+  // Select only the fields needed for product lists to reduce payload size
+  let query = supabase.from("products").select(
+    "id,name,price,category,image_url,tags,variants,in_stock,featured,created_at"
+  );
   if (params.category) {
     const category = String(params.category);
     if (category === "gaming") query = query.in("category", ["gaming", "game-topups"]);

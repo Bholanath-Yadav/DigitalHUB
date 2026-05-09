@@ -331,7 +331,14 @@ export default function Home() {
           <h2 className="text-2xl font-black tracking-tight mb-6">Shop by Category</h2>
         </FadeUp>
         <StaggerGrid fast className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {CATEGORIES.map(cat => (
+          {(() => {
+            const byCategory = (allProducts ?? []).reduce((acc: Record<string, number>, p: any) => {
+              const k = normalizeCategory(p.category);
+              acc[k] = (acc[k] ?? 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+
+            return CATEGORIES.map(cat => (
             <motion.div key={cat.value} variants={scaleIn} className="h-full">
               <Link href={`/products?category=${cat.value}`}>
                 <div className="group relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card to-muted hover:border-primary/60 transition-all duration-300 hover:-translate-y-2 hover:shadow-lg cursor-pointer p-5 h-full flex flex-col items-center justify-center text-center">
@@ -340,12 +347,13 @@ export default function Home() {
                   </div>
                   <p className="font-bold text-sm leading-tight">{cat.label}</p>
                   <p className="text-xs text-muted-foreground mt-2">
-                    {allProducts?.filter(p => normalizeCategory(p.category) === cat.value).length ?? "0"} items
+                    {byCategory[cat.value] ?? 0} items
                   </p>
                 </div>
               </Link>
             </motion.div>
-          ))}
+            ));
+          })()}
         </StaggerGrid>
       </section>
 
