@@ -276,7 +276,7 @@ export default function AdminProducts() {
             toast({ title: "Product created" });
           }
         },
-        onError: () => toast({ title: "Failed to create", variant: "destructive" }),
+        onError: (error) => toast({ title: "Failed to create", description: error.message, variant: "destructive" }),
       });
     }
   };

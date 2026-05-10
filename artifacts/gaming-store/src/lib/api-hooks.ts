@@ -225,7 +225,7 @@ export function useCreateProduct(options?: UseMutationOptions<Product, Error, { 
           name: data.name,
           description: data.description ?? null,
           price: data.price ?? 0,
-          category: data.category ?? null,
+          category: normalizeProductCategory(data.category ?? null),
           image_url: data.imageUrl ?? null,
           tags: Array.isArray(data.tags) ? data.tags : [],
           dynamic_fields: Array.isArray(data.dynamicFields) ? data.dynamicFields : [],
@@ -254,7 +254,7 @@ export function useUpdateProduct(options?: UseMutationOptions<Product, Error, { 
       if (data.name !== undefined) updatePayload.name = data.name;
       if (data.description !== undefined) updatePayload.description = data.description;
       if (data.price !== undefined) updatePayload.price = data.price;
-      if (data.category !== undefined) updatePayload.category = data.category;
+      if (data.category !== undefined) updatePayload.category = normalizeProductCategory(data.category);
       if (data.imageUrl !== undefined) updatePayload.image_url = data.imageUrl;
       if (data.tags !== undefined) updatePayload.tags = data.tags;
       if (data.dynamicFields !== undefined) updatePayload.dynamic_fields = data.dynamicFields;
