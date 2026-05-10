@@ -56,6 +56,11 @@ function categoryAliases(category: string): string[] {
   return [category];
 }
 
+function normalizeCategoryFilter(category: string | null | undefined): string | null {
+  const normalized = normalizeProductCategory(category);
+  return normalized || null;
+}
+
 function mapProduct(row: any): Product {
   return {
     id: row.id,
@@ -147,16 +152,18 @@ async function fetchProducts(params: ListProductsParams = {}): Promise<Product[]
   let query = supabase.from("products").select(
     "id,name,price,category,image_url,tags,variants,in_stock,featured,created_at"
   );
-  if (params.category) {
-    const category = String(params.category);
-    query = query.in("category", categoryAliases(category));
-  }
   if (params.featured === true) query = query.eq("featured", true);
   if (params.search) query = query.ilike("name", `%${params.search}%`);
 
   const { data, error } = await query.order("created_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []).map(mapProduct);
+
+  const products = (data ?? []).map(mapProduct);
+  const category = normalizeCategoryFilter(params.category);
+  if (!category) return products;
+
+  const allowed = new Set(categoryAliases(category));
+  return products.filter((product) => allowed.has(product.category));
 }
 
 export function useListProducts(
