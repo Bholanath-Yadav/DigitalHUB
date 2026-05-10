@@ -236,7 +236,13 @@ export function useCreateProduct(options?: UseMutationOptions<Product, Error, { 
         .select("*")
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        const extra = [error.code, error.details, error.hint].filter(Boolean).join(" | ");
+        if (error.code === "42501") {
+          throw new Error(`Permission denied by database policy. Ensure your user role is admin or staff in public.users. ${extra}`.trim());
+        }
+        throw new Error(`Create product failed: ${error.message}${extra ? ` | ${extra}` : ""}`);
+      }
       if (!inserted) throw new Error("Failed to create product");
 
       return mapProduct(inserted);
