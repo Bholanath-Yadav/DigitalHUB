@@ -72,14 +72,18 @@ function AppDownloadButton() {
 
 function Navbar() {
   const { isSignedIn, signOut } = useAuth();
-      import {
-        User, LogOut, Menu, Shield, Sun, Moon,
+  const [location, setLocation] = useLocation();
+  const { data: profile } = useGetMyProfile({ query: { enabled: isSignedIn } });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
- 
- 
- 
+
+  const isAdmin = profile?.role === "admin" || profile?.role === "staff";
+
+  const navLinks = [
+    { href: "/", label: "Home", icon: <Gamepad2 className="h-4 w-4" /> },
+    { href: "/products", label: "Products", icon: <Zap className="h-4 w-4" /> },
+    { href: "/products?category=game-topups", label: "Top-ups", icon: <Gamepad2 className="h-4 w-4" /> },
     { href: "/products?category=gift-cards", label: "Gift Cards", icon: <Gift className="h-4 w-4" /> },
     { href: "/products?category=vouchers", label: "Vouchers", icon: <Ticket className="h-4 w-4" /> },
   ];
@@ -88,180 +92,179 @@ function Navbar() {
 
   return (
     <>
-    <motion.header
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70"
-    >
-      <div className="container max-w-screen-xl flex h-16 items-center px-4 md:px-6">
-
-        <div className="mr-8 shrink-0">
-          <Logo href="/" size="md" />
-        </div>
-
-        <nav className="hidden lg:flex items-center gap-1 flex-1">
-          {navLinks.map((link, i) => (
-            <motion.div
-              key={link.href}
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: 0.05 + i * 0.04 }}
-            >
-              <Link
-                href={link.href}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150
-                  ${isActive(link.href)
-                    ? "bg-primary/10 text-primary"
-                    : "text-foreground/60 hover:text-foreground hover:bg-muted"}`}
-              >
-                {link.label}
-              </Link>
-            </motion.div>
-          ))}
-        </nav>
-
-        <div className="ml-auto flex items-center gap-2">
-          <div className="hidden lg:flex items-center mr-1">
-            <SearchTrigger onOpen={() => setSearchOpen(true)} />
+      <motion.header
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70"
+      >
+        <div className="container max-w-screen-xl flex h-16 items-center px-4 md:px-6">
+          <div className="mr-8 shrink-0">
+            <Logo href="/" size="md" />
           </div>
-          <ThemeToggle />
 
-          {!isSignedIn ? (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden lg:inline-flex"
-                onClick={() => setLocation("/sign-in")}
+          <nav className="hidden lg:flex items-center gap-1 flex-1">
+            {navLinks.map((link, i) => (
+              <motion.div
+                key={link.href}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: 0.05 + i * 0.04 }}
               >
-                Sign In
-              </Button>
-              <Button
-                size="sm"
-                className="hidden lg:inline-flex"
-                onClick={() => setLocation("/sign-up")}
-              >
-                Sign Up
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden lg:inline-flex gap-1.5"
-                onClick={() => setAccountOpen(true)}
-              >
-                <User className="h-4 w-4" />
-                Account
-              </Button>
-              {isAdmin && (
+                <Link
+                  href={link.href}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150
+                    ${isActive(link.href)
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground/60 hover:text-foreground hover:bg-muted"}`}
+                >
+                  {link.label}
+                </Link>
+              </motion.div>
+            ))}
+          </nav>
+
+          <div className="ml-auto flex items-center gap-2">
+            <div className="hidden lg:flex items-center mr-1">
+              <SearchTrigger onOpen={() => setSearchOpen(true)} />
+            </div>
+            <ThemeToggle />
+
+            {!isSignedIn ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden lg:inline-flex"
+                  onClick={() => setLocation("/sign-in")}
+                >
+                  Sign In
+                </Button>
+                <Button
+                  size="sm"
+                  className="hidden lg:inline-flex"
+                  onClick={() => setLocation("/sign-up")}
+                >
+                  Sign Up
+                </Button>
+              </>
+            ) : (
+              <>
                 <Button
                   variant="outline"
                   size="sm"
                   className="hidden lg:inline-flex gap-1.5"
-                  onClick={() => setLocation("/admin")}
+                  onClick={() => setAccountOpen(true)}
                 >
-                  <Shield className="h-4 w-4" />
-                  Admin
+                  <User className="h-4 w-4" />
+                  Account
                 </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hidden lg:inline-flex gap-1.5"
-                onClick={async () => {
-                  await signOut();
-                  setLocation("/");
-                }}
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </Button>
-            </>
-          )}
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hidden lg:inline-flex gap-1.5"
+                    onClick={() => setLocation("/admin")}
+                  >
+                    <Shield className="h-4 w-4" />
+                    Admin
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hidden lg:inline-flex gap-1.5"
+                  onClick={async () => {
+                    await signOut();
+                    setLocation("/");
+                  }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </>
+            )}
 
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden rounded-full w-9 h-9 border border-border"
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <div className="flex flex-col h-full">
-                <div className="p-5 border-b border-border">
-                  <div onClick={() => setMobileOpen(false)}>
-                    <Logo href="/" size="md" />
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden rounded-full w-9 h-9 border border-border"
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72 p-0">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <div className="flex flex-col h-full">
+                  <div className="p-5 border-b border-border">
+                    <div onClick={() => setMobileOpen(false)}>
+                      <Logo href="/" size="md" />
+                    </div>
+                  </div>
+                  <nav className="flex-1 p-4 space-y-1">
+                    {navLinks.map(link => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition-colors group"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-primary">{link.icon}</span>
+                          {link.label}
+                        </div>
+                        <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Link>
+                    ))}
+                  </nav>
+                  <div className="border-t border-border p-4 space-y-2">
+                    {!isSignedIn ? (
+                      <>
+                        <Button className="w-full" onClick={() => { setMobileOpen(false); setLocation("/sign-in"); }}>
+                          Sign In
+                        </Button>
+                        <Button variant="outline" className="w-full" onClick={() => { setMobileOpen(false); setLocation("/sign-up"); }}>
+                          Sign Up
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="outline" className="w-full gap-2" onClick={() => { setMobileOpen(false); setAccountOpen(true); }}>
+                          <User className="h-4 w-4" />
+                          Account
+                        </Button>
+                        {isAdmin && (
+                          <Button variant="outline" className="w-full gap-2" onClick={() => { setMobileOpen(false); setLocation("/admin"); }}>
+                            <Shield className="h-4 w-4" />
+                            Admin Dashboard
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          className="w-full gap-2"
+                          onClick={async () => {
+                            setMobileOpen(false);
+                            await signOut();
+                            setLocation("/");
+                          }}
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Logout
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
-                <nav className="flex-1 p-4 space-y-1">
-                  {navLinks.map(link => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition-colors group"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-primary">{link.icon}</span>
-                        {link.label}
-                      </div>
-                      <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </Link>
-                  ))}
-                </nav>
-                <div className="border-t border-border p-4 space-y-2">
-                  {!isSignedIn ? (
-                    <>
-                      <Button className="w-full" onClick={() => { setMobileOpen(false); setLocation("/sign-in"); }}>
-                        Sign In
-                      </Button>
-                      <Button variant="outline" className="w-full" onClick={() => { setMobileOpen(false); setLocation("/sign-up"); }}>
-                        Sign Up
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button variant="outline" className="w-full gap-2" onClick={() => { setMobileOpen(false); setAccountOpen(true); }}>
-                        <User className="h-4 w-4" />
-                        Account
-                      </Button>
-                      {isAdmin && (
-                        <Button variant="outline" className="w-full gap-2" onClick={() => { setMobileOpen(false); setLocation("/admin"); }}>
-                          <Shield className="h-4 w-4" />
-                          Admin Dashboard
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        className="w-full gap-2"
-                        onClick={async () => {
-                          setMobileOpen(false);
-                          await signOut();
-                          setLocation("/");
-                        }}
-                      >
-                        <LogOut className="h-4 w-4" />
-                        Logout
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-      </div>
-    </motion.header>
+      </motion.header>
 
-    <AccountModal open={accountOpen} onClose={() => setAccountOpen(false)} />
-    <SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <AccountModal open={accountOpen} onClose={() => setAccountOpen(false)} />
+      <SearchPalette open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }
