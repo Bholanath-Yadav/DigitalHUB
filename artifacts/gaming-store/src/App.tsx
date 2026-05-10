@@ -1,7 +1,8 @@
 import { Suspense, lazy, useEffect, useRef } from "react";
 import { Switch, Route, Router as WouterRouter } from 'wouter';
-import { queryClient } from "@/lib/queryClient";
-import { QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { queryClient, queryPersister } from "@/lib/queryClient";
+import { useQueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -59,7 +60,13 @@ function AuthCacheInvalidator() {
 
 function AppRoutes() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister: queryPersister,
+        maxAge: 24 * 60 * 60 * 1000,
+      }}
+    >
       <AuthProvider>
         <AuthCacheInvalidator />
         <ThemeProvider>
@@ -103,7 +110,7 @@ function AppRoutes() {
           </TooltipProvider>
         </ThemeProvider>
       </AuthProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
 
