@@ -1,4 +1,4 @@
-const CACHE_NAME = "digitalhub-v2";
+const CACHE_NAME = "digitalhub-v3";
 const APP_SHELL = ["/", "/site.webmanifest", "/favicon.svg", "/logo.svg"];
 
 self.addEventListener("install", (event) => {
@@ -20,6 +20,20 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
+  const url = new URL(event.request.url);
+  const isApiRequest =
+    url.pathname.startsWith("/rest/v1/") ||
+    url.pathname.startsWith("/auth/v1/") ||
+    url.pathname.startsWith("/storage/v1/") ||
+    url.pathname.startsWith("/functions/v1/") ||
+    url.hostname.endsWith(".supabase.co");
+
+  // Never cache API calls. Always go to network for live DB/auth data.
+  if (isApiRequest) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request)
@@ -35,6 +49,9 @@ self.addEventListener("fetch", (event) => {
       return fetch(event.request)
         .then((response) => {
           if (!response || response.status !== 200 || response.type === "opaque") {
+            return response;
+          }
+          if (url.origin !== self.location.origin) {
             return response;
           }
           const copy = response.clone();
