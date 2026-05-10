@@ -267,3 +267,20 @@ CREATE POLICY "Auth upload content images"
     bucket_id = 'gaming-store'
     AND (storage.foldername(name))[1] IN ('product-images', 'banner-images', 'qr-codes')
   );
+
+-- ============================================================
+-- Ensure admin user is set up in public.users with correct role
+-- This is required for RLS policies to grant admin write permissions
+-- ============================================================
+
+-- Upsert admin user: admin@digitalhub.com with UID d02ff351-72b3-45dd-a7ca-474ad82aa48a
+INSERT INTO public.users (supabase_id, email, role)
+VALUES (
+  'd02ff351-72b3-45dd-a7ca-474ad82aa48a',
+  'admin@digitalhub.com',
+  'admin'
+)
+ON CONFLICT (supabase_id) DO UPDATE SET
+  role = 'admin',
+  email = 'admin@digitalhub.com',
+  updated_at = now();
