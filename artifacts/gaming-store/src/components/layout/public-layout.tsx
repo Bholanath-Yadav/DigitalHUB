@@ -83,9 +83,9 @@ function Navbar() {
   const navLinks = [
     { href: "/", label: "Home", icon: <Gamepad2 className="h-4 w-4" /> },
     { href: "/products", label: "Products", icon: <Zap className="h-4 w-4" /> },
-    { href: "/products?category=game-topups", label: "Top-ups", icon: <Gamepad2 className="h-4 w-4" /> },
+    { href: "/products?category=gaming", label: "Top-ups", icon: <Gamepad2 className="h-4 w-4" /> },
     { href: "/products?category=gift-cards", label: "Gift Cards", icon: <Gift className="h-4 w-4" /> },
-    { href: "/products?category=vouchers", label: "Vouchers", icon: <Ticket className="h-4 w-4" /> },
+    { href: "/products?category=streaming", label: "Subscriptions", icon: <Ticket className="h-4 w-4" /> },
   ];
 
   const isActive = (href: string) => location === href.split("?")[0];
@@ -300,10 +300,10 @@ function Footer() {
           <div className="lg:col-span-2">
             <h4 className="font-semibold text-sm mb-3 text-foreground">Products</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/products?category=game-topups" className="inline-flex rounded-md px-2 py-1 -mx-2 hover:bg-primary/10 hover:text-primary transition-colors">Game Top-ups</Link></li>
+              <li><Link href="/products?category=gaming" className="inline-flex rounded-md px-2 py-1 -mx-2 hover:bg-primary/10 hover:text-primary transition-colors">Game Top-ups</Link></li>
               <li><Link href="/products?category=gift-cards" className="inline-flex rounded-md px-2 py-1 -mx-2 hover:bg-primary/10 hover:text-primary transition-colors">Gift Cards</Link></li>
-              <li><Link href="/products?category=subscriptions" className="inline-flex rounded-md px-2 py-1 -mx-2 hover:bg-primary/10 hover:text-primary transition-colors">Subscriptions</Link></li>
-              <li><Link href="/products?category=vouchers" className="inline-flex rounded-md px-2 py-1 -mx-2 hover:bg-primary/10 hover:text-primary transition-colors">Vouchers</Link></li>
+              <li><Link href="/products?category=streaming" className="inline-flex rounded-md px-2 py-1 -mx-2 hover:bg-primary/10 hover:text-primary transition-colors">Subscriptions</Link></li>
+              <li><Link href="/products?category=digital-tools" className="inline-flex rounded-md px-2 py-1 -mx-2 hover:bg-primary/10 hover:text-primary transition-colors">Digital Tools</Link></li>
             </ul>
           </div>
           <div className="lg:col-span-2">

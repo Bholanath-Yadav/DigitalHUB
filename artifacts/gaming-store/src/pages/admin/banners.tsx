@@ -44,6 +44,14 @@ export default function AdminBanners() {
     });
   }, [banners, search]);
 
+  const normalizeBannerLink = (value: string) => {
+    if (!value) return value;
+    return value
+      .replace(/category=game-topups/g, "category=gaming")
+      .replace(/category=subscriptions/g, "category=streaming")
+      .replace(/category=vouchers/g, "category=gift-cards");
+  };
+
   const handleImageUpload = async (file: File) => {
     setUploading(true);
     try {
@@ -69,7 +77,7 @@ export default function AdminBanners() {
 
   const buildData = () => ({
     title: form.title, subtitle: form.subtitle || null,
-    imageUrl: form.imageUrl || null, linkUrl: form.linkUrl || null,
+    imageUrl: form.imageUrl || null, linkUrl: normalizeBannerLink(form.linkUrl) || null,
     active: form.active, sortOrder: parseInt(form.sortOrder) || 0,
   });
 
@@ -93,7 +101,7 @@ export default function AdminBanners() {
           queryClient.invalidateQueries({ queryKey: ["banners"] });
           setOpen(false);
         },
-        onError: () => toast({ title: "Failed to create", variant: "destructive" }),
+        onError: (error) => toast({ title: "Failed to create", description: error.message, variant: "destructive" }),
       });
     }
   };
@@ -231,7 +239,7 @@ export default function AdminBanners() {
               )}
             </div>
             <div className="space-y-1.5"><Label>Link URL</Label>
-              <Input value={form.linkUrl} onChange={e => f("linkUrl", e.target.value)} placeholder="/products?category=game-topups" /></div>
+              <Input value={form.linkUrl} onChange={e => f("linkUrl", e.target.value)} placeholder="/products?category=gaming" /></div>
             <div className="grid grid-cols-2 gap-3 items-end">
               <div className="space-y-1.5"><Label>Sort Order</Label>
                 <Input type="number" value={form.sortOrder} onChange={e => f("sortOrder", e.target.value)} /></div>

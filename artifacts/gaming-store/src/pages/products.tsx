@@ -176,7 +176,7 @@ const CATEGORY_SEO: Record<string, { title: string; desc: string; kw: string }> 
 
 export default function Products() {
   const urlParams = new URLSearchParams(window.location.search);
-  const initialCategory = urlParams.get("category") || "all";
+  const initialCategory = normalizeCategory(urlParams.get("category") || "all") || "all";
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>(initialCategory);

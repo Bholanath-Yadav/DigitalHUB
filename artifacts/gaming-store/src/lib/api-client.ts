@@ -3,10 +3,12 @@ export interface MessageResponse { message: string }
 
 export type ProductCategory = (typeof ProductCategory)[keyof typeof ProductCategory];
 export const ProductCategory = {
-  "game-topups": "game-topups",
+  gaming: "gaming",
   "gift-cards": "gift-cards",
-  subscriptions: "subscriptions",
-  vouchers: "vouchers",
+  streaming: "streaming",
+  "digital-tools": "digital-tools",
+  "social-boost": "social-boost",
+  "vpn-privacy": "vpn-privacy",
 } as const;
 
 export type DynamicFieldType = (typeof DynamicFieldType)[keyof typeof DynamicFieldType];
@@ -44,10 +46,12 @@ export interface Product {
 
 export type ListProductsCategory = (typeof ListProductsCategory)[keyof typeof ListProductsCategory];
 export const ListProductsCategory = {
-  "game-topups": "game-topups",
+  gaming: "gaming",
   "gift-cards": "gift-cards",
-  subscriptions: "subscriptions",
-  vouchers: "vouchers",
+  streaming: "streaming",
+  "digital-tools": "digital-tools",
+  "social-boost": "social-boost",
+  "vpn-privacy": "vpn-privacy",
 } as const;
 
 export type ListProductsParams = {

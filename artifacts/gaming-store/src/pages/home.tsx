@@ -285,7 +285,7 @@ export default function Home() {
                 className="gap-2 bg-gradient-to-r from-primary to-secondary text-white border-none hover:opacity-90 shadow-lg font-bold px-8 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
                 <Zap className="h-4 w-4" /> Shop Now
               </Button>
-              <Button size="lg" variant="outline" onClick={() => setLocation("/products?category=game-topups")}
+              <Button size="lg" variant="outline" onClick={() => setLocation("/products?category=gaming")}
                 className="gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
                 <Gamepad2 className="h-4 w-4" /> Browse Top-ups
               </Button>

@@ -41,10 +41,12 @@ type ProductForm = {
 
 // Smart defaults per category — what account info is needed
 const CATEGORY_DEFAULT_FIELDS: Record<string, DynField[]> = {
-  "game-topups":    [{ name: "playerId",   label: "Player ID",       type: "text",  required: true  }],
+  gaming:           [{ name: "playerId",   label: "Player ID",       type: "text",  required: true  }],
   "gift-cards":     [{ name: "recipientEmail", label: "Recipient Email", type: "email", required: false }],
-  "subscriptions":  [{ name: "accountEmail",   label: "Account Email",   type: "email", required: true  }],
-  "vouchers":       [],
+  streaming:         [{ name: "accountEmail",   label: "Account Email",   type: "email", required: true  }],
+  "digital-tools":  [],
+  "social-boost":   [],
+  "vpn-privacy":    [],
 };
 
 function getDefaultFields(category: string): DynField[] {
@@ -53,9 +55,9 @@ function getDefaultFields(category: string): DynField[] {
 
 const EMPTY: ProductForm = {
   productType: "fixed",
-  name: "", description: "", price: "", category: "game-topups",
+  name: "", description: "", price: "", category: "gaming",
   imageUrl: "", inStock: true, featured: false, tags: "",
-  dynamicFields: getDefaultFields("game-topups"),
+  dynamicFields: getDefaultFields("gaming"),
 };
 
 function isVariantProduct(p: any) {
@@ -193,16 +195,23 @@ export default function AdminProducts() {
 
   const openEdit = (p: any) => {
     const hasVars = isVariantProduct(p);
+    const category = p.category === "game-topups"
+      ? "gaming"
+      : p.category === "subscriptions"
+        ? "streaming"
+        : p.category === "vouchers"
+          ? "gift-cards"
+          : p.category;
     const existingFields: DynField[] = Array.isArray(p.dynamicFields) && p.dynamicFields.length > 0
       ? p.dynamicFields
-      : getDefaultFields(p.category);
+      : getDefaultFields(category);
     setEditId(p.id);
     setForm({
       productType: hasVars ? "variant" : "fixed",
       name: p.name,
       description: p.description ?? "",
       price: hasVars ? "" : String(p.price),
-      category: p.category,
+      category,
       imageUrl: p.imageUrl ?? "",
       inStock: p.inStock,
       featured: p.featured,
@@ -477,10 +486,12 @@ export default function AdminProducts() {
                 <Select value={form.category} onValueChange={handleCategoryChange}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="game-topups">Game Top-ups</SelectItem>
+                    <SelectItem value="gaming">Game Top-ups</SelectItem>
                     <SelectItem value="gift-cards">Gift Cards</SelectItem>
-                    <SelectItem value="subscriptions">Subscriptions</SelectItem>
-                    <SelectItem value="vouchers">Vouchers</SelectItem>
+                    <SelectItem value="streaming">Subscriptions</SelectItem>
+                    <SelectItem value="digital-tools">Digital Tools</SelectItem>
+                    <SelectItem value="social-boost">Social Boost</SelectItem>
+                    <SelectItem value="vpn-privacy">VPN & Privacy</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

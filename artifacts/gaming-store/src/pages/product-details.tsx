@@ -151,7 +151,7 @@ export default function ProductDetails() {
   const effectiveDynamicFields: { name: string; label: string; type: string; required: boolean }[] =
     product?.dynamicFields && product.dynamicFields.length > 0
       ? (product.dynamicFields as any[])
-      : product?.category === "game-topups"
+      : product?.category === "gaming" || product?.category === "game-topups"
         ? DEFAULT_GAME_FIELDS
         : [];
 

@@ -49,6 +49,13 @@ function normalizeProductCategory(category: string | null | undefined): string {
   return category;
 }
 
+function categoryAliases(category: string): string[] {
+  if (category === "gaming" || category === "game-topups") return ["gaming", "game-topups"];
+  if (category === "streaming" || category === "subscriptions") return ["streaming", "subscriptions"];
+  if (category === "gift-cards" || category === "vouchers") return ["gift-cards", "vouchers"];
+  return [category];
+}
+
 function mapProduct(row: any): Product {
   return {
     id: row.id,
@@ -142,10 +149,7 @@ async function fetchProducts(params: ListProductsParams = {}): Promise<Product[]
   );
   if (params.category) {
     const category = String(params.category);
-    if (category === "gaming") query = query.in("category", ["gaming", "game-topups"]);
-    else if (category === "streaming") query = query.in("category", ["streaming", "subscriptions"]);
-    else if (category === "gift-cards") query = query.in("category", ["gift-cards", "vouchers"]);
-    else query = query.eq("category", category);
+    query = query.in("category", categoryAliases(category));
   }
   if (params.featured === true) query = query.eq("featured", true);
   if (params.search) query = query.ilike("name", `%${params.search}%`);

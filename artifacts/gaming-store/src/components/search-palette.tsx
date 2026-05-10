@@ -6,10 +6,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { fmtNPR } from "@/lib/currency";
 
 const CATEGORY_LABELS: Record<string, string> = {
-  "game-topups":   "Game Top-up",
+  gaming:          "Game Top-up",
   "gift-cards":    "Gift Card",
-  "subscriptions": "Subscription",
-  "vouchers":      "Voucher",
+  streaming:       "Subscription",
+  "digital-tools": "Digital Tools",
+  "social-boost":  "Social Boost",
+  "vpn-privacy":   "VPN & Privacy",
 };
 
 function isMac() {
@@ -259,7 +261,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
                   <ul className="space-y-0.5">
                     {[
                       { href: "/products", label: "All Products", sub: "Browse everything", icon: <Zap className="h-4 w-4" /> },
-                      { href: "/products?category=game-topups", label: "Game Top-ups", sub: "Free Fire, PUBG, TikTok…", icon: <Gamepad2 className="h-4 w-4" /> },
+                      { href: "/products?category=gaming", label: "Game Top-ups", sub: "Free Fire, PUBG, TikTok…", icon: <Gamepad2 className="h-4 w-4" /> },
                       { href: "/products?category=gift-cards",  label: "Gift Cards",   sub: "Google Play, Steam…", icon: <Gamepad2 className="h-4 w-4" /> },
                     ].map(item => (
                       <li key={item.href}>
